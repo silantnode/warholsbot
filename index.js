@@ -5,11 +5,9 @@
 const TeleBot = require('telebot');
 const bot = new TeleBot('214012546:AAEAHZ04FXgPiSX1tqPzGfTZmHjUm0b8pTU');
 
+// URL validator
 
-// Include the ask module.
-
-bot.use(require('telebot/modules/ask.js'));
-
+var validUrl = require('valid-url');
 
 // Telebot button names
 
@@ -180,14 +178,32 @@ bot.on( GET_BUTTON, msg => {
 
 bot.on( SPEND_BUTTON, msg => {
 
-    let markup = bot.keyboard([
-      [ GIFT_ECON ],[ CREATIVE_ECON ],[ SPECULATIVE_ECON ]], { resize: true }
-    );  
+     // Check their account to see if it has any warhols.
+
+    GetBalance( msg.from.id, function( error, balance ){
+
+      if ( balance <= 5 ){
+
+          let markup = bot.keyboard([
+            [ GET_BUTTON ]], { resize: true }
+          );
+
+          return bot.sendMessage( msg.from.id, `You don’t have enough Warhols in your account. You need at least 5 Warhols and your balance is ${ balance }. You should /get some Warhols first.`);
+
+      } else {
+
+        let markup = bot.keyboard([
+          [ GIFT_ECON ],[ CREATIVE_ECON ],[ SPECULATIVE_ECON ]], { resize: true }
+        ); 
+
+        warholMode = 2;
+
+        return bot.sendMessage( msg.from.id, `How do you want to spend Warhols?`, { markup });
+
+      }
+
+    });
     
-    warholMode = 2;
-
-    return bot.sendMessage( msg.from.id, `How do you want to spend Warhols?`, { markup });
-
 });
 
 
