@@ -211,16 +211,30 @@ bot.on( SPEND_BUTTON, msg => {
 
 bot.on( CREATIVE_ECON, msg => {
 
-  let markup = bot.keyboard([
-    [ BACK_BUTTON ]], { resize: true }
-  );
+  if ( warholMode == 1 ){
 
-  GetCreativeContent( function( error, content ){
-  
-    // Display the tasks as text.
-    return bot.sendMessage( msg.from.id, `${ content }`, { markup } );
-  
-  });
+    let markup = bot.keyboard([
+      [ BACK_BUTTON ]], { resize: true }
+    );
+
+    GetCreativeContent( function( error, content ){
+    
+      // Display the tasks as text.
+      return bot.sendMessage( msg.from.id, `${ content }`, { markup } );
+    
+    });
+
+  } else if ( warholMode == 2 ){
+
+    GetBalance( msg.from.id, function( error, balance ){
+
+      return bot.sendMessage( msg.from.id, `You can /publish your content for 10 warhols. Your current balance is ${ balance } warhols`);
+
+      // Function for reading url and descriptive text from the user and sending it to the database.
+
+    });
+
+  }
 
 });
 
@@ -377,7 +391,7 @@ bot.on( '/*' , msg => {
 
 bot.on( '/yes', msg => {
 
-    if ( warholMode == 1 ){
+    if ( warholMode == 1 ){ // Verify that they are in spend mode.
 
     let markup = bot.keyboard([
       [ BACK_BUTTON ]], { resize: true }
@@ -421,6 +435,8 @@ bot.on( '/no', msg => {
 
 /* * * FUNCTIONS * * */
 
+// Adds warhols to a user account
+
 function AddWarhols( userID, addedBalance ){
 
     connection.query('UPDATE accounts SET balance = ? WHERE owner = ?', [ addedBalance, userID ], function( error, current ){
@@ -434,6 +450,8 @@ function AddWarhols( userID, addedBalance ){
 }
 
 
+// Gets the current balance of a user account
+
 function GetBalance( msgID, callback ){
 
     connection.query('SELECT balance FROM accounts WHERE owner =' + msgID , function( error, result ){
@@ -446,6 +464,8 @@ function GetBalance( msgID, callback ){
 
 }
 
+
+// Selects five random from the creative contet for the user to choose from.
 
 function GetCreativeContent( callback ){
 
@@ -487,6 +507,8 @@ function GetCreativeContent( callback ){
 
 }
 
+
+// Selects five random items from the gifts for users to choose from.
 
 function GetGiftsContent( callback ){
 
