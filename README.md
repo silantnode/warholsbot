@@ -4,6 +4,7 @@ Basic Idea:
 
 The idea for the project is the following:
 
+<<<<<<< HEAD
     People message the WarholsBot on Telegram
     They get a chance to earn Warhols currency by performing tasks
     The first tasks will be provided by the "sponsors", who already start with an account pre-filled with many Warhols
@@ -15,6 +16,19 @@ The user will choose from a list of tasks. Here are some examples:
     Watch the Gridcosm Unplugged video - get 30 Warhols (URL)
     Attend Jon Van Oast's talk at ISEA - get 100 Warhols (URL)
     Load more tasks
+=======
+- People message the WarholsBot on Telegram
+- They get a chance to earn Warhols currency by performing tasks
+- The first tasks will be provided by the "sponsors", who already start with an account pre-filled with many Warhols
+
+The user will choose from a list of tasks. Here are some examples:
+
+- Visit the Yono page at SITO.ORG - get 20 Warhols (URL)
+- Follow @groblinlagumba on Twitter - get 5 Warhols (URL)
+- Watch the Gridcosm Unplugged video - get 30 Warhols (URL)
+- Attend Jon Van Oast's talk at ISEA - get 100 Warhols (URL)
+- Load more tasks
+>>>>>>> 9f3336f8ed5681b5bbc16b48c041ce401e4584fa
 
 After choosing one of the tasks, we verify if the person really did it, by asking a question about the content they read/watched. We can make this a multiple choice of 4 or something… if they answer right they get the Warhols, if not they don't and can then choose another task.
 
