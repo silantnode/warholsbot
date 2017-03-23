@@ -361,12 +361,13 @@ bot.on( '/*' , msg => {
 
 bot.on( '/yes', msg => {
 
-  // if ( warholMode == 1 ){
+    if ( warholMode == 1 ){
 
     let markup = bot.keyboard([
       [ BACK_BUTTON ]], { resize: true }
     );
 
+    
     var warholValue;
     var newBalance;
 
@@ -380,9 +381,9 @@ bot.on( '/yes', msg => {
           
     });
 
-    return bot.sendMessage( `Enjoy! Your account has benn credited with ${ warholValue } Warhols`, { markup } );
+    return bot.sendMessage( msg.from.id, `Enjoy! Your account has benn credited with ${ warholValue } Warhols`, { markup } );
 
-  // }
+    }
 
 });
 
