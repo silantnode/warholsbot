@@ -3,7 +3,7 @@
 // Initialize telebot
 
 const TeleBot = require('telebot');
-const bot = new TeleBot('214012546:AAEAHZ04FXgPiSX1tqPzGfTZmHjUm0b8pTU');
+const bot = new TeleBot(-botcode-);
 
 // URL validator
 
