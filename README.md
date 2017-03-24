@@ -37,3 +37,4 @@ In this way the Warhols will move from the sponsors "accounts" to the users. Whe
 So in the beginning people will see only the initial sponsors tasks, but later there will be user created tasks as well. And the Warhols will circulate around.
 
 Previously the project was being developed using PHP and MySQL. In order to simplify the implementation we are rebuilding the project using Node.js to interface with Telegram. We will continue to use the same MySQL database.
+# warholsbot 
