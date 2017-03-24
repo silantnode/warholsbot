@@ -3,7 +3,7 @@
 // Initialize telebot
 
 const TeleBot = require('telebot');
-const bot = new TeleBot(-botcode-);
+const bot = new TeleBot('your_bot_token');
 
 // URL validator
 
@@ -20,6 +20,7 @@ const BACK_BUTTON = "/back";
 const GIFT_ECON = "/gift";
 const CREATIVE_ECON = "/creative";
 const SPECULATIVE_ECON = "/speculative";
+const PUBLISH_BUTTON = "/publish";
 
 const MAX_LIST_DISPLAY = 5;
 const RAND_GIFT_RANGE = 10;
@@ -38,10 +39,10 @@ var warholMode = 0;
 const mysql      = require('mysql');
 
 const connection = mysql.createConnection({
-  host     : 'mysql.coinspiration.org',
-  user     : 'coinspiration',
-  password : 'c01nspiration',
-  database : 'warholsbot'
+  host     : 'yourhost',
+  user     : 'youruser',
+  password : 'yourpass',
+  database : 'yourdatabase'
 
 });
 
@@ -228,6 +229,10 @@ bot.on( CREATIVE_ECON, msg => {
 
     GetBalance( msg.from.id, function( error, balance ){
 
+      let markup = bot.keyboard([
+      [ PUBLISH_BUTTON ]], { resize: true }
+      );
+
       return bot.sendMessage( msg.from.id, `You can /publish your content for 10 warhols. Your current balance is ${ balance } warhols`);
 
       // Function for reading url and descriptive text from the user and sending it to the database.
@@ -238,6 +243,12 @@ bot.on( CREATIVE_ECON, msg => {
 
 });
 
+
+bot.on( PUBLISH_BUTTON, msg => {
+
+  
+
+});
 
 // The creative economy content, where everyone makes stuff but nobody keeps money.
 
