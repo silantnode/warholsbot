@@ -1,13 +1,46 @@
 'use strict';
 
+// Read an external file where values await.
+var fs = require('fs');
+var custom_data = fs.readFileSync('data.txt').toString().split("\n");
+
+// Create the connection to the database.
+const mysql = require('mysql');
+
+const connection = mysql.createConnection({
+  host     : custom_data[1], // Host address of the database server.
+  user     : custom_data[2], // Username for the coinspiration account.
+  password : custom_data[3], // Password for the coinspiration account.
+  database : custom_data[4]  // Name of the database we are accessing.
+
+});
+
+connection.connect( function (error){
+  
+  if (error) {
+
+    console.log('Error connecting to Db');
+    return;
+
+  }
+
+  console.log('Connection established');
+
+});
+
 // Initialize telebot
 
 const TeleBot = require('telebot');
-const bot = new TeleBot('your_bot_token');
+const bot = new TeleBot(custom_data[0]);
 
-// URL validator
+// Ask module
 
-var validUrl = require('valid-url');
+bot.use(require('telebot/modules/ask.js'));
+
+
+var validUrl = require('valid-url'); // URL validator module
+
+
 
 // Telebot button names
 
@@ -33,32 +66,6 @@ var currentGiftSelection = [];
 // '/speculative' twice by simply checking the mode whenever these commands are called. Probably not the best approach
 // but it was the first solution I came up with so I decided to run with it and deal with the consequences later.
 var warholMode = 0; 
-
-// Connect to the warhols database
-
-const mysql      = require('mysql');
-
-const connection = mysql.createConnection({
-  host     : 'yourhost',
-  user     : 'youruser',
-  password : 'yourpass',
-  database : 'yourdatabase'
-
-});
-
-connection.connect(function(error){
-  
-  if (error) {
-
-    console.log('Error connecting to Db');
-    return;
-
-  }
-
-  console.log('Connection established');
-
-});
-
 
 
 // The user starts the bot with the /start command.
@@ -246,7 +253,16 @@ bot.on( CREATIVE_ECON, msg => {
 
 bot.on( PUBLISH_BUTTON, msg => {
 
-  
+  // 1) Ask the user for URL to their content.
+  // 2) Use the URL validator to make sure it is proper URL.
+  // 3) If it is not a proper URL tell them and ask again.
+  // 4) If the URL is valid...
+  // 5) ... ask the user for 140 character description of the content.
+  // 6) If there is no description tell that they need to enter one.
+  // 7) If the text has more than 140 characters tell them to shorten the description.
+  // 8) Update the database with the information provided.
+  // 9) Subtract warhols from the user account.
+  return bot.sendMessage( msg.from.id, `Enter the URL for the content.` , { ask: 'url'});
 
 });
 
