@@ -63,10 +63,13 @@ const DESCRIPTION_MAX_LENGTH = 140; // How long a description of content is allo
 var currentCreativeSelection = []; 
 var currentGiftSelection = [];
 
-// Set by get or spend. 1 is get and 2 is spend. This allows me to use the same command set of '/gift', '/creative' and 
+// Set by /get, /spend. 1 is get and 2 is spend. This allows me to use the same command set of '/gift', '/creative' and 
 // '/speculative' twice by simply checking the mode whenever these commands are called. Probably not the best approach
 // but it was the first solution I came up with so I decided to run with it and deal with the consequences later.
-var warholMode = 0; 
+var warholMode = 0;
+
+// Set by /gift, /creative or /speculation. 1 is gift, 2 is creative and 3 is speculative. 
+var econMode = 0;
 
 
 // The user starts the bot with the /start command.
@@ -453,7 +456,7 @@ bot.on( '/*' , msg => {
 
 bot.on( '/yes', msg => {
 
-    if ( warholMode == 1 ){ // Verify that they are in spend mode.
+    if ( warholMode == 1 ){ // Verify that they are in gift mode.
 
     let markup = bot.keyboard([
       [ BACK_BUTTON ]], { resize: true }
