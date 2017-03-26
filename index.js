@@ -38,8 +38,7 @@ const bot = new TeleBot(custom_data[0]);
 bot.use(require('telebot/modules/ask.js'));
 
 
-var validUrl = require('valid-url'); // URL validator module
-
+var isUrl = require('is-url-superb');
 
 
 // Telebot button names
@@ -55,8 +54,10 @@ const CREATIVE_ECON = "/creative";
 const SPECULATIVE_ECON = "/speculative";
 const PUBLISH_BUTTON = "/publish";
 
-const MAX_LIST_DISPLAY = 5;
-const RAND_GIFT_RANGE = 10;
+const MAX_LIST_DISPLAY = 5; // Maximum number of items to be displayed for the user to choose from whenever they are presented with multiple choice selections.
+const RAND_GIFT_RANGE = 10; // Range setting for randomly giving out warhols.
+
+const DESCRIPTION_MAX_LENGTH = 140; // How long a description of content is allowed to be.
 
 // Holds the random selection of five items to be selected from by the user. The list is changed every time the user selects the 'creative' option when selecting 'get'
 var currentCreativeSelection = []; 
@@ -251,7 +252,7 @@ bot.on( CREATIVE_ECON, msg => {
 });
 
 
-bot.on( PUBLISH_BUTTON, msg => {
+bot.on( [ PUBLISH_BUTTON,  '/no' ], msg => {
 
   // 1) Ask the user for URL to their content.
   // 2) Use the URL validator to make sure it is proper URL.
@@ -263,6 +264,40 @@ bot.on( PUBLISH_BUTTON, msg => {
   // 8) Update the database with the information provided.
   // 9) Subtract warhols from the user account.
   return bot.sendMessage( msg.from.id, `Enter the URL for the content.` , { ask: 'url'});
+
+});
+
+
+
+bot.on('ask.url', msg => {
+  
+  let content = msg.text;
+
+  if ( isUrl( content ) == true ){
+
+        return bot.sendMessage( msg.from.id, `Now enter a 140 character description of the content.`, { ask: 'description' });
+
+    } else {
+
+        return bot.sendMessage( msg.from.id, `You have not entered a valid web address. Please try again using the proper formatting.`, { ask: 'url'});
+
+    }
+
+});
+
+bot.on('description', msg => {
+
+  let description = msg.text;
+
+  if ( description.length > DESCRIPTION_MAX_LENGTH ) {
+
+    return bot.sendMessage( msg.from.id, `Your description is longer than 140 charcters. Please shorten it.`)
+
+  } else if ( description.length <= DESCRIPTION_MAX_LENGTH ) {
+
+    return bot.sendMessage( msg.from.id, `Please review your submission! Is the content correct? \n /yes /no` )
+
+  }
 
 });
 
@@ -424,7 +459,6 @@ bot.on( '/yes', msg => {
       [ BACK_BUTTON ]], { resize: true }
     );
 
-    
     var warholValue;
     var newBalance;
 

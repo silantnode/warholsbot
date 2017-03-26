@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/silantnode/warholsbot/issues"
   },
-  "homepage": "https://github.com/silantnode/warholsbot#readme"
+  "homepage": "https://github.com/silantnode/warholsbot#readme",
+  "dependencies": {
+    "is-url-superb": "^2.0.0"
+  }
 }
