@@ -499,9 +499,11 @@ bot.on( '/yes', msg => {
       // Add the submitted content to the database.
       // Subtract warhols from the account of the user.
 
-      contentSubmission = [];
+      AddCreativeContent( msg.from.id, msg.from.first_name, contentSubmission );
 
       SubtractWarhols( msg.from.id, 10 );
+
+      contentSubmission = [];
 
       return bot.sendMessage( msg.from.id, `Excellent! Your content is now available for viewing and 10 warhols have been subtracted from your account.`)
 
@@ -666,9 +668,30 @@ function GetGiftsContent( callback ){
 
 }
 
-function addCreativeContent(){
+/*
 
-  connection.query('INSERT into tasks')
+let newOwner = { owner: msg.from.id, owner_name: msg.from.first_name, balance: 0 };
+    
+connection.query('INSERT INTO accounts SET ?', newOwner, function( error, result ){
+    
+if( error ) throw error;
+
+*/
+
+function AddCreativeContent( userID, userName, newContent ){
+
+  // let contentURL = newContent;
+  // let contentDescription = newContent;
+  
+  let loadContent = { owner: userID, owner_name: userName, description: newContent[1] , url: newContent[0], price: 2 };
+
+  connection.query('INSERT into tasks SET ?', loadContent, function( error, result ){
+
+    if( error ) throw error;
+
+    // console.log('Last insert ID:', result.insertId);
+
+  });
 
 }
 
