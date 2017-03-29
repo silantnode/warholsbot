@@ -679,17 +679,12 @@ if( error ) throw error;
 */
 
 function AddCreativeContent( userID, userName, newContent ){
-
-  // let contentURL = newContent;
-  // let contentDescription = newContent;
   
   let loadContent = { owner: userID, owner_name: userName, description: newContent[1] , url: newContent[0], price: 2 };
 
   connection.query('INSERT into tasks SET ?', loadContent, function( error, result ){
 
     if( error ) throw error;
-
-    // console.log('Last insert ID:', result.insertId);
 
   });
 
