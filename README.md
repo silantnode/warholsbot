@@ -1,40 +1,15 @@
-#warholbot A bot for Telegram that facilitates transactions for an informal alternative currency called Warhols. It is planned to have several different 'flavors' of warhols that allow for people to experiment with different types of currency designs.
+#warholsbot A bot for Telegram that facilitates transactions for an experimental art currency called Warhols. 
 
-Basic Idea:
-
-The idea for the project is the following:
+In the current version people can get and spend Warhols in three different ways: Creative Economy, Gift Economy and Speculation Economy.
 
 
-People message the WarholsBot on Telegram
-They get a chance to earn Warhols currency by performing tasks
-The first tasks will be provided by the "sponsors", who already start with an account pre-filled with many Warhols
+The Creative Economy is organized around discovering content of several types created by other users, and also adding and promoting your content to the economy. Most people are familiar with this model, since it’s similar to how online publishing and social media works nowadays.
 
-The user will choose from a list of tasks. Here are some examples:
+Then there is the Speculation Economy. This one is about taking risks, and having the promise of great rewards. For the brave thrill seekers, we created a stock exchange market, where you can invest in different “flavors” of Warhols. There is also a cultural market of sorts, playing on the theme of fame and obscurity.
 
-* Visit the Yono page at SITO.ORG - get 20 Warhols (URL)
-* Follow @groblinlagumba on Twitter - get 5 Warhols (URL)
-* Watch the Gridcosm Unplugged video - get 30 Warhols (URL)
-* Attend Jon Van Oast's talk at ISEA - get 100 Warhols (URL)
-* Load more tasks
-
-* People message the WarholsBot on Telegram
-* They get a chance to earn Warhols currency by performing tasks
-* The first tasks will be provided by the "sponsors", who already start with an account pre-filled with many Warhols
-
-The user will choose from a list of tasks. Here are some examples:
-
-* Visit the Yono page at SITO.ORG - get 20 Warhols (URL)
-* Follow @groblinlagumba on Twitter - get 5 Warhols (URL)
-* Watch the Gridcosm Unplugged video - get 30 Warhols (URL)
-* Attend Jon Van Oast's talk at ISEA - get 100 Warhols (URL)
-* Load more tasks
+Finaly there is the Gift Economy. We use the gift economy in our lives pretty much everyday, but it’s almost by definition not associated with money. To draw attention to this amazing way of exchanging things between one another, we created a way to stimulate the gifting. Pay forward for your Warhols with acts or kindness, or put them into the Warhols Fountain, where they are multiplied until they overflow into everyone’s account.
 
 
-After choosing one of the tasks, we verify if the person really did it, by asking a question about the content they read/watched. We can make this a multiple choice of 4 or something… if they answer right they get the Warhols, if not they don't and can then choose another task.
 
-In this way the Warhols will move from the sponsors "accounts" to the users. When users have a balance of Warhols they can create tasks of their own and become "sponsors". 
+Previously the project was being developed using PHP and MySQL, and had only the Creative Economy function. In order to simplify the implementation we are rebuilding the project using Node.js to interface with Telegram. We will continue to use the same MySQL database.
 
-So in the beginning people will see only the initial sponsors tasks, but later there will be user created tasks as well. And the Warhols will circulate around.
-
-Previously the project was being developed using PHP and MySQL. In order to simplify the implementation we are rebuilding the project using Node.js to interface with Telegram. We will continue to use the same MySQL database.
-# warholsbot 
