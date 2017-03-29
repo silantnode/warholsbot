@@ -300,10 +300,9 @@ bot.on('ask.whatisit', msg => {
 
     contentSubmission[1] = incomingText;
 
-    return bot.sendMessage( msg.from.id, `Please review your submission! Is the content correct? \n \n
-    ${ contentSubmission[1] } \n
-    ${ contentSubmission[0] } \n \n
-    /yes /no` );
+    return bot.sendMessage( msg.from.id, `${ contentSubmission[1] } ${ contentSubmission[0] } \n Please review your submission! \n \n 
+    Is the content correct? \n
+    /yes or /no` );
 
   }
 
