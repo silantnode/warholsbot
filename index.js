@@ -503,6 +503,8 @@ bot.on( '/yes', msg => {
 
       contentSubmission = [];
 
+      SubtractWarhols( msg.from.id, 10 );
+
       return bot.sendMessage( msg.from.id, `Excellent! Your content is now available for viewing and 10 warhols have been subtracted from your account.`)
 
     } 
@@ -535,11 +537,9 @@ bot.on( '/no', msg => {
 
 function AddWarhols( userID, addedBalance ){
 
-    connection.query('UPDATE accounts SET balance = ? WHERE owner = ?', [ addedBalance, userID ], function( error, current ){
+    connection.query( 'UPDATE accounts SET balance = ? WHERE owner = ?', [ addedBalance, userID ], function( error, current ){
                 
     if ( error ) throw error;
-
-    // console.log('Changed ' + current.changedRows + ' rows');
 
   });
 
@@ -547,9 +547,15 @@ function AddWarhols( userID, addedBalance ){
 
 
 
-function SubtractWarhols( userID, addedBalance ){
+function SubtractWarhols( userID, subtractedBalance ){
 
-  
+  connection.query( 'UPDATE accounts SET balance = ? WHERE owner =?', [ subtractedBalance, userID ], function( error, current ){
+
+    if ( error ) throw error;
+
+    // console.log('Changed ' + current.changedRows + ' rows');
+
+  });
 
 }
 
