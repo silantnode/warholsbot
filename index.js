@@ -63,12 +63,19 @@ const DESCRIPTION_MAX_LENGTH = 140; // How long a description of content is allo
 var currentCreativeSelection = []; 
 var currentGiftSelection = [];
 
+// Holds two items submitted by a user in spend/creative mode: 
+// - url for the content.
+// - description of the content.
+// Is reset after every use. 
+var contentSubmission = [];
+
 // Set by /get, /spend. 1 is get and 2 is spend. This allows me to use the same command set of '/gift', '/creative' and 
 // '/speculative' twice by simply checking the mode whenever these commands are called. Probably not the best approach
 // but it was the first solution I came up with so I decided to run with it and deal with the consequences later.
 var warholMode = 0;
 
 // Set by /gift, /creative or /speculation. 1 is gift, 2 is creative and 3 is speculative. 
+// May or may not be used. We'll see.
 var econMode = 0;
 
 
@@ -231,8 +238,8 @@ bot.on( CREATIVE_ECON, msg => {
 
     GetCreativeContent( function( error, content ){
     
-      // Display the tasks as text.
-      return bot.sendMessage( msg.from.id, `${ content }`, { markup } );
+    // Display the tasks as text.
+    return bot.sendMessage( msg.from.id, `${ content }`, { markup } );
     
     });
 
@@ -244,7 +251,7 @@ bot.on( CREATIVE_ECON, msg => {
       [ PUBLISH_BUTTON ]], { resize: true }
       );
 
-      return bot.sendMessage( msg.from.id, `You can /publish your content for 10 warhols. Your current balance is ${ balance } warhols`);
+      return bot.sendMessage( msg.from.id, `You can /publish your content for 10 warhols. Your current balance is ${ balance } warhols`, { markup } );
 
       // Function for reading url and descriptive text from the user and sending it to the database.
 
@@ -255,7 +262,7 @@ bot.on( CREATIVE_ECON, msg => {
 });
 
 
-bot.on( [ PUBLISH_BUTTON,  '/no' ], msg => {
+bot.on( PUBLISH_BUTTON , msg => {
 
   // 1) Ask the user for URL to their content.
   // 2) Use the URL validator to make sure it is proper URL.
@@ -266,7 +273,7 @@ bot.on( [ PUBLISH_BUTTON,  '/no' ], msg => {
   // 7) If the text has more than 140 characters tell them to shorten the description.
   // 8) Update the database with the information provided.
   // 9) Subtract warhols from the user account.
-  return bot.sendMessage( msg.from.id, `Enter the URL for the content.` , { ask: 'url'});
+  return bot.sendMessage( msg.from.id, `Enter the URL for the content.`, { ask: 'url'});
 
 });
 
@@ -276,9 +283,10 @@ bot.on('ask.url', msg => {
   
   let content = msg.text;
 
-  if ( isUrl( content ) == true ){
+  if ( isUrl( content ) == true ){ // Check if the url is a valid one.
 
-        return bot.sendMessage( msg.from.id, `Now enter a 140 character description of the content.`, { ask: 'description' });
+        contentSubmission[0] = content; // save the url for review by the user.
+        return bot.sendMessage( msg.from.id, `Now enter a 140 character description of the content.`, { ask: 'whatisit' });
 
     } else {
 
@@ -288,21 +296,28 @@ bot.on('ask.url', msg => {
 
 });
 
-bot.on('description', msg => {
 
-  let description = msg.text;
+bot.on('ask.whatisit', msg => {
+  
+  let incomingText = msg.text;
 
-  if ( description.length > DESCRIPTION_MAX_LENGTH ) {
+  if ( incomingText.length > DESCRIPTION_MAX_LENGTH ) {
 
-    return bot.sendMessage( msg.from.id, `Your description is longer than 140 charcters. Please shorten it.`)
+    return bot.sendMessage( msg.from.id, `Your description is longer than 140 charcters. Please shorten it.`, { ask: 'whatisit' });
 
-  } else if ( description.length <= DESCRIPTION_MAX_LENGTH ) {
+  } else if ( incomingText.length <= DESCRIPTION_MAX_LENGTH ) {
 
-    return bot.sendMessage( msg.from.id, `Please review your submission! Is the content correct? \n /yes /no` )
+    contentSubmission[1] = incomingText;
+
+    return bot.sendMessage( msg.from.id, `Please review your submission! Is the content correct? \n \n
+    ${ contentSubmission[1] } \n
+    ${ contentSubmission[0] } \n \n
+    /yes /no` );
 
   }
 
 });
+
 
 // The creative economy content, where everyone makes stuff but nobody keeps money.
 
@@ -458,32 +473,45 @@ bot.on( '/yes', msg => {
 
     if ( warholMode == 1 ){ // Verify that they are in gift mode.
 
-    let markup = bot.keyboard([
-      [ BACK_BUTTON ]], { resize: true }
-    );
+      let markup = bot.keyboard([
+        [ BACK_BUTTON ]], { resize: true }
+      );
 
-    var warholValue;
-    var newBalance;
+      var warholValue;
+      var newBalance;
 
-    warholValue = (Math.ceil( Math.random() * RAND_GIFT_RANGE ) -1 );          
+      warholValue = (Math.ceil( Math.random() * RAND_GIFT_RANGE ) -1 );          
 
-    GetBalance( msg.from.id, function( error, result ){
+      GetBalance( msg.from.id, function( error, result ){
 
-        newBalance = ( warholValue + result );
-        
-        AddWarhols( msg.from.id, newBalance );
+          newBalance = ( warholValue + result );
           
-    });
+          AddWarhols( msg.from.id, newBalance );
+            
+      });
 
-    return bot.sendMessage( msg.from.id, `Enjoy! Your account has benn credited with ${ warholValue } Warhols`, { markup } );
+      warholMode = 0;
 
-    }
+      return bot.sendMessage( msg.from.id, `Enjoy! Your account has benn credited with ${ warholValue } Warhols`, { markup } );
+
+    } else if ( warholMode == 2 ){
+
+      warholMode = 0;
+
+      // Add the submitted content to the database.
+      // Subtract warhols from the account of the user.
+
+      contentSubmission = [];
+
+      return bot.sendMessage( msg.from.id, `Excellent! Your content is now available for viewing and 10 warhols have been subtracted from your account.`)
+
+    } 
 
 });
 
 bot.on( '/no', msg => {
 
-  // if ( warholMode == 1 ){
+  if ( warholMode == 1 ){
 
     let markup = bot.keyboard([
       [ BACK_BUTTON ],[ GET_BUTTON ]], { resize: true }
@@ -491,7 +519,11 @@ bot.on( '/no', msg => {
 
     return bot.sendMessage( msg.from.id, `Perhaps there is another good deed you are willing to perform isntead? \n Use use /get to find another or go /back to the main menu.`, { markup } );
 
-  // }
+  } else if ( warholMode == 2 ){
+
+    return bot.sendMessage( msg.from.id, `Enter the URL for the content.` , { ask: 'url'});
+
+  }
 
 });
 
@@ -512,6 +544,15 @@ function AddWarhols( userID, addedBalance ){
   });
 
 }
+
+
+
+function SubtractWarhols( userID, addedBalance ){
+
+  
+
+}
+
 
 
 // Gets the current balance of a user account
@@ -611,6 +652,12 @@ function GetGiftsContent( callback ){
     return callback ( error, giftListDisplay );
 
   });
+
+}
+
+function addCreativeContent(){
+
+
 
 }
 
