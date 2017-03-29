@@ -536,7 +536,7 @@ bot.on( '/no', msg => {
 // Adds warhols to a user account
 
 function AddWarhols( userID, addedBalance ){
-
+    
     connection.query( 'UPDATE accounts SET balance = ? WHERE owner = ?', [ addedBalance, userID ], function( error, current ){
                 
     if ( error ) throw error;
@@ -546,14 +546,21 @@ function AddWarhols( userID, addedBalance ){
 }
 
 
+// Subtracts warhols from a users account
 
 function SubtractWarhols( userID, subtractedBalance ){
 
-  connection.query( 'UPDATE accounts SET balance = ? WHERE owner =?', [ subtractedBalance, userID ], function( error, current ){
+    GetBalance( userID, function( error, result ){ // Get the current balance on the account of the user.
 
-    if ( error ) throw error;
+      let newBalance = ( result - subtractedBalance );
 
-    // console.log('Changed ' + current.changedRows + ' rows');
+      connection.query( 'UPDATE accounts SET balance = ? WHERE owner =?', [ newBalance, userID ], function( error, current ){
+
+      if ( error ) throw error;
+
+      // console.log('Changed ' + current.changedRows + ' rows');
+
+    });
 
   });
 
