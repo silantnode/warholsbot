@@ -497,10 +497,9 @@ bot.on( '/yes', msg => {
       warholMode = 0;
 
       // Add the submitted content to the database.
-      // Subtract warhols from the account of the user.
-
       AddCreativeContent( msg.from.id, msg.from.first_name, contentSubmission );
 
+      // Subtract warhols from the account of the user.
       SubtractWarhols( msg.from.id, 10 );
 
       contentSubmission = [];
