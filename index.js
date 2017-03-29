@@ -245,11 +245,7 @@ bot.on( CREATIVE_ECON, msg => {
 
     GetBalance( msg.from.id, function( error, balance ){
 
-      let markup = bot.keyboard([
-      [ PUBLISH_BUTTON ]], { resize: true }
-      );
-
-      return bot.sendMessage( msg.from.id, `You can /publish your content for 10 warhols. Your current balance is ${ balance } warhols`, { markup } );
+      return bot.sendMessage( msg.from.id, `You can /publish your content for 10 warhols. Your current balance is ${ balance } warhols`, { markup: 'hide' } );
 
       // Function for reading url and descriptive text from the user and sending it to the database.
 
@@ -260,12 +256,14 @@ bot.on( CREATIVE_ECON, msg => {
 });
 
 
+// The following three bot.on commands deal with a user spending warhols by submitting content.
+
 bot.on( PUBLISH_BUTTON , msg => {
 
   // Need a way to prevent the publish command from being invoked or set warhol mode in case people want to short cut to publish without
   // stepping through all of the other menus.
 
-  return bot.sendMessage( msg.from.id, `Enter the URL for the content.`, { ask: 'url'});
+  return bot.sendMessage( msg.from.id, `Enter the URL for the content.`, { ask: 'url' });
 
 });
 
@@ -287,6 +285,7 @@ bot.on('ask.url', msg => {
     }
 
 });
+
 
 
 bot.on('ask.whatisit', msg => {
