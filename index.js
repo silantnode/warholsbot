@@ -160,8 +160,6 @@ bot.on( BALANCE_BUTTON, msg => {
     [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
   );
 
-  // connection.query('SELECT balance FROM accounts WHERE owner =' + msg.from.id , function( error, result ){
-
   GetBalance( msg.from.id, function( error, result ){
 
     // Check what the balance is... 
@@ -670,7 +668,7 @@ function GetGiftsContent( callback ){
 
 function addCreativeContent(){
 
-
+  connection.query('INSERT into tasks')
 
 }
 
