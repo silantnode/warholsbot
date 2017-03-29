@@ -113,7 +113,7 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
     
       if( error ) throw error;
     
-      console.log('Last insert ID:', result.insertId);
+      // console.log('Last insert ID:', result.insertId);
 
     });
 
