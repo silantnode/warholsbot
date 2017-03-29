@@ -262,15 +262,9 @@ bot.on( CREATIVE_ECON, msg => {
 
 bot.on( PUBLISH_BUTTON , msg => {
 
-  // 1) Ask the user for URL to their content.
-  // 2) Use the URL validator to make sure it is proper URL.
-  // 3) If it is not a proper URL tell them and ask again.
-  // 4) If the URL is valid...
-  // 5) ... ask the user for 140 character description of the content.
-  // 6) If there is no description tell that they need to enter one.
-  // 7) If the text has more than 140 characters tell them to shorten the description.
-  // 8) Update the database with the information provided.
-  // 9) Subtract warhols from the user account.
+  // Need a way to prevent the publish command from being invoked or set warhol mode in case people want to short cut to publish without
+  // stepping through all of the other menus.
+
   return bot.sendMessage( msg.from.id, `Enter the URL for the content.`, { ask: 'url'});
 
 });
