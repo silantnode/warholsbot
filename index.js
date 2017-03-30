@@ -79,7 +79,15 @@ var contentSubmission = [];
 // 2 is spend.
 // This allows me to use the same command set of '/gift', '/creative' and '/speculative' twice by simply checking the mode whenever these commands are called. Probably not the best approach but it was the first solution I came up with so I decided to run with it and deal with the consequences later.
 
-warholMode = 0;
+var warholMode = 0;
+
+// Is set by /random, /fountain or /user
+// 1 is random
+// 2 is fountain
+// 3 is user
+// Will be verified in the huge block that checks for all commands followed by a number ( i.e. /* ). I guess I could have used warholMode by specifying additional values, but it seemed too risky. Rather keep my sanity if there is a problem as we careen towards the deadline for this project.
+
+var giftSpendMode = 0;
 
 
 // The user starts the bot with the /start command.
