@@ -485,6 +485,10 @@ bot.on( '/yes', msg => {
       return bot.sendMessage( msg.from.id, `Enjoy! Your account has benn credited with ${ warholValue } Warhols`, { markup } );
 
     } else if ( warholMode == 2 ){
+      
+      let markup = bot.keyboard([
+        [ BACK_BUTTON ]], { resize: true }
+      );
 
       warholMode = 0;
 
@@ -496,7 +500,7 @@ bot.on( '/yes', msg => {
 
       contentSubmission = [];
 
-      return bot.sendMessage( msg.from.id, `Excellent! Your content is now available for viewing and 10 warhols have been subtracted from your account.`)
+      return bot.sendMessage( msg.from.id, `Excellent! Your content is now available for viewing and 10 warhols have been subtracted from your account.`, { markup } );
 
     } 
 
