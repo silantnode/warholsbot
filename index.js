@@ -94,6 +94,8 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
   // Check the Warhols database to see if the user already has an account.
   connection.query( 'SELECT * FROM accounts', function( error, rows ){
 
+    if( error ) throw error;
+
     for( let i = 0; i < rows.length; i++ ){
 
       if( rows[i].owner == msg.from.id ){
@@ -391,7 +393,7 @@ bot.on( '/*' , msg => {
   );
 
   // They selected creative economy.
-  
+
   if ( currentCreativeSelection.length == 5 ) {
 
     // Read the creative table so we can extract the content associated with
