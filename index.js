@@ -186,7 +186,7 @@ bot.on( GET_BUTTON, msg => {
       [ GIFT_ECON ],[ CREATIVE_ECON ],[ SPECULATIVE_ECON ]], { resize: true }
     );
 
-    warholMode = 1;
+    warholMode = 1; // Entering get mode.
 
     return bot.sendMessage( msg.from.id, `How do you want to get Warhols?`, { markup });
 
@@ -213,7 +213,7 @@ bot.on( SPEND_BUTTON, msg => {
           [ GIFT_ECON ],[ CREATIVE_ECON ],[ SPECULATIVE_ECON ]], { resize: true }
         ); 
 
-        warholMode = 2;
+        warholMode = 2; // Entering spend mode.
 
         return bot.sendMessage( msg.from.id, `How do you want to spend Warhols?`, { markup });
 
