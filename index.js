@@ -74,12 +74,14 @@ var currentGiftSelection = [];
 
 var contentSubmission = [];
 
+
 // Set by /get, /spend. 
 // 1 is get.
 // 2 is spend.
 // This allows me to use the same command set of '/gift', '/creative' and '/speculative' twice by simply checking the mode whenever these commands are called. Probably not the best approach but it was the first solution I came up with so I decided to run with it and deal with the consequences later.
 
 var warholMode = 0;
+
 
 // Is set by /random, /fountain or /user
 // 1 is random
@@ -344,7 +346,7 @@ bot.on( GIFT_ECON, msg => {
         [ '/random' ], [ '/fountain' ] ], { resize: true }
       );
 
-      return bot.sendMessage( msg.from.id, `Give Warhols to everybody with the Warhols /fountain \n Give Warhols to a /random person`, { markup });
+      return bot.sendMessage( msg.from.id, `Give Warhols to everybody with the Warhols /fountain \n Give Warhols to a person at /random`, { markup });
 
     }
 
@@ -502,18 +504,30 @@ bot.on( '/*' , msg => {
   if ( warholMode == 2 ) { // Make sure we are in spend mode.
     
     // Read from the second character in the message string.
+    let readText = msg.text;
     let amountSelection = readText.slice( 1, 2 );
 
     // Make sure that what the text is only a number.
-    warholAmount = Number( amountSelection );
+    let warholAmount = Number( amountSelection );
   
-
     if ( giftSpendMode == 1 ){ // They have chosen to give to a random person.
 
-      // Read how many users are in the accounts table.
-      // Choose one user at random.
-      // Subtract Warhols from the current users account.
-      // Award the randomly chosen user the Warhols.
+      connection.query( 'SELECT * FROM accounts', function( error, users ){
+
+        if( error ) throw error;
+        
+        // Choose one user at random.
+
+        var randomUser = ( Math.ceil( Math.random() * users.length ) - 1 );
+
+        console.log( users[randomUser].owner_name );
+
+        
+        
+        // Subtract Warhols from the current users account.
+        // Award the randomly chosen user the Warhols.
+
+      });
 
 
     } else if ( giftSpendMode == 2 ) { // They have chosen to give to the fountain.
