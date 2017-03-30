@@ -146,6 +146,8 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
 bot.on( '/test', msg => {
 
+  /*
+
   connection.query('SELECT * FROM tasks', function( error, rows ){
 
     if ( error ) throw error;
@@ -163,6 +165,29 @@ bot.on( '/test', msg => {
     // console.log(rows[0].description);
     console.log(rows.length);
     console.log(arr);
+
+  });
+
+  */
+
+  connection.query( 'SELECT * FROM accounts', function( error, users ){
+
+    if ( error ) throw error;
+
+    let theOthers = [];
+
+    for( let i = 0; i < users.length; i++){
+
+      if ( users[i].owner != msg.from.id ){
+
+        // theOthers.push = users[i].owner;
+        theOthers.push(users[i].owner);
+
+      }
+
+    }
+    
+    console.log(theOthers);
 
   });
 
@@ -521,13 +546,33 @@ bot.on( '/*' , msg => {
         
         // Choose one user at random.
 
-        var randomUser = ( Math.ceil( Math.random() * users.length ) - 1 );
+        // But first we have to make sure that the current user is not
+        // accidentally giving themselves Warhols.
 
-        GetBalance( users[randomUser].owner, function( error, theirBalance ){
+        let theOthers = [];
+
+        for( let i = 0; i < users.length; i++){
+
+          if ( users[i].owner != msg.from.id ){
+
+            theOthers.push(users[i].owner);
+
+          }
+
+        }
+
+        var randomUser = ( Math.ceil( Math.random() * theOthers.length ) - 1 );
+
+        GetBalance( users[ randomUser ].owner, function( error, theirBalance ){
           
+          // console.log(users[randomUser].owner_name);
+          // console.log(theirBalance);
+
           let theirNewBalance = ( theirBalance + warholAmount );
 
-          AddWarhols( users[randomUser].owner, theirNewBalance );
+          // console.log(theirNewBalance);
+
+          AddWarhols( users[ randomUser ].owner, theirNewBalance );
 
         });
 
