@@ -347,7 +347,7 @@ bot.on( '/random', msg => {
 
 
 
-bot.on( '/foutain', msg => {
+bot.on( '/fountain', msg => {
 
   
 
