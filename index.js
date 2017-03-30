@@ -585,11 +585,11 @@ function AddWarhols( userID, addedBalance ){
 
 // Subtracts Warhols from a users account
 
-function SubtractWarhols( userID, subtractedBalance ){
+function SubtractWarhols( userID, subtractionAmount ){
 
     GetBalance( userID, function( error, result ){ // Get the current balance on the account of the user.
 
-      let newBalance = ( result - subtractedBalance );
+      let newBalance = ( result - subtractionAmount );
 
       connection.query( 'UPDATE accounts SET balance = ? WHERE owner =?', [ newBalance, userID ], function( error, current ){
 
