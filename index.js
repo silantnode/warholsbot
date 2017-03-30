@@ -360,19 +360,9 @@ bot.on( [ '/random', '/fountain' ], msg => {
 
     giftSpendMode = 1;
 
-    // Read how many users are in the accounts table.
-    // Choose one user at random.
-    // Subtract Warhols from the current users account.
-    // Award the randomly chosen user the Warhols.
-
   } else if ( msg.text == '/fountain' ) {
 
     giftSpendMode = 2;
-
-    // Get the current balance of the fountain.
-    // Add the Warhols contributed.
-    // Check if the fountain is full yet.
-    // If the fountain is overflowing notify the user?
 
   }
 
@@ -511,11 +501,18 @@ bot.on( '/*' , msg => {
 
   if ( giftSpendMode == 1 ){ // They have chosen to give to a random person.
 
-    
+    // Read how many users are in the accounts table.
+    // Choose one user at random.
+    // Subtract Warhols from the current users account.
+    // Award the randomly chosen user the Warhols.
+
 
   } else if ( giftSpendMode == 2) { // They have chosen to give to the fountain.
 
-
+    // Get the current balance of the fountain.
+    // Add the Warhols contributed.
+    // Check if the fountain is full yet.
+    // If the fountain is overflowing notify the user?
 
   }
 
