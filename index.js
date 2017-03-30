@@ -343,6 +343,22 @@ bot.on( [ '/random', '/fountain' ], msg => {
 
   // Ask the user how many Warhols they want to spend.
   
+  if ( msg.text == '/random' ) {
+
+    // Read how many users are in the accounts table.
+    // Choose one user at random.
+    // Subtract Warhols from the current users account.
+    // Award the randomly chosen user the Warhols.
+
+  } else if ( msg.text == '/fountain' ) {
+
+    // Get the current balance of the fountain.
+    // Add the Warhols contributed.
+    // Check if the fountain is full yet.
+    // If the fountain is overflowing notify the user?
+
+  }
+
   return bot.sendMessage( msg.from.id, `How many Warhols do you want to spend? \n /5 \n /10 \n /20`);
 
 });
