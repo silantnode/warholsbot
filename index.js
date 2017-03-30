@@ -391,6 +391,7 @@ bot.on( '/*' , msg => {
   );
 
   // They selected creative economy.
+  
   if ( currentCreativeSelection.length == 5 ) {
 
     // Read the creative table so we can extract the content associated with
