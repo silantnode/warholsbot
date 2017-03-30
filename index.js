@@ -146,50 +146,7 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
 bot.on( '/test', msg => {
 
-  /*
-
-  connection.query('SELECT * FROM tasks', function( error, rows ){
-
-    if ( error ) throw error;
-    
-    var arr = [];
-
-    while( arr.length < 6 ){
-
-        var randomnumber = ( Math.ceil( Math.random() * rows.length ) - 1 );
-        if( arr.indexOf( randomnumber ) > -1 ) continue;
-        arr[ arr.length ] = randomnumber;
-
-    }
-
-    // console.log(rows[0].description);
-    console.log(rows.length);
-    console.log(arr);
-
-  });
-
-  */
-
-  connection.query( 'SELECT * FROM accounts', function( error, users ){
-
-    if ( error ) throw error;
-
-    let theOthers = [];
-
-    for( let i = 0; i < users.length; i++){
-
-      if ( users[i].owner != msg.from.id ){
-
-        // theOthers.push = users[i].owner;
-        theOthers.push(users[i].owner);
-
-      }
-
-    }
-    
-    console.log(theOthers);
-
-  });
+  
 
 });
 
