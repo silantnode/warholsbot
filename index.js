@@ -59,10 +59,13 @@ const RAND_GIFT_RANGE = 10; // Range setting for randomly giving out Warhols.
 
 const DESCRIPTION_MAX_LENGTH = 140; // How long a description of content is allowed to be.
 
+
 // Holds the random selection of five items to be selected from by the user. The list is changed every time the user selects the 'creative' option when selecting 'get'
 // It also serves to filter out any numbered commands (i.e. /4, /21, etc.)
+
 var currentCreativeSelection = []; 
 var currentGiftSelection = [];
+
 
 // Holds two items submitted by a user in spend/creative mode: 
 // - url for the content.
@@ -72,14 +75,16 @@ var currentGiftSelection = [];
 var contentSubmission = [];
 
 // Set by /get, /spend. 
-// 1 is get
-// 2 is spend. 
+// 1 is get.
+// 2 is spend.
 // This allows me to use the same command set of '/gift', '/creative' and '/speculative' twice by simply checking the mode whenever these commands are called. Probably not the best approach but it was the first solution I came up with so I decided to run with it and deal with the consequences later.
 
 var warholMode = 0;
 
+
 // Set by /gift, /creative or /speculation. 1 is gift, 2 is creative and 3 is speculative. 
 // May or may not be used. We'll see.
+
 var econMode = 0;
 
 
