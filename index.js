@@ -368,7 +368,7 @@ bot.on( [ '/random', '/fountain' ], msg => {
   } else if ( msg.text == '/fountain' ) {
 
     giftSpendMode = 2;
-    
+
     // Get the current balance of the fountain.
     // Add the Warhols contributed.
     // Check if the fountain is full yet.
@@ -507,6 +507,16 @@ bot.on( '/*' , msg => {
 
     });
     
+  }
+
+  if ( giftSpendMode == 1 ){ // They have chosen to give to a random person.
+
+
+
+  } else if ( giftSpendMode == 2) { // They have chosen to give to the fountain.
+
+
+
   }
 
 });
