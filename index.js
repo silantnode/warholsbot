@@ -339,17 +339,11 @@ bot.on( GIFT_ECON, msg => {
 
   
 
-bot.on( '/random', msg => {
+bot.on( [ '/random', '/fountain' ], msg => {
 
   // Ask the user how many Warhols they want to spend.
-
-});
-
-
-
-bot.on( '/fountain', msg => {
-
   
+  return bot.sendMessage( msg.from.id, `How many Warhols do you want to spend? \n /5 \n /10 \n /20`);
 
 });
 
