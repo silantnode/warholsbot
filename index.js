@@ -331,7 +331,7 @@ bot.on( GIFT_ECON, msg => {
         [ '/random' ], [ '/fountain' ] ], { resize: true }
       );
 
-      return bot.sendMessage( msg.from.id, `Give Warhols to everybody with the Warhols /fountain \n Give Warhols to a person at /random`, { markup });
+      return bot.sendMessage( msg.from.id, `Give Warhols to everybody with the Warhols /fountain\nGive Warhols to a person at /random`, { markup });
 
     }
 
@@ -538,7 +538,7 @@ bot.on( '/*' , msg => {
         warholMode = 0;
         giftSpendMode = 0;
         
-        return bot.sendMessage( msg.from.id, `Thank you for your gift! Your Warhols have been anonymously sent to a random person.`);
+        return bot.sendMessage( msg.from.id, `Thank you for your gift! Your Warhols have been anonymously sent to a random person.`, { markup });
 
       });
 
