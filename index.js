@@ -327,11 +327,16 @@ bot.on( GIFT_ECON, msg => {
 
     } else if ( warholMode == 2 ) { // If we are in spend mode...
 
-      return bot.sendMessage( msg.from.id, `Give Warhols to everybody with the Warhols /fountain \n Give Warhols to a /random person `);
+      let markup = bot.keyboard([
+        [ '/random' ], [ '/fountain' ] ], { resize: true }
+      );
+
+      return bot.sendMessage( msg.from.id, `Give Warhols to everybody with the Warhols /fountain \n Give Warhols to a /random person`, { markup });
 
     }
 
 });
+
   
 
 // The speculative economy, where everyone loses their shirt except for the socipaths.
