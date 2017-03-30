@@ -339,6 +339,22 @@ bot.on( GIFT_ECON, msg => {
 
   
 
+bot.on( '/random', msg => {
+
+
+
+});
+
+
+
+bot.on( '/foutain', msg => {
+
+  
+
+});
+
+
+
 // The speculative economy, where everyone loses their shirt except for the socipaths.
 
 bot.on( SPECULATIVE_ECON, msg => {
