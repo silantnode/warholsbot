@@ -55,7 +55,7 @@ const SPECULATIVE_ECON = "/speculative";
 const PUBLISH_BUTTON = "/publish";
 
 const MAX_LIST_DISPLAY = 5; // Maximum number of items to be displayed for the user to choose from whenever they are presented with multiple choice selections.
-const RAND_GIFT_RANGE = 10; // Range setting for randomly giving out warhols.
+const RAND_GIFT_RANGE = 10; // Range setting for randomly giving out Warhols.
 
 const DESCRIPTION_MAX_LENGTH = 140; // How long a description of content is allowed to be.
 
@@ -91,7 +91,7 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
   currentCreativeSelection = [];
   currentGiftSelection = [];
 
-  // Check the warhols database to see if the user already has an account.
+  // Check the Warhols database to see if the user already has an account.
   connection.query( 'SELECT * FROM accounts', function( error, rows ){
 
     for( let i = 0; i < rows.length; i++ ){
@@ -151,7 +151,7 @@ bot.on( '/test', msg => {
 });
 
 
-// Check the balance of the current users warhols account.
+// Check the balance of the current users Warhols account.
 
 bot.on( BALANCE_BUTTON, msg => {
   
@@ -164,12 +164,12 @@ bot.on( BALANCE_BUTTON, msg => {
 
     // Check what the balance is... 
     if ( result == 0 ) {
-        // If there are no warhols on the account encourage them to get some warhols.
-        return bot.sendMessage( msg.from.id, `You currently have ${ result } warhols. Use the /get command to change this situation.`, { markup });
+        // If there are no Warhols on the account encourage them to get some Warhols.
+        return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Use the /get command to change this situation.`, { markup });
         
     } else {
-        // If they have warhols encourage them to spend the warhols.
-        return bot.sendMessage( msg.from.id, `You currently have ${ result } warhols. Use the /spend to change this situation.`, { markup });
+        // If they have Warhols encourage them to spend the Warhols.
+        return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Use the /spend to change this situation.`, { markup });
 
     }
 
@@ -195,7 +195,7 @@ bot.on( GET_BUTTON, msg => {
 
 bot.on( SPEND_BUTTON, msg => {
 
-     // Check their account to see if it has any warhols.
+     // Check their account to see if it has any Warhols.
 
     GetBalance( msg.from.id, function( error, balance ){
 
@@ -245,7 +245,7 @@ bot.on( CREATIVE_ECON, msg => {
 
     GetBalance( msg.from.id, function( error, balance ){
 
-      return bot.sendMessage( msg.from.id, `You can /publish your content for 10 warhols. Your current balance is ${ balance } warhols`, { markup: 'hide' } );
+      return bot.sendMessage( msg.from.id, `You can /publish your content for 10 Warhols. Your current balance is ${ balance } Warhols`, { markup: 'hide' } );
 
       // Function for reading url and descriptive text from the user and sending it to the database.
 
@@ -256,7 +256,7 @@ bot.on( CREATIVE_ECON, msg => {
 });
 
 
-// The following three bot.on commands deal with a user spending warhols by submitting content.
+// The following three bot.on commands deal with a user spending Warhols by submitting content.
 
 bot.on( PUBLISH_BUTTON , msg => {
 
@@ -313,15 +313,23 @@ bot.on('ask.whatisit', msg => {
 
 bot.on( GIFT_ECON, msg => {
 
-    let markup = bot.keyboard([
-      [ BACK_BUTTON ]], { resize: true }
-    );
+    if ( warholMode == 1 ){ // If we are in get mode...
 
-    GetGiftsContent( function( error, content ){
+      let markup = bot.keyboard([
+        [ BACK_BUTTON ]], { resize: true }
+      );
 
-      return bot.sendMessage( msg.from.id, `${ content }`, { markup } );
+      GetGiftsContent( function( error, content ){
 
-    });
+        return bot.sendMessage( msg.from.id, `${ content }`, { markup } );
+
+      });
+
+    } else if ( warholMode == 2 ) { // If we are in spend mode...
+
+      return bot.sendMessage( msg.from.id, `Give Warhols to everybody with the Warhols /fountain give Warhols to a /random person `);
+
+    }
 
 });
   
@@ -363,7 +371,7 @@ bot.on( '/*' , msg => {
       // Copy the text from the user.
       let readText = msg.text; 
 
-      // Setup containers for reading entries from the selected content as well as updating the users warhols balance.
+      // Setup containers for reading entries from the selected content as well as updating the users Warhols balance.
       let taskNumber;
         
       // Var because it needs to be used within the GetBalance function for a callback.  
@@ -387,7 +395,7 @@ bot.on( '/*' , msg => {
         contentSelector = currentCreativeSelection[ ( taskNumber - 1 ) ];
 
         taskURL = rows[ contentSelector ].url; // Content address.
-        warholValue = rows[ contentSelector ].price; // Content price, as in how many warhols are earned by watching this media.
+        warholValue = rows[ contentSelector ].price; // Content price, as in how many Warhols are earned by watching this media.
 
         // Reset the random list to nothing so that if someone decides to use a command with a number nothing will happen.
         currentCreativeSelection = [];
@@ -398,7 +406,7 @@ bot.on( '/*' , msg => {
 
           AddWarhols( msg.from.id, newBalance ); // Function talks to database but does not require a callback.
 
-            return bot.sendMessage( msg.from.id, `You now have more warhols. Enjoy! The link for the content is ${ taskURL }`, { markup });
+            return bot.sendMessage( msg.from.id, `You now have more Warhols. Enjoy! The link for the content is ${ taskURL }`, { markup });
 
         });
 
@@ -419,7 +427,7 @@ bot.on( '/*' , msg => {
     // Copy the text from the user.
     let readText = msg.text; 
 
-    // Setup containers for reading entries from the selected task as well as updating the users warhols balance.
+    // Setup containers for reading entries from the selected task as well as updating the users Warhols balance.
     var giftNumber;
     var giftDescription;
     var contentSelector;
@@ -495,12 +503,12 @@ bot.on( '/yes', msg => {
       // Add the submitted content to the database.
       AddCreativeContent( msg.from.id, msg.from.first_name, contentSubmission );
 
-      // Subtract warhols from the account of the user.
+      // Subtract Warhols from the account of the user.
       SubtractWarhols( msg.from.id, 10 );
 
       contentSubmission = [];
 
-      return bot.sendMessage( msg.from.id, `Excellent! Your content is now available for viewing and 10 warhols have been subtracted from your account.`, { markup });
+      return bot.sendMessage( msg.from.id, `Excellent! Your content is now available for viewing and 10 Warhols have been subtracted from your account.`, { markup });
 
     } 
 
@@ -528,7 +536,7 @@ bot.on( '/no', msg => {
 
 /* * * FUNCTIONS * * */
 
-// Adds warhols to a user account
+// Adds Warhols to a user account
 
 function AddWarhols( userID, addedBalance ){
     
@@ -541,7 +549,7 @@ function AddWarhols( userID, addedBalance ){
 }
 
 
-// Subtracts warhols from a users account
+// Subtracts Warhols from a users account
 
 function SubtractWarhols( userID, subtractedBalance ){
 
