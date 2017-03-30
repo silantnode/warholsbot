@@ -523,11 +523,11 @@ bot.on( '/*' , msg => {
 
         var randomUser = ( Math.ceil( Math.random() * users.length ) - 1 );
 
-        console.log( users[randomUser].owner_name );
-
         GetBalance( users[randomUser].owner, function( error, theirBalance ){
+          
+          let theirNewBalance = ( theirBalance + warholAmount );
 
-          theirNewBalance = ( theirBalance + warholAmount );
+          AddWarhols( users[randomUser].owner, theirNewBalance );
 
         });
 
