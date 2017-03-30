@@ -358,6 +358,8 @@ bot.on( [ '/random', '/fountain' ], msg => {
   
   if ( msg.text == '/random' ) {
 
+    giftSpendMode = 1;
+
     // Read how many users are in the accounts table.
     // Choose one user at random.
     // Subtract Warhols from the current users account.
@@ -365,6 +367,8 @@ bot.on( [ '/random', '/fountain' ], msg => {
 
   } else if ( msg.text == '/fountain' ) {
 
+    giftSpendMode = 2;
+    
     // Get the current balance of the fountain.
     // Add the Warhols contributed.
     // Check if the fountain is full yet.
