@@ -499,20 +499,31 @@ bot.on( '/*' , msg => {
     
   }
 
-  if ( giftSpendMode == 1 ){ // They have chosen to give to a random person.
+  if ( warholMode == 2 ) { // Make sure we are in spend mode.
+    
+    // Read from the second character in the message string.
+    let amountSelection = readText.slice( 1, 2 );
 
-    // Read how many users are in the accounts table.
-    // Choose one user at random.
-    // Subtract Warhols from the current users account.
-    // Award the randomly chosen user the Warhols.
+    // Make sure that what the text is only a number.
+    warholAmount = Number( amountSelection );
+  
+
+    if ( giftSpendMode == 1 ){ // They have chosen to give to a random person.
+
+      // Read how many users are in the accounts table.
+      // Choose one user at random.
+      // Subtract Warhols from the current users account.
+      // Award the randomly chosen user the Warhols.
 
 
-  } else if ( giftSpendMode == 2) { // They have chosen to give to the fountain.
+    } else if ( giftSpendMode == 2 ) { // They have chosen to give to the fountain.
 
-    // Get the current balance of the fountain.
-    // Add the Warhols contributed.
-    // Check if the fountain is full yet.
-    // If the fountain is overflowing notify the user?
+      // Get the current balance of the fountain.
+      // Add the Warhols contributed.
+      // Check if the fountain is full yet.
+      // If the fountain is overflowing notify the user?
+
+    }
 
   }
 
