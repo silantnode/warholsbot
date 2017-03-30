@@ -511,7 +511,7 @@ bot.on( '/*' , msg => {
 
   if ( giftSpendMode == 1 ){ // They have chosen to give to a random person.
 
-
+    
 
   } else if ( giftSpendMode == 2) { // They have chosen to give to the fountain.
 
