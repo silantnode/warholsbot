@@ -96,6 +96,9 @@ var giftSpendMode = 0;
 
 bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
   
+  warholMode = 0;
+  giftSpendMode = 0;
+
   // Display commands as handy buttons in the telegram interface.
   let markup = bot.keyboard([
     [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
@@ -522,10 +525,18 @@ bot.on( '/*' , msg => {
 
         console.log( users[randomUser].owner_name );
 
+        GetBalance( users[randomUser].owner, function( error, theirBalance ){
+
+          theirNewBalance = ( theirBalance + warholAmount );
+
+        });
+
+        SubtractWarhols( msg.from.id, warholAmount );
+
+        warholMode = 0;
+        giftSpendMode = 0;
         
-        
-        // Subtract Warhols from the current users account.
-        // Award the randomly chosen user the Warhols.
+        return bot.sendMessage( msg.from.id, `Thank you for your gift! Your Warhols have been anonymously sent to a random person.`);
 
       });
 
