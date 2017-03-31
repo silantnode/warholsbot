@@ -345,7 +345,7 @@ bot.on( GIFT_ECON, msg => {
 
   
 
-bot.on( [ '/random', '/fountain' ], msg => {
+bot.on( [ GIFT_RANDOM, GIFT_FOUNTAIN ], msg => {
 
   // Ask the user how many Warhols they want to spend.
   
