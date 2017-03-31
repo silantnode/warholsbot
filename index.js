@@ -349,17 +349,21 @@ bot.on( [ GIFT_RANDOM, GIFT_FOUNTAIN ], msg => {
 
   // Ask the user how many Warhols they want to spend.
   
-  if ( msg.text == '/random' ) {
+  if ( warholMode == 2 ) {
 
-    giftSpendMode = 1;
+    if ( msg.text == '/random' ) {
 
-  } else if ( msg.text == '/fountain' ) {
+      giftSpendMode = 1;
 
-    giftSpendMode = 2;
+    } else if ( msg.text == '/fountain' ) {
+
+      giftSpendMode = 2;
+
+    }
+
+    return bot.sendMessage( msg.from.id, `How many Warhols do you want to spend? \n /5 \n /10 \n /20`);
 
   }
-
-  return bot.sendMessage( msg.from.id, `How many Warhols do you want to spend? \n /5 \n /10 \n /20`);
 
 });
 
