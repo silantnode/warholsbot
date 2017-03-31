@@ -54,6 +54,12 @@ const CREATIVE_ECON = "/creative";
 const SPECULATIVE_ECON = "/speculative";
 const PUBLISH_BUTTON = "/publish";
 
+const GIFT_FOUNTAIN = "/fountain";
+const GIFT_RANDOM = "/random";
+
+const YES_BUTTON = "/yes";
+const NO_BUTTON = "/no";
+
 const MAX_LIST_DISPLAY = 5; // Maximum number of items to be displayed for the user to choose from whenever they are presented with multiple choice selections.
 const RAND_GIFT_RANGE = 10; // Range setting for randomly giving out Warhols.
 
@@ -328,7 +334,7 @@ bot.on( GIFT_ECON, msg => {
     } else if ( warholMode == 2 ) { // If we are in spend mode...
 
       let markup = bot.keyboard([
-        [ '/random' ], [ '/fountain' ] ], { resize: true }
+        [ GIFT_RANDOM ], [ GIFT_FOUNTAIN ] ], { resize: true }
       );
 
       return bot.sendMessage( msg.from.id, `Give Warhols to everybody with the Warhols /fountain\nGive Warhols to a person at /random`, { markup });
@@ -561,7 +567,7 @@ bot.on( '/*' , msg => {
 // These two are only relevant for the end routine of a user who has chosen to earn Warhols through the gift economy.
 // I could do an overall better implementation of this but for now I am just trying to get this project done. I am sure you understand how deadlines work.
 
-bot.on( '/yes', msg => {
+bot.on( YES_BUTTON, msg => {
 
     if ( warholMode == 1 ){ // Verify that they are in gift mode.
 
@@ -608,7 +614,7 @@ bot.on( '/yes', msg => {
 
 });
 
-bot.on( '/no', msg => {
+bot.on( NO_BUTTON, msg => {
 
   if ( warholMode == 1 ){
 
