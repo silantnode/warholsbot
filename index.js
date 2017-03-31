@@ -33,10 +33,13 @@ connection.connect( function (error){
 const TeleBot = require('telebot');
 const bot = new TeleBot(custom_data[0]);
 
+
 // Ask module
 
 bot.use(require('telebot/modules/ask.js'));
 
+
+// Module for verifying and validating a web address
 
 var isUrl = require('is-url-superb');
 
