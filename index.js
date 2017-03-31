@@ -586,9 +586,9 @@ bot.on( YES_BUTTON, msg => {
 
       GetBalance( msg.from.id, function( error, result ){
 
-          newBalance = ( warholValue + result );
+        newBalance = ( warholValue + result );
           
-          AddWarhols( msg.from.id, newBalance );
+        AddWarhols( msg.from.id, newBalance );
             
       });
 
