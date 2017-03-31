@@ -690,7 +690,7 @@ function GetBalance( msgID, callback ){
 }
 
 
-// Selects five random from the creative contet for the user to choose from.
+// Selects five random entries from the creative content for the user to choose from.
 
 function GetCreativeContent( callback ){
 
