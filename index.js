@@ -565,6 +565,20 @@ bot.on( '/*' , msg => {
       // Check if the fountain is full yet.
       // If the fountain is overflowing notify the user?
 
+      connection.query('SELECT reservoir FROM fountain WHERE id =' + 1, function( error, currentReservoirBalance ) {
+
+        if ( error ) return error;
+
+        var newReservoirBalance = ( currentReservoirBalance[0].reservoir + warholAmount ); 
+
+        connection.query('UPDATE fountain SET reservoir = ? WHERE id =?', [ newReservoirBalance, 1 ], function( error, current ){
+
+          if ( error ) throw error;
+
+        });
+
+      });
+
     }
 
   }
