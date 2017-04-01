@@ -583,6 +583,8 @@ bot.on( '/*' , msg => {
 
         }
 
+        return bot.sendMessage( msg.from.id, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.` , { markup });
+        
       });      
 
     }
@@ -790,7 +792,6 @@ function ShareTheWealth( newReservoirBalance ){
   });
 
 }
-
 
 
 
