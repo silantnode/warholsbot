@@ -579,7 +579,7 @@ bot.on( '/*' , msg => {
 
         if ( newReservoirBalance >= MAX_RESERVOIR ){
 
-          ShareTheWealth();
+          ShareTheWealth( newReservoirBalance );
 
         }
 
@@ -741,12 +741,53 @@ function AddToFountain( contribution ){
 }
 
 
-function ShareTheWealth(){
+
+function SubtractFromFountain( amount, members, currentBalance ){
+
+  let resetBalance = ( amount * members );
+
+  resetBalance = ( resetBalance - currentBalance );
+
+  connection.query('UPDATE fountain SET reservoir = ? WHERE id =?', [ resetBalance, 1 ], function( error, current ){
+
+    if ( error ) throw error;
+
+  });
+
+}
+
+
+
+function ShareTheWealth( newReservoirBalance ){
 
   // How many user accounts
   // Divide the pooled warhols by the amount of accounts
   // Update all of the warhol balances on all of the accounts
   console.log('The fountain has been activated!');
+
+  connection.query( 'SELECT * FROM accounts', function( error, members ){
+
+    if( error ) throw error;
+
+    let distroAmount =  Math.round( ( newReservoirBalance / members.length ) );
+
+    console.log( distroAmount );
+
+    for (let i = 0; i < members.length; i++ ){
+
+      GetBalance( members[i].owner, function( error, currentBalance ){
+
+        let newBalance = ( distroAmount + currentBalance );
+
+        AddWarhols( members[i].owner, newBalance );
+
+      });
+
+    }
+
+    SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
+
+  });
 
 }
 
