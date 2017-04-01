@@ -879,15 +879,7 @@ function GetGiftsContent( callback ){
 
 }
 
-/*
 
-let newOwner = { owner: msg.from.id, owner_name: msg.from.first_name, balance: 0 };
-    
-connection.query('INSERT INTO accounts SET ?', newOwner, function( error, result ){
-    
-if( error ) throw error;
-
-*/
 
 function AddCreativeContent( userID, userName, newContent ){
   
