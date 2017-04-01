@@ -509,7 +509,9 @@ bot.on( '/*' , msg => {
 
     // Make sure that what the text is only a number.
     let warholAmount = Number( amountSelection );
-  
+
+    // SubtractWarhols( msg.from.id, warholAmount ); // We can already subtract from the user account... why not?
+    
     if ( giftSpendMode == 1 ){ // They have chosen to give to a random person.
 
       connection.query( 'SELECT * FROM accounts', function( error, users ){
@@ -546,9 +548,9 @@ bot.on( '/*' , msg => {
 
           AddWarhols( users[ randomUser ].owner, theirNewBalance );
 
-        });
+          SubtractWarhols( msg.from.id, warholAmount );
 
-        SubtractWarhols( msg.from.id, warholAmount );
+        });        
 
         warholMode = 0;
         giftSpendMode = 0;
@@ -565,19 +567,23 @@ bot.on( '/*' , msg => {
       // Check if the fountain is full yet.
       // If the fountain is overflowing notify the user?
 
-      connection.query('SELECT reservoir FROM fountain WHERE id =' + 1, function( error, currentReservoirBalance ) {
+      let newReservoirBalance;
 
-        if ( error ) return error;
+      GetFountainBalance( function( error, fountainBalance ){
 
-        var newReservoirBalance = ( currentReservoirBalance[0].reservoir + warholAmount ); 
+        newReservoirBalance = ( fountainBalance + warholAmount );
+      
+        AddToFountain( newReservoirBalance );
 
-        connection.query('UPDATE fountain SET reservoir = ? WHERE id =?', [ newReservoirBalance, 1 ], function( error, current ){
+        SubtractWarhols( msg.from.id, warholAmount );
 
-          if ( error ) throw error;
+        if ( newReservoirBalance >= MAX_RESERVOIR ){
 
-        });
+          ShareTheWealth();
 
-      });
+        }
+
+      });      
 
     }
 
@@ -672,7 +678,8 @@ function AddWarhols( userID, addedBalance ){
 }
 
 
-// Subtracts Warhols from a users account
+// Subtracts Warhols from a users account. Need to re-write function so that it does not call GetBalance within it.
+// Have it just receive the value it needs to send to the database.
 
 function SubtractWarhols( userID, subtractionAmount ){
 
@@ -707,6 +714,43 @@ function GetBalance( msgID, callback ){
     });
 
 }
+
+
+function GetFountainBalance( callback ){
+
+  connection.query('SELECT reservoir FROM fountain WHERE id =' + 1, function( error, result ){
+
+        if ( error ) return error;
+
+        return callback( error, result[0].reservoir );
+        
+    });
+
+}
+
+
+
+function AddToFountain( contribution ){
+
+  connection.query('UPDATE fountain SET reservoir = ? WHERE id =?', [ contribution, 1 ], function( error, current ){
+
+    if ( error ) throw error;
+
+  });
+
+}
+
+
+function ShareTheWealth(){
+
+  // How many user accounts
+  // Divide the pooled warhols by the amount of accounts
+  // Update all of the warhol balances on all of the accounts
+  console.log('The fountain has been activated!');
+
+}
+
+
 
 
 // Selects five random entries from the creative content for the user to choose from.
