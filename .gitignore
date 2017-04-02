@@ -1,5 +1,6 @@
 # Ignore data file
 data.txt
+tokens_list_clean.rtf
 
 # Logs
 logs
