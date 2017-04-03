@@ -157,7 +157,7 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
 bot.on( '/test', msg => {
 
-  
+
 
 });
 
@@ -584,7 +584,7 @@ bot.on( '/*' , msg => {
         }
 
         return bot.sendMessage( msg.from.id, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.` , { markup });
-        
+
       });      
 
     }
