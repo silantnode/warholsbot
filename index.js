@@ -754,6 +754,12 @@ bot.on( NO_BUTTON, msg => {
 
 });
 
+// Last Interaction test command
+
+bot.on('/last', msg => {
+  // Update database date_last column with current date timestamp.
+      LastDate( msg.from.id);
+});
 
 
 /* * * FUNCTIONS * * */
@@ -985,6 +991,20 @@ function AddCreativeContent( userID, userName, newContent ){
 
 }
 
+// Update last interaction date
+
+function LastDate( userID ){
+    
+    var currentDate = new Date();
+
+    connection.query( 'UPDATE accounts SET date_last = ? WHERE owner = ?', [ currentDate, userID ], function( error, current ){
+                
+    if ( error ) throw error;
+
+
+  });
+
+}
 
 
 bot.connect();
