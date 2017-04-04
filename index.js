@@ -985,6 +985,20 @@ function AddCreativeContent( userID, userName, newContent ){
 
 }
 
+// Update last interaction date
+
+function LastDate( userID ){
+    
+    var currentDate = new Date();
+
+    connection.query( 'UPDATE accounts SET date_last = ? WHERE owner = ?', [ currentDate, userID ], function( error, current ){
+                
+    if ( error ) throw error;
+
+
+  });
+
+}
 
 
 bot.connect();
