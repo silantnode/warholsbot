@@ -645,6 +645,8 @@ bot.on( '/*' , msg => {
 
     } else if ( giftSpendMode == 2 ) { // They have chosen to give to the fountain.
 
+      
+
       // Get the current balance of the fountain.
       // Add the Warhols contributed.
       // Check if the fountain is full yet.
@@ -668,11 +670,11 @@ bot.on( '/*' , msg => {
 
             ShareTheWealth( newReservoirBalance );
             
-            return bot.sendMessage( msg.from.id, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.` , { markup });
-
           }
 
         });
+        
+        return bot.sendMessage( msg.from.id, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.` , { markup });
 
       });
       
