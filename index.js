@@ -754,6 +754,12 @@ bot.on( NO_BUTTON, msg => {
 
 });
 
+// Last Interaction test command
+
+bot.on('/last', msg => {
+  // Update database date_last column with current date timestamp.
+      LastDate( msg.from.id);
+});
 
 
 /* * * FUNCTIONS * * */
