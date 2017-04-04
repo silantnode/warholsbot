@@ -341,7 +341,11 @@ bot.on('ask.coupon', msg => {
 
               });
 
-              return bot.sendMessage( msg.from.id, `Congradulations! You now have 10 Warhols on your account.`);
+              let markup = bot.keyboard([
+                [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+              );
+
+              return bot.sendMessage( msg.from.id, `Congradulations! You now have 10 Warhols on your account.`, { markup });
 
             }
 
