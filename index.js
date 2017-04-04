@@ -758,7 +758,7 @@ bot.on( NO_BUTTON, msg => {
 
 bot.on('/last', msg => {
   // Update database date_last column with current date timestamp.
-      LastDate( msg.from.id);
+      LastDate( msg.from.id );
 });
 
 
