@@ -60,7 +60,7 @@ const PUBLISH_BUTTON = "/publish";
 const GIFT_FOUNTAIN = "/fountain";
 const GIFT_RANDOM = "/random";
 
-const MAX_RESERVOIR = 10; // The amount required for the fountain to overflow.
+const MIN_DISTRO = 2; // The minimum amount of warhols required per amount of users for an even distrobution of warhols from the fountain.
 
 const YES_BUTTON = "/yes";
 const NO_BUTTON = "/no";
