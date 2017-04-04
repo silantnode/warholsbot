@@ -67,6 +67,7 @@ const NO_BUTTON = "/no";
 
 const MAX_LIST_DISPLAY = 5; // Maximum number of items to be displayed for the user to choose from whenever they are presented with multiple choice selections.
 const RAND_GIFT_RANGE = 10; // Range setting for randomly giving out Warhols.
+const MAX_COUPON = 10;
 
 const DESCRIPTION_MAX_LENGTH = 140; // How long a description of content is allowed to be.
 
@@ -275,6 +276,84 @@ bot.on( PUBLISH_BUTTON , msg => {
   // stepping through all of the other menus.
 
   return bot.sendMessage( msg.from.id, `Enter the URL for the content.`, { ask: 'url' });
+
+});
+
+
+
+bot.on('/coupon', msg => {
+
+  return bot.sendMessage( msg.from.id, `Please enter code exactly as it appears on the coupon.`, { ask: 'coupon' });
+
+});
+
+
+bot.on('ask.coupon', msg => {
+
+  let couponCode = msg.text;
+
+  connection.query( 'SELECT * FROM coupons', function( error, uniqueCode ){
+
+    if( error ) throw error;
+
+      for( let i = 0; i < uniqueCode.length; i++ ){
+        
+        // Check if the user has previously submitted a code.
+        if ( uniqueCode[i].owner == msg.from.id ){
+
+            let markup = bot.keyboard([
+              [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+            );
+
+            return bot.sendMessage( msg.from.id, `You have already used a coupon code. Maybe /get some warhols?`, { markup });
+
+        } else {
+
+          // Check if the submitted code matches a code in the database.
+          if ( couponCode == uniqueCode[i].unique ){
+
+          // Verify if the code has been used already.
+            if ( uniqueCode[i].used == 1 ){
+
+              return bot.sendMessage( msg.from.id, `This coupon has already been used. Please enter a different code if you have one.`, { ask: 'coupon' });
+
+            } else {
+
+              // If the code is unused mark it as used.
+              connection.query( 'UPDATE coupons SET used = ? WHERE id = ?', [ 1, uniqueCode[i].id ], function( error, selectedCoupon ){
+
+                if( error ) throw error;
+
+              });
+              // Record the Telegram user id of the person who used the code.
+              connection.query( 'UPDATE coupons SET owner = ? WHERE id = ?', [ msg.from.id , uniqueCode[i].id ], function( error, claiment ){
+
+                if( error ) throw error;
+
+              });
+                
+              // Give the user their warhols.
+              GetBalance( members[i].owner, function( error, currentBalance ){
+
+                let newBalance = ( MAX_COUPON + currentBalance );
+
+                AddWarhols( msg.from.id, newBalance );
+
+              });
+
+              return bot.sendMessage( msg.from.id, `Congradulations! You now have 10 Warhols on your account.`);
+
+            }
+
+          }
+
+        }
+  
+      }
+
+    return bot.sendMessage( msg.from.id, `Perhaps you entered the code incorrectly? Please try again.`, { ask: 'coupon' });
+
+  });
 
 });
 
