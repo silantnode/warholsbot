@@ -660,17 +660,23 @@ bot.on( '/*' , msg => {
 
         SubtractWarhols( msg.from.id, warholAmount );
 
-        if ( newReservoirBalance >= MAX_RESERVOIR ){
+        connection.query( 'SELECT * FROM accounts', function( error, howmanyusers ){
 
-          ShareTheWealth( newReservoirBalance );
+          if( error ) throw error;
 
-        }
+          if ( newReservoirBalance >= ( MIN_DISTRO * howmanyusers.length ) ){
 
-        return bot.sendMessage( msg.from.id, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.` , { markup });
+            ShareTheWealth( newReservoirBalance );
+            
+            return bot.sendMessage( msg.from.id, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.` , { markup });
 
-      });      
+          }
 
-    }
+        });
+
+      });
+      
+    }      
 
   }
 
@@ -964,7 +970,6 @@ function GetGiftsContent( callback ){
 }
 
 
-
 // Adds creative content submitted by the user.
 function AddCreativeContent( userID, userName, newContent ){
   
@@ -977,6 +982,7 @@ function AddCreativeContent( userID, userName, newContent ){
   });
 
 }
+
 
 
 bot.connect();
