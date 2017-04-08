@@ -61,6 +61,7 @@ const GIFT_FOUNTAIN = "/fountain";
 const GIFT_RANDOM = "/random";
 
 const MIN_DISTRO = 2; // The minimum amount of warhols required per amount of users for an even distrobution of warhols from the fountain.
+const MAX_BONUS = 1; // The maximum bonus amount of warhols included in the distrobution from the fountain.
 
 const YES_BUTTON = "/yes";
 const NO_BUTTON = "/no";
@@ -666,7 +667,7 @@ bot.on( '/*' , msg => {
 
           if( error ) throw error;
 
-          if ( newReservoirBalance >= ( MIN_DISTRO * howmanyusers.length ) ){
+          if ( newReservoirBalance >= ( ( MIN_DISTRO * howmanyusers.length ) + MAX_BONUS ) ){
 
             ShareTheWealth( newReservoirBalance );
             
