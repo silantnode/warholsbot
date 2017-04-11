@@ -4,6 +4,9 @@
 var fs = require('fs');
 var custom_data = fs.readFileSync('data.txt').toString().split("\n");
 
+// HTTP request tool used for POST to WarholsChannel
+var requestify = require('requestify'); 
+
 // Create the connection to the database.
 const mysql = require('mysql');
 
@@ -59,6 +62,9 @@ const PUBLISH_BUTTON = "/publish";
 
 const GIFT_FOUNTAIN = "/fountain";
 const GIFT_RANDOM = "/random";
+
+const SPEC_MARKET = "/market";
+const SPEC_RANKING = "/ranking";
 
 const MIN_DISTRO = 2; // The minimum amount of warhols required per amount of users for an even distrobution of warhols from the fountain.
 const MAX_BONUS = 1; // The maximum bonus amount of warhols included in the distrobution from the fountain.
@@ -128,8 +134,8 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
     for( let i = 0; i < rows.length; i++ ){
 
       if( rows[i].owner == msg.from.id ){
-
-        // Send them a message welcoming them back.
+ 
+        // Send them a message welcoming them back. 
         return bot.sendMessage( msg.from.id, `Welcome back ${ msg.from.first_name }!`, { markup } );
         
       }
@@ -237,7 +243,7 @@ bot.on( SPEND_BUTTON, msg => {
 });
 
 
-// The gift based economy, where everyone sees themselves in the face of the other.
+// The creative economy content, where everyone makes stuff but nobody keeps money.
 
 bot.on( CREATIVE_ECON, msg => {
 
@@ -404,7 +410,7 @@ bot.on('ask.whatisit', msg => {
 });
 
 
-// The creative economy content, where everyone makes stuff but nobody keeps money.
+// The gift based economy, where everyone sees themselves in the face of the other.
 
 bot.on( GIFT_ECON, msg => {
 
@@ -463,10 +469,14 @@ bot.on( [ GIFT_RANDOM, GIFT_FOUNTAIN ], msg => {
 bot.on( SPECULATIVE_ECON, msg => {
 
   let markup = bot.keyboard([
-    [ BACK_BUTTON ]], { resize: true }
+    [ SPEC_MARKET ],[ SPEC_RANKING ],[ BACK_BUTTON ]], { resize: true }
   );
 
-  return bot.sendMessage( msg.from.id, `This economy has not been developed... yet. Please commen zee backen später.`, { markup });
+GetBalance( msg.from.id, function( error, balance ){
+
+      return bot.sendMessage( msg.from.id, `Are you ready to take some risks and maybe get some rewards?. How would you like to invest your Warhols: \n /market exchange of flavors \n /ranking of cultural appreciation`, { markup } );
+
+    });
   
 });
 
@@ -729,6 +739,19 @@ bot.on( YES_BUTTON, msg => {
       // Subtract Warhols from the account of the user.
       SubtractWarhols( msg.from.id, 10 );
 
+      // Post to WarholsChannel New Content
+requestify.post('https://maker.ifttt.com/trigger/new_content/with/key/' + custom_data[5] , { // IFTTT secret key.
+        value1: ('@' + msg.from.username ) , // telegram user.
+        value2: contentSubmission[1] , // content title.
+        value3: contentSubmission[0] // content URL.
+    })
+    .then(function(response) {
+        // Get the response and write to console
+        response.body;
+        console.log('Response: ' + response.body);
+
+    }); // End of WarholsChannel posting routine.
+
       contentSubmission = [];
 
       return bot.sendMessage( msg.from.id, `Excellent! Your content is now available for viewing and 10 Warhols have been subtracted from your account.`, { markup });
@@ -759,8 +782,19 @@ bot.on( NO_BUTTON, msg => {
 
 bot.on('/last', msg => {
   // Update database date_last column with current date timestamp.
-      LastDate( msg.from.id);
+      LastDate( msg.from.id );
 });
+
+// Date comparison test command
+
+bot.on('/date', msg => {
+  // Compare current date and /last date.
+
+  
+      DateCompare ( msg.from.id );
+});
+
+
 
 
 /* * * FUNCTIONS * * */
@@ -1000,12 +1034,66 @@ function LastDate( userID ){
 
     connection.query( 'UPDATE accounts SET date_last = ? WHERE owner = ?', [ currentDate, userID ], function( error, current ){
                 
-    if ( error ) throw error;
+     if ( error ) throw error;
 
 
-  });
+   });
 
 }
 
+// Check for time since last interaction
 
+function DateCompare( userID ){
+
+      var currentDate = new Date();
+
+    connection.query('SELECT date_last FROM accounts WHERE owner =' + userID , function( error, result ){
+      
+        if ( error ) return error;
+
+          var previousDate = result[0].date_last; // magical command to get one result into a variable
+
+          var sincelastDate = Math.abs(currentDate-previousDate);  // difference in milliseconds
+
+          // console.log(result);
+          // console.log('Last here: ' + result[0].date_last );
+          // console.log('Time now: ' + currentDate );
+          // console.log('Difference: ' + timeConversion(sincelastDate) );
+    });
+
+}
+
+// Convert milliseconds into human understandable time
+
+function timeConversion(millisec) {
+
+        var seconds = (millisec / 1000).toFixed(1);
+
+        var minutes = (millisec / (1000 * 60)).toFixed(1);
+
+        var hours = (millisec / (1000 * 60 * 60)).toFixed(1);
+
+        var days = (millisec / (1000 * 60 * 60 * 24)).toFixed(1);
+
+        if (seconds < 60) {
+            return seconds + " Sec";
+        } else if (minutes < 60) {
+            return minutes + " Min";
+        } else if (hours < 24) {
+            return hours + " Hrs";
+        } else {
+            return days + " Days"
+        }
+    }
+
+      // Compare current date with last interaction date.
+
+      // Check for fountain overflows in that period and how much they were.   
+
+      // Add overflown Warhols to users account.
+       
+      // If appropriate send them a message notifying of fountain or market and new balance.
+    
+// Last line of code, all functions should be above here
 bot.connect();
+// Do not add any code after this line
