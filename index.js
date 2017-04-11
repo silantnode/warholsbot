@@ -729,7 +729,7 @@ bot.on( YES_BUTTON, msg => {
 
       return bot.sendMessage( msg.from.id, `Enjoy! Your account has benn credited with ${ warholValue } Warhols`, { markup });
 
-    } else if ( warholMode == 2 ){
+    } else if ( warholMode == 2 ){ // Verify that they are in spend mode.
       
       let markup = bot.keyboard([
         [ BACK_BUTTON ]], { resize: true }
