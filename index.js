@@ -485,14 +485,16 @@ bot.on( [ GIFT_RANDOM, GIFT_FOUNTAIN ], msg => {
 bot.on( SPECULATIVE_ECON, msg => {
 
   let markup = bot.keyboard([
+
     [ SPEC_MARKET ],[ SPEC_RANKING ],[ BACK_BUTTON ]], { resize: true }
+
   );
 
-GetBalance( msg.from.id, function( error, balance ){
+  GetBalance( msg.from.id, function( error, balance ){
 
-      return bot.sendMessage( msg.from.id, `Are you ready to take some risks and maybe get some rewards?. How would you like to invest your Warhols: \n /market exchange of flavors \n /ranking of cultural appreciation`, { markup } );
+  return bot.sendMessage( msg.from.id, `Are you ready to take some risks and maybe get some rewards?. How would you like to invest your Warhols: \n /market exchange of flavors \n /ranking of cultural appreciation`, { markup } );
 
-    });
+  });
   
 });
 
@@ -693,7 +695,7 @@ bot.on( '/*' , msg => {
 
           if( error ) throw error;
 
-          if ( newReservoirBalance >= ( ( MIN_DISTRO * howmanyusers.length ) + MAX_GIFT ) ){
+          if ( newReservoirBalance >= ( ( MIN_DISTRO * howmanyusers.length ) ) ){
 
             ShareTheWealth( newReservoirBalance );
             
@@ -920,6 +922,8 @@ function ShareTheWealth( newReservoirBalance ){
     if( error ) throw error;
 
     let distroAmount =  Math.round( ( newReservoirBalance / members.length ) );
+
+    distroAmount = distroAmount + MAX_GIFT;
 
     console.log( distroAmount );
 
