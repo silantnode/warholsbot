@@ -674,8 +674,6 @@ bot.on( '/*' , msg => {
 
     } else if ( giftSpendMode == 2 ) { // They have chosen to give to the fountain.
 
-      
-
       // Get the current balance of the fountain.
       // Add the Warhols contributed.
       // Check if the fountain is full yet.
