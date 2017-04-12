@@ -699,9 +699,12 @@ bot.on( '/*' , msg => {
             
           }
 
+          warholMode = 0;
+          giftSpendMode = 0;
+
+          return bot.sendMessage( msg.from.id, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
+
         });
-        
-        return bot.sendMessage( msg.from.id, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
 
       });
       
