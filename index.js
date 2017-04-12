@@ -69,7 +69,7 @@ const SPEC_MARKET = "/market";
 const SPEC_RANKING = "/ranking";
 
 const MIN_DISTRO = 2; // The minimum amount of warhols required per amount of users for an even distrobution of warhols from the fountain.
-const MAX_GIFT = 1; // The maximum bonus amount of warhols included in the distrobution from the fountain.
+const GIFT_MULTIPLYER = 2; // The maximum bonus amount of warhols included in the distrobution from the fountain.
 
 const YES_BUTTON = "/yes";
 const NO_BUTTON = "/no";
@@ -617,7 +617,7 @@ bot.on( '/*' , msg => {
     
     // Read from the second character in the message string.
     let readText = msg.text;
-    let amountSelection = readText.slice( 1, 2 );
+    let amountSelection = readText.slice( 1, readText.length );
 
     // Make sure that what the text is only a number.
     let warholAmount = Number( amountSelection );
@@ -683,7 +683,16 @@ bot.on( '/*' , msg => {
 
       GetFountainBalance( function( error, fountainBalance ){
 
-        newReservoirBalance = ( fountainBalance + warholAmount );
+        console.log('The amount of warhols contributed to the fountain is ' + warholAmount );
+        console.log('The amount of warhols currently in the resevoir is ' + fountainBalance );
+        
+        let multiplyerTest = ( warholAmount * GIFT_MULTIPLYER );
+
+        console.log('Contribution amount after multiplyer is ' + multiplyerTest );
+
+        newReservoirBalance = ( fountainBalance + ( warholAmount * GIFT_MULTIPLYER ) ) ;
+
+        console.log('The new reservoir balance based on the last contribution is ' + newReservoirBalance );
       
         AddToFountain( newReservoirBalance );
 
@@ -692,6 +701,8 @@ bot.on( '/*' , msg => {
         connection.query( 'SELECT * FROM accounts', function( error, howmanyusers ){
 
           if( error ) throw error;
+
+          console.log('There are ' + howmanyusers.length + ' warhols users');
 
           if ( newReservoirBalance >= ( ( MIN_DISTRO * howmanyusers.length ) ) ){
 
@@ -742,7 +753,7 @@ bot.on( YES_BUTTON, msg => {
 
       warholMode = 0;
 
-      return bot.sendMessage( msg.from.id, `Enjoy! Your account has benn credited with ${ warholValue } Warhols`, { markup });
+      return bot.sendMessage( msg.from.id, `Enjoy! Your account has been credited with ${ warholValue } Warhols`, { markup });
 
     } else if ( warholMode == 2 ){ // Verify that they are in spend mode.
       
@@ -895,6 +906,43 @@ function AddToFountain( contribution ){
 
 
 
+function ShareTheWealth( newReservoirBalance ){
+
+  // How many user accounts
+  // Divide the pooled warhols by the amount of accounts
+  // Update all of the warhol balances on all of the accounts
+  console.log('The fountain has been activated!');
+
+  connection.query( 'SELECT * FROM accounts', function( error, members ){
+
+    if( error ) throw error;
+
+    let distroAmount =  Math.floor( ( newReservoirBalance / members.length ) ); 
+
+    console.log( 'Each user gets ' + distroAmount + ' warhols' );
+
+    for (let i = 0; i < members.length; i++ ){
+
+      GetBalance( members[i].owner, function( error, currentBalance ){
+
+        let newBalance = ( distroAmount + currentBalance );
+
+        AddWarhols( members[i].owner, newBalance );
+
+        newBalance = 0;
+
+      });
+
+    }
+
+    SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
+
+  });
+
+}
+
+
+
 function SubtractFromFountain( amount, members, currentBalance ){
 
   let resetBalance = ( amount * members );
@@ -908,45 +956,6 @@ function SubtractFromFountain( amount, members, currentBalance ){
   });
 
 }
-
-
-
-function ShareTheWealth( newReservoirBalance ){
-
-  // How many user accounts
-  // Divide the pooled warhols by the amount of accounts
-  // Update all of the warhol balances on all of the accounts
-  console.log('The fountain has been activated!');
-
-  connection.query( 'SELECT * FROM accounts', function( error, members ){
-
-    if( error ) throw error;
-
-    let distroAmount =  Math.round( ( newReservoirBalance / members.length ) );
-
-    // Add the gift amount to the distribution amount based on the amount of users
-    distroAmount = distroAmount + MAX_GIFT; 
-
-    console.log( distroAmount );
-
-    for (let i = 0; i < members.length; i++ ){
-
-      GetBalance( members[i].owner, function( error, currentBalance ){
-
-        let newBalance = ( distroAmount + currentBalance );
-
-        AddWarhols( members[i].owner, newBalance );
-
-      });
-
-    }
-
-    SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
-
-  });
-
-}
-
 
 
 // Selects five random entries from the creative content for the user to choose from.
