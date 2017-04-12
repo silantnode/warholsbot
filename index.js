@@ -20,6 +20,8 @@ const connection = mysql.createConnection({
 
 connection.connect( function (error){
   
+  if( error ) throw error;
+
   if (error) {
 
     console.log('Error connecting to Db');
@@ -67,7 +69,7 @@ const SPEC_MARKET = "/market";
 const SPEC_RANKING = "/ranking";
 
 const MIN_DISTRO = 2; // The minimum amount of warhols required per amount of users for an even distrobution of warhols from the fountain.
-const MAX_BONUS = 1; // The maximum bonus amount of warhols included in the distrobution from the fountain.
+const MAX_GIFT = 1; // The maximum bonus amount of warhols included in the distrobution from the fountain.
 
 const YES_BUTTON = "/yes";
 const NO_BUTTON = "/no";
@@ -166,6 +168,20 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 bot.on( '/test', msg => {
 
 
+
+});
+
+
+
+bot.on( '/help', msg => {
+
+  return bot.sendMessage( msg.from.id, `A list of common commands available to use for interacting with warhols bot.\n 
+  /start - Starts the warholsbot.\n
+  /back - Returns you to the start menu from anywhere.\n
+  /spend - Starts the process of spending warhols and can be used anywhere.\n
+  /balance - Check how many warhols you have. Can be accessed anywhere.\n\n
+  You may see other commands as you step through the procedures provided by each of the above commands. These commands are process specific and will not work out of context.
+  `);
 
 });
 
@@ -619,7 +635,7 @@ bot.on( '/*' , msg => {
 
         let theOthers = [];
 
-        for( let i = 0; i < users.length; i++){
+        for( let i = 0; i < users.length; i++ ){
 
           if ( users[i].owner != msg.from.id ){
 
@@ -677,7 +693,7 @@ bot.on( '/*' , msg => {
 
           if( error ) throw error;
 
-          if ( newReservoirBalance >= ( ( MIN_DISTRO * howmanyusers.length ) + MAX_BONUS ) ){
+          if ( newReservoirBalance >= ( ( MIN_DISTRO * howmanyusers.length ) + MAX_GIFT ) ){
 
             ShareTheWealth( newReservoirBalance );
             
@@ -725,7 +741,7 @@ bot.on( YES_BUTTON, msg => {
 
       return bot.sendMessage( msg.from.id, `Enjoy! Your account has benn credited with ${ warholValue } Warhols`, { markup });
 
-    } else if ( warholMode == 2 ){
+    } else if ( warholMode == 2 ){ // Verify that they are in spend mode.
       
       let markup = bot.keyboard([
         [ BACK_BUTTON ]], { resize: true }
