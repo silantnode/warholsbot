@@ -923,7 +923,8 @@ function ShareTheWealth( newReservoirBalance ){
 
     let distroAmount =  Math.round( ( newReservoirBalance / members.length ) );
 
-    distroAmount = distroAmount + MAX_GIFT;
+    // Add the gift amount to the distribution amount based on the amount of users
+    distroAmount = distroAmount + MAX_GIFT; 
 
     console.log( distroAmount );
 
