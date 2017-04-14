@@ -946,7 +946,7 @@ function ShareTheWealth( newReservoirBalance ){
 function SubtractFromFountain( amount, members, currentBalance ){
 
   let resetBalance = ( amount * members );
-
+  
   resetBalance = ( resetBalance - currentBalance );
 
   connection.query('UPDATE fountain SET reservoir = ? WHERE id =?', [ resetBalance, 1 ], function( error, current ){
