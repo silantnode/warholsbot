@@ -618,7 +618,7 @@ bot.on( '/*' , msg => {
     // Read from the second character in the message string.
     let readText = msg.text;
     let amountSelection = readText.slice( 1, readText.length );
-
+    
     // Make sure that what the text is only a number.
     let warholAmount = Number( amountSelection );
 
