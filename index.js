@@ -76,7 +76,7 @@ const NO_BUTTON = "/no";
 
 const MAX_LIST_DISPLAY = 5; // Maximum number of items to be displayed for the user to choose from whenever they are presented with multiple choice selections.
 const RAND_GIFT_RANGE = 10; // Range setting for randomly giving out Warhols.
-const MAX_COUPON = 10;
+const MAX_COUPON = 10; // The amount one receives if they have a coupon
 
 const DESCRIPTION_MAX_LENGTH = 140; // How long a description of content is allowed to be.
 
