@@ -484,8 +484,6 @@ bot.on( SPECULATIVE_ECON, msg => {
     [ SPEC_MARKET ],[ SPEC_RANKING ],[ BACK_BUTTON ]], { resize: true }
   );
 
-warholMode = 2; // Entering spend mode. (in the SPECULATION economy GET behaves the same as SPEND which is warholMode 2)
-
 GetBalance( msg.from.id, function( error, balance ){
 
       return bot.sendMessage( msg.from.id, `Are you ready to take some risks and maybe get some rewards?. How would you like to invest your Warhols: \n /market exchange of flavors \n /ranking of cultural appreciation`, { markup } );
@@ -1016,18 +1014,6 @@ function ShareTheWealth( newReservoirBalance ){
   // Divide the pooled warhols by the amount of accounts
   // Update all of the warhol balances on all of the accounts
   console.log('The fountain has been activated!');
-
-        // Post to WarholsChannel New Fountain Distribution
-        requestify.post('https://maker.ifttt.com/trigger/new_fountain/with/key/' + custom_data[5] , { // IFTTT secret key.
-        value1: ( distroAmount ) , // amount of warhols each person will get.
-
-        })
-           .then(function(response) {
-              // Get the response and write to console
-              response.body;
-              console.log('Response: ' + response.body);
-
-           }); // End of WarholsChannel content posting routine.
 
   connection.query( 'SELECT * FROM accounts', function( error, members ){
 
