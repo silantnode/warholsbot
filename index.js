@@ -740,6 +740,12 @@ bot.on( '/*' , msg => {
 
     console.log(warholAmount);
 
+    if ( warholAmount < 10 ){
+
+      console.log('You do not have enough warhols.');
+
+    }
+
     // Check if the amount they have selected does not exceed the amount available in their account.
 
     /*
