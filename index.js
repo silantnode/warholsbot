@@ -743,11 +743,13 @@ bot.on( '/*' , msg => {
 
     GetBalance( msg.from.id, function( error, userBalance ){
 
+      console.log(warholAmount);
+
       if ( userBalance < warholAmount ){
 
         return bot.sendMessage( msg.from.id, `You do not have enough warhols. Please choose a smaller amount or /get more warhols.`);
 
-      } else {
+      } else if ( userBalance >= warholAmount ){
 
         if ( giftSpendMode == 1 ){ // They have chosen to give to a random person.
 
