@@ -797,7 +797,7 @@ bot.on( '/*' , msg => {
 
         } else if ( giftSpendMode == 2 ) { // They have chosen to give to the fountain.
 
-          ShareTheWealth( msg.from.id, amountSelection );
+          ShareTheWealth( msg.from.id, warholAmount );
 
         }
 
