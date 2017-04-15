@@ -733,22 +733,13 @@ bot.on( '/*' , msg => {
     
     // Read from the second character in the message string.
     let readText = msg.text;
-    let amountSelection = readText.slice( 1, 3 );
+    let warholAmount = readText.slice( 1, 3 );
     
-    // Make sure that what the text is only a number.
-    let warholAmount = amountSelection;
-
     console.log(warholAmount);
-
-    if ( warholAmount < 10 ){
-
-      console.log('You do not have enough warhols.');
-
-    }
 
     // Check if the amount they have selected does not exceed the amount available in their account.
 
-    /*
+    
 
     GetBalance( msg.from.id, function( error, userBalance ){
 
@@ -814,8 +805,6 @@ bot.on( '/*' , msg => {
       }
 
     });
-
-    */
 
   }
 
