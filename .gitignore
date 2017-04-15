@@ -2,6 +2,7 @@
 data.txt
 tokens_list_clean.rtf
 tokens_list_clean.txt
+.DS_Store
 
 # Logs
 logs
