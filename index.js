@@ -246,7 +246,7 @@ bot.on( SPEND_BUTTON, msg => {
 
     GetBalance( msg.from.id, function( error, balance ){
 
-      if ( balance <= 5 ){
+      if ( balance < 5 ){
 
           let markup = bot.keyboard([
             [ GET_BUTTON ]], { resize: true }
