@@ -735,14 +735,14 @@ bot.on( '/*' , msg => {
     let readText = msg.text;
     let amountSelection = readText.slice( 1, 3 );
     
-    console.log(amountSelection);
-
     // Make sure that what the text is only a number.
-    let warholAmount = Number( amountSelection );
+    let warholAmount = amountSelection;
 
     console.log(warholAmount);
 
     // Check if the amount they have selected does not exceed the amount available in their account.
+
+    /*
 
     GetBalance( msg.from.id, function( error, userBalance ){
 
@@ -808,6 +808,8 @@ bot.on( '/*' , msg => {
       }
 
     });
+
+    */
 
   }
 
