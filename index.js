@@ -738,8 +738,6 @@ bot.on( '/*' , msg => {
     // Check if the amount they have selected does not exceed the amount available in their account.
     GetBalance( msg.from.id, function( error, userBalance ){
 
-      console.log(warholAmount);
-
       if ( userBalance < warholAmount ){
 
         return bot.sendMessage( msg.from.id, `You do not have enough warhols. Please choose a smaller amount or /get more warhols.`);
