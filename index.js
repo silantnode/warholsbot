@@ -69,14 +69,14 @@ const SPEC_MARKET = "/market";
 const SPEC_RANKING = "/ranking";
 
 const MIN_DISTRO = 2; // The minimum amount of warhols required per amount of users for an even distrobution of warhols from the fountain.
-const MAX_GIFT = 1; // The maximum bonus amount of warhols included in the distrobution from the fountain.
+const GIFT_MULTIPLYER = 2; // The maximum bonus amount of warhols included in the distrobution from the fountain.
 
 const YES_BUTTON = "/yes";
 const NO_BUTTON = "/no";
 
 const MAX_LIST_DISPLAY = 5; // Maximum number of items to be displayed for the user to choose from whenever they are presented with multiple choice selections.
 const RAND_GIFT_RANGE = 10; // Range setting for randomly giving out Warhols.
-const MAX_COUPON = 10;
+const MAX_COUPON = 10; // The amount one receives if they have a coupon
 
 const DESCRIPTION_MAX_LENGTH = 140; // How long a description of content is allowed to be.
 
@@ -485,14 +485,16 @@ bot.on( [ GIFT_RANDOM, GIFT_FOUNTAIN ], msg => {
 bot.on( SPECULATIVE_ECON, msg => {
 
   let markup = bot.keyboard([
+
     [ SPEC_MARKET ],[ SPEC_RANKING ],[ BACK_BUTTON ]], { resize: true }
+
   );
 
-GetBalance( msg.from.id, function( error, balance ){
+  GetBalance( msg.from.id, function( error, balance ){
 
-      return bot.sendMessage( msg.from.id, `Are you ready to take some risks and maybe get some rewards?. How would you like to invest your Warhols: \n /market exchange of flavors \n /ranking of cultural appreciation`, { markup } );
+  return bot.sendMessage( msg.from.id, `Are you ready to take some risks and maybe get some rewards?. How would you like to invest your Warhols: \n /market exchange of flavors \n /ranking of cultural appreciation`, { markup } );
 
-    });
+  });
   
 });
 
@@ -615,8 +617,8 @@ bot.on( '/*' , msg => {
     
     // Read from the second character in the message string.
     let readText = msg.text;
-    let amountSelection = readText.slice( 1, 2 );
-
+    let amountSelection = readText.slice( 1, readText.length );
+    
     // Make sure that what the text is only a number.
     let warholAmount = Number( amountSelection );
 
@@ -669,43 +671,11 @@ bot.on( '/*' , msg => {
 
       });
 
-
     } else if ( giftSpendMode == 2 ) { // They have chosen to give to the fountain.
 
-      
+      ShareTheWealth( msg.from.id, amountSelection );
 
-      // Get the current balance of the fountain.
-      // Add the Warhols contributed.
-      // Check if the fountain is full yet.
-      // If the fountain is overflowing notify the user?
-
-      let newReservoirBalance;
-
-      GetFountainBalance( function( error, fountainBalance ){
-
-        newReservoirBalance = ( fountainBalance + warholAmount );
-      
-        AddToFountain( newReservoirBalance );
-
-        SubtractWarhols( msg.from.id, warholAmount );
-
-        connection.query( 'SELECT * FROM accounts', function( error, howmanyusers ){
-
-          if( error ) throw error;
-
-          if ( newReservoirBalance >= ( ( MIN_DISTRO * howmanyusers.length ) + MAX_GIFT ) ){
-
-            ShareTheWealth( newReservoirBalance );
-            
-          }
-
-        });
-        
-        return bot.sendMessage( msg.from.id, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
-
-      });
-      
-    }      
+    }
 
   }
 
@@ -739,7 +709,7 @@ bot.on( YES_BUTTON, msg => {
 
       warholMode = 0;
 
-      return bot.sendMessage( msg.from.id, `Enjoy! Your account has benn credited with ${ warholValue } Warhols`, { markup });
+      return bot.sendMessage( msg.from.id, `Enjoy! Your account has been credited with ${ warholValue } Warhols`, { markup });
 
     } else if ( warholMode == 2 ){ // Verify that they are in spend mode.
       
@@ -892,12 +862,80 @@ function AddToFountain( contribution ){
 
 
 
+function ShareTheWealth( userID, fountainContribution ){
+
+  let markup = bot.keyboard([
+    [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+  );
+
+  GetFountainBalance( function( error, fountainBalance ){
+    
+    // Add the new contribution of warhols to the current reservoir balance including the multiplier. 
+    let newReservoirBalance = ( fountainBalance + ( fountainContribution * GIFT_MULTIPLYER ) ) ;
+
+    // Send the newly calculated value to the reservoir.
+    AddToFountain( newReservoirBalance );
+
+    // Subtract the contribution of the warhols from the user account.
+    SubtractWarhols( userID, fountainContribution );
+
+    // Find out how many warhols users there are.
+    connection.query( 'SELECT * FROM accounts', function( error, howmanyusers ){
+
+      if( error ) throw error;
+
+      // Check if the reservoir is full enough for a distrobution of warhols to all the users.
+      if ( newReservoirBalance >= ( ( MIN_DISTRO * howmanyusers.length ) ) ){
+
+        connection.query( 'SELECT * FROM accounts', function( error, members ){
+
+          if( error ) throw error;
+
+          // Round down the number resulting from dividing the new reservoir balance with the number of warhols users.
+          let distroAmount =  Math.floor( ( newReservoirBalance / members.length ) ); 
+
+          // Distribute the awarded warhols to all the users.
+          for (let i = 0; i < members.length; i++ ){
+
+            GetBalance( members[i].owner, function( error, currentBalance ){
+
+              let newBalance = ( distroAmount + currentBalance );
+
+              AddWarhols( members[i].owner, newBalance );
+
+              newBalance = 0;
+
+            });
+
+          }
+
+          SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
+
+          warholMode = 0;
+          giftSpendMode = 0;
+
+          return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
+
+        });
+        
+      }
+
+    });
+
+  });
+
+}
+
+
 function SubtractFromFountain( amount, members, currentBalance ){
 
+  // Multiply the amount of members with the amount each member received.
   let resetBalance = ( amount * members );
 
-  resetBalance = ( resetBalance - currentBalance );
+  // Subtract the total amount awarded from the reservoir account.
+  resetBalance = ( currentBalance - resetBalance );
 
+  // Update the reservoir.
   connection.query('UPDATE fountain SET reservoir = ? WHERE id =?', [ resetBalance, 1 ], function( error, current ){
 
     if ( error ) throw error;
@@ -905,42 +943,6 @@ function SubtractFromFountain( amount, members, currentBalance ){
   });
 
 }
-
-
-
-function ShareTheWealth( newReservoirBalance ){
-
-  // How many user accounts
-  // Divide the pooled warhols by the amount of accounts
-  // Update all of the warhol balances on all of the accounts
-  console.log('The fountain has been activated!');
-
-  connection.query( 'SELECT * FROM accounts', function( error, members ){
-
-    if( error ) throw error;
-
-    let distroAmount =  Math.round( ( newReservoirBalance / members.length ) );
-
-    console.log( distroAmount );
-
-    for (let i = 0; i < members.length; i++ ){
-
-      GetBalance( members[i].owner, function( error, currentBalance ){
-
-        let newBalance = ( distroAmount + currentBalance );
-
-        AddWarhols( members[i].owner, newBalance );
-
-      });
-
-    }
-
-    SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
-
-  });
-
-}
-
 
 
 // Selects five random entries from the creative content for the user to choose from.
