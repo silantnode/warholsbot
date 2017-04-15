@@ -735,6 +735,8 @@ bot.on( '/*' , msg => {
     let readText = msg.text;
     let amountSelection = readText.slice( 1, readText.length );
     
+    console.log(amountSelection);
+
     // Make sure that what the text is only a number.
     let warholAmount = Number( amountSelection );
 
