@@ -733,7 +733,7 @@ bot.on( '/*' , msg => {
     
     // Read from the second character in the message string.
     let readText = msg.text;
-    let amountSelection = readText.slice( 1, readText.length );
+    let amountSelection = readText.slice( 1, 3 );
     
     console.log(amountSelection);
 
