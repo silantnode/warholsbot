@@ -671,55 +671,11 @@ bot.on( '/*' , msg => {
 
       });
 
-
     } else if ( giftSpendMode == 2 ) { // They have chosen to give to the fountain.
 
-      // Get the current balance of the fountain.
-      // Add the Warhols contributed.
-      // Check if the fountain is full yet.
-      // If the fountain is overflowing notify the user?
+      ShareTheWealth( msg.from.id, amountSelection );
 
-      let newReservoirBalance;
-
-      GetFountainBalance( function( error, fountainBalance ){
-
-        console.log('The amount of warhols contributed to the fountain is ' + warholAmount );
-        console.log('The amount of warhols currently in the resevoir is ' + fountainBalance );
-        
-        let multiplyerTest = ( warholAmount * GIFT_MULTIPLYER );
-
-        console.log('Contribution amount after multiplyer is ' + multiplyerTest );
-
-        newReservoirBalance = ( fountainBalance + ( warholAmount * GIFT_MULTIPLYER ) ) ;
-
-        console.log('The new reservoir balance based on the last contribution is ' + newReservoirBalance );
-      
-        AddToFountain( newReservoirBalance );
-
-        SubtractWarhols( msg.from.id, warholAmount );
-
-        connection.query( 'SELECT * FROM accounts', function( error, howmanyusers ){
-
-          if( error ) throw error;
-
-          console.log('There are ' + howmanyusers.length + ' warhols users');
-
-          if ( newReservoirBalance >= ( ( MIN_DISTRO * howmanyusers.length ) ) ){
-
-            ShareTheWealth( newReservoirBalance );
-            
-          }
-
-          warholMode = 0;
-          giftSpendMode = 0;
-
-          return bot.sendMessage( msg.from.id, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
-
-        });
-
-      });
-      
-    }      
+    }
 
   }
 
@@ -906,49 +862,80 @@ function AddToFountain( contribution ){
 
 
 
-function ShareTheWealth( newReservoirBalance ){
+function ShareTheWealth( userID, fountainContribution ){
 
-  // How many user accounts
-  // Divide the pooled warhols by the amount of accounts
-  // Update all of the warhol balances on all of the accounts
-  console.log('The fountain has been activated!');
+  let markup = bot.keyboard([
+    [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+  );
 
-  connection.query( 'SELECT * FROM accounts', function( error, members ){
+  GetFountainBalance( function( error, fountainBalance ){
+    
+    // Add the new contribution of warhols to the current reservoir balance including the multiplier. 
+    let newReservoirBalance = ( fountainBalance + ( fountainContribution * GIFT_MULTIPLYER ) ) ;
 
-    if( error ) throw error;
+    // Send the newly calculated value to the reservoir.
+    AddToFountain( newReservoirBalance );
 
-    let distroAmount =  Math.floor( ( newReservoirBalance / members.length ) ); 
+    // Subtract the contribution of the warhols from the user account.
+    SubtractWarhols( userID, fountainContribution );
 
-    console.log( 'Each user gets ' + distroAmount + ' warhols' );
+    // Find out how many warhols users there are.
+    connection.query( 'SELECT * FROM accounts', function( error, howmanyusers ){
 
-    for (let i = 0; i < members.length; i++ ){
+      if( error ) throw error;
 
-      GetBalance( members[i].owner, function( error, currentBalance ){
+      // Check if the reservoir is full enough for a distrobution of warhols to all the users.
+      if ( newReservoirBalance >= ( ( MIN_DISTRO * howmanyusers.length ) ) ){
 
-        let newBalance = ( distroAmount + currentBalance );
+        connection.query( 'SELECT * FROM accounts', function( error, members ){
 
-        AddWarhols( members[i].owner, newBalance );
+          if( error ) throw error;
 
-        newBalance = 0;
+          // Round down the number resulting from dividing the new reservoir balance with the number of warhols users.
+          let distroAmount =  Math.floor( ( newReservoirBalance / members.length ) ); 
 
-      });
+          // Distribute the awarded warhols to all the users.
+          for (let i = 0; i < members.length; i++ ){
 
-    }
+            GetBalance( members[i].owner, function( error, currentBalance ){
 
-    SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
+              let newBalance = ( distroAmount + currentBalance );
+
+              AddWarhols( members[i].owner, newBalance );
+
+              newBalance = 0;
+
+            });
+
+          }
+
+          SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
+
+          warholMode = 0;
+          giftSpendMode = 0;
+
+          return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
+
+        });
+        
+      }
+
+    });
 
   });
 
 }
 
 
-
 function SubtractFromFountain( amount, members, currentBalance ){
 
+  // Multiply the amount of members with the amount each member received.
   let resetBalance = ( amount * members );
-  
-  resetBalance = ( resetBalance - currentBalance );
 
+  // Subtract the total amount awarded from the reservoir account.
+  resetBalance = ( currentBalance - resetBalance );
+
+  // Update the reservoir.
   connection.query('UPDATE fountain SET reservoir = ? WHERE id =?', [ resetBalance, 1 ], function( error, current ){
 
     if ( error ) throw error;
