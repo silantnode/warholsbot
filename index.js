@@ -68,6 +68,11 @@ const GIFT_RANDOM = "/random";
 const SPEC_MARKET = "/market";
 const SPEC_RANKING = "/ranking";
 
+const SPEC_FLAVOR_1 = "/blue";
+const SPEC_FLAVOR_2 = "/green";
+const SPEC_FLAVOR_3 = "/orange";
+const SPEC_FLAVOR_4 = "/purple";
+
 const MIN_DISTRO = 2; // The minimum amount of warhols required per amount of users for an even distrobution of warhols from the fountain.
 const GIFT_MULTIPLYER = 2; // The maximum bonus amount of warhols included in the distrobution from the fountain.
 
@@ -80,6 +85,9 @@ const MAX_COUPON = 10; // The amount one receives if they have a coupon
 
 const DESCRIPTION_MAX_LENGTH = 140; // How long a description of content is allowed to be.
 
+// Identify the event for which the Warhols will be used - this will provide a subset of market closing dates to work with
+
+ var eventName = 'test';
 
 // Holds the random selection of five items to be selected from by the user. The list is changed every time the user selects the 'creative' option when selecting 'get'
 // It also serves to filter out any numbered commands (i.e. /4, /21, etc.)
@@ -112,6 +120,10 @@ var warholMode = 0;
 
 var giftSpendMode = 0;
 
+// Set by /market selection of Warhols flavor 
+// 1, 2, 3 etc correspond to the flavor color chosen
+
+var marketFlavor = 0;
 
 // The user starts the bot with the /start command.
 
@@ -498,7 +510,111 @@ bot.on( SPECULATIVE_ECON, msg => {
   
 });
 
+// If the user chooses the Market of flavors
 
+bot.on( SPEC_MARKET , msg => {
+
+  // check if user has enough balance, if not ask to choose other value
+
+
+    let markup = bot.keyboard([
+      [SPEC_FLAVOR_1],[SPEC_FLAVOR_2],[SPEC_FLAVOR_3],[ BACK_BUTTON ]], { resize: true }
+    );
+
+      // new connection to retrieve next market closure dates
+      connection.query('SELECT close_time FROM market WHERE event = ?', [eventName], function (error, results, fields) {
+        if (error) throw error;
+
+      var currentDate = new Date();
+      var i = 0;
+      for (i = 0; i < results.length; i++) {
+        var dateDifference = (results[i].close_time-currentDate);
+        var timetoClosing = timeConversion(dateDifference);
+             if (dateDifference > 600000) { break; } // choose the first date at least 10 minutes in the future
+       
+      }
+          return bot.sendMessage( msg.from.id, `The Warhols exchange market will close in ` + timetoClosing + `. In which flavor would you like to invest? \n `+ SPEC_FLAVOR_1 +` Warhols \n `+ SPEC_FLAVOR_2 +` Warhols \n `+ SPEC_FLAVOR_3 +` Warhols`, { markup } );
+        });
+
+    
+      // end retrieving market closure dates
+
+ });
+
+
+// assign marketFlavor variable according to the choice of flavor by the user
+
+bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {  
+
+  if ( msg.text == SPEC_FLAVOR_1 ) {
+
+  marketFlavor = 1; 
+  console.log(marketFlavor);
+  } else if ( msg.text == SPEC_FLAVOR_2 ) {
+
+  marketFlavor = 2; 
+  console.log(marketFlavor);
+  } else if ( msg.text == SPEC_FLAVOR_3 ) {
+
+  marketFlavor = 3; 
+  console.log(marketFlavor);
+  }
+
+    var flavorName = msg.text.substr(1);
+      return bot.sendMessage( msg.from.id, `How many shares of ` + flavorName + ` Warhols you want to buy? \n /five \n /ten \n /20 \n /50 \n /100`);
+
+  });
+
+
+
+// Market investment 
+
+bot.on( '/five', msg => {  // amount chosen to invest
+
+    var betAmount = 5;
+// check if user has enough balance, if not ask to choose other value
+
+  GetBalance( msg.from.id, function( error, result ){
+
+    // Check what the balance is... 
+    if ( result < betAmount ) {
+        return bot.sendMessage( msg.from.id, `You currently have only ${ result } Warhols. Please start with a lower investment.`, { markup: 'hide' });
+        
+    } else {   // Continue with the investment.
+        
+     console.log('they have enough Warhols - ', result);
+// write to market bets database: user id, user name, flavor, amount, time bet placed
+
+    var currentDate = new Date();
+      if (typeof msg.from.last_name != "undefined") // if the user does not have a last name
+         {  var betOwner = (msg.from.first_name +' '+ msg.from.last_name);
+         }
+         else  {  var betOwner = (msg.from.first_name);
+         }
+    let newBet = { time: currentDate, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
+    connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
+    
+      if( error ) throw error;
+    
+     console.log('New bet from:', betOwner);
+
+    });
+// deduct warhols from users account
+
+  SubtractWarhols( msg.from.id, betAmount );
+  setLastDate( msg.from.id ); // set last interaction date
+
+// send message with thanks, display home menu
+   let markup = bot.keyboard([
+       [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+   );
+   return bot.sendMessage( msg.from.id, `Thanks for your investment! You will get a notification when the market closes. Good luck!`, { markup } );
+
+
+      } // end if balance enough
+
+  });
+ });
 
 // Checks if a user has selected content from a provided random list. 
 // '/*' listens for any activity entered by the user and then filters out the resulting strings of
@@ -726,17 +842,17 @@ bot.on( YES_BUTTON, msg => {
       SubtractWarhols( msg.from.id, 10 );
 
       // Post to WarholsChannel New Content
-requestify.post('https://maker.ifttt.com/trigger/new_content/with/key/' + custom_data[5] , { // IFTTT secret key.
+      requestify.post('https://maker.ifttt.com/trigger/new_content/with/key/' + custom_data[5] , { // IFTTT secret key.
         value1: ('@' + msg.from.username ) , // telegram user.
         value2: contentSubmission[1] , // content title.
         value3: contentSubmission[0] // content URL.
-    })
-    .then(function(response) {
+      })
+      .then(function(response) {
         // Get the response and write to console
         response.body;
         console.log('Response: ' + response.body);
 
-    }); // End of WarholsChannel posting routine.
+      }); // End of WarholsChannel content posting routine.
 
       contentSubmission = [];
 
@@ -768,7 +884,7 @@ bot.on( NO_BUTTON, msg => {
 
 bot.on('/last', msg => {
   // Update database date_last column with current date timestamp.
-      LastDate( msg.from.id );
+      setLastDate( msg.from.id );
 });
 
 // Date comparison test command
@@ -1046,7 +1162,7 @@ function AddCreativeContent( userID, userName, newContent ){
 
 // Update last interaction date
 
-function LastDate( userID ){
+function setLastDate( userID ){
     
     var currentDate = new Date();
 
@@ -1081,28 +1197,49 @@ function DateCompare( userID ){
 
 }
 
+// Get last interaction date
+
+function LastInteraction( userID, callback ){
+
+    connection.query('SELECT date_last FROM accounts WHERE owner =' + userID , function( error, result ){
+      
+        if ( error ) return error;
+
+          return callback( error, result[0].date_last );
+
+    });
+
+}
+
+
 // Convert milliseconds into human understandable time
 
 function timeConversion(millisec) {
 
-        var seconds = (millisec / 1000).toFixed(1);
+        var seconds = (millisec / 1000).toFixed(0);
 
-        var minutes = (millisec / (1000 * 60)).toFixed(1);
+        var minutes = (millisec / (1000 * 60)).toFixed(0);
 
-        var hours = (millisec / (1000 * 60 * 60)).toFixed(1);
+        var hours = (millisec / (1000 * 60 * 60)).toFixed(0);
 
-        var days = (millisec / (1000 * 60 * 60 * 24)).toFixed(1);
+        var days = (millisec / (1000 * 60 * 60 * 24)).toFixed(0);
 
         if (seconds < 60) {
-            return seconds + " Sec";
+            return seconds + " seconds";
         } else if (minutes < 60) {
-            return minutes + " Min";
+            return minutes + " minutes";
+        } else if (hours == 1) {
+            return hours + " hour";  // added exception for single hour
         } else if (hours < 24) {
-            return hours + " Hrs";
+            return hours + " hours";
+        } else if (days == 1) {
+            return days + " day";   // added exception for singe day
         } else {
-            return days + " Days"
+            return days + " days"
         }
     }
+
+      // TO DO:
 
       // Compare current date with last interaction date.
 
