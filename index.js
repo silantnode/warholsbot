@@ -738,8 +738,18 @@ bot.on( '/*' , msg => {
     // Make sure that what the text is only a number.
     let warholAmount = Number( amountSelection );
 
-    // SubtractWarhols( msg.from.id, warholAmount ); // We can already subtract from the user account... why not?
-    
+    // Check if the amount they have selected does not exceed the amount available in their account.
+
+    GetBalance( msg.from.id, function( error, userBalance ){
+
+      if ( userBalance < warholAmount ){
+
+        return bot.sendMessage( msg.from.id, `You do not have enough warhols. Please choose a smaller amount or /get more warhols.`);
+
+      }
+
+    });
+
     if ( giftSpendMode == 1 ){ // They have chosen to give to a random person.
 
       connection.query( 'SELECT * FROM accounts', function( error, users ){
