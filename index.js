@@ -1255,6 +1255,8 @@ function LastInteraction( userID, callback ){
 
 // Convert milliseconds into human understandable time
 
+/*
+
 function timeConversion( millisec ) {
 
   var seconds = ( millisec / 1000 ).toFixed(0);
@@ -1292,6 +1294,8 @@ function timeConversion( millisec ) {
   }
 
 }
+
+*/
 
       // TO DO:
 
