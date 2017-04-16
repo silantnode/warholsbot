@@ -188,6 +188,20 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
 bot.on( '/test', msg => {
 
+  var tableName = 'tasks';
+
+  connection.query('SELECT * FROM ' + tableName, function( error, rows ){
+
+    if ( error ) throw error;
+
+    console.log(rows[0].description);
+
+  });
+/*
+  string columnName = "xy";
+  string sql = "SELECT id AS " + columnName + " FROM table_name";
+*/
+
 });
 
 
@@ -647,57 +661,19 @@ bot.on( '/*' , msg => {
 
   if ( currentCreativeSelection.length == 5 ) {
 
-    // Read the creative table so we can extract the content associated with
-    // the content description chosen by the user.
-    connection.query('SELECT * FROM tasks', function( error, rows ){
+    // Copy the text from the user.
+    let readText = msg.text; 
 
-      if ( error ) throw error;
+    // Setup containers for reading entries from the selected content as well as updating the users Warhols balance.
+    let taskNumber;
 
-      // Copy the text from the user.
-      let readText = msg.text; 
+    // Read from the second character in the message string.
+    let ReadTaskNumber = readText.slice( 1, 2 );
 
-      // Setup containers for reading entries from the selected content as well as updating the users Warhols balance.
-      let taskNumber;
-        
-      // Var because it needs to be used within the GetBalance function for a callback.  
-      var warholValue;
-      var newBalance;
-      var taskURL;
-        
-      let contentSelector;
-        
-      // Read from the second character in the message string.
-      let ReadTaskNumber = readText.slice( 1, 2 );
+    // Make sure that what the text is only a number.
+    taskNumber = Number( ReadTaskNumber );
 
-      // Make sure that what the text is only a number.
-      taskNumber = Number( ReadTaskNumber );
-
-      // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
-      if ( taskNumber >= 1 && taskNumber <= 5 ) {
-        
-        // Retrieve the corresponding item number from the random selection made when the user selected the /creative option.
-        // We use minus 1 to offset the reading of the array.
-        contentSelector = currentCreativeSelection[ ( taskNumber - 1 ) ];
-
-        taskURL = rows[ contentSelector ].url; // Content address.
-        warholValue = rows[ contentSelector ].price; // Content price, as in how many Warhols are earned by watching this media.
-
-        // Reset the random list to nothing so that if someone decides to use a command with a number nothing will happen.
-        currentCreativeSelection = [];
-
-        GetBalance( msg.from.id, function(error, result){ // Function talks to database and requires a callback.
-          
-          newBalance = ( warholValue + result );
-
-          AddWarhols( msg.from.id, newBalance ); // Function talks to database but does not require a callback.
-
-            return bot.sendMessage( msg.from.id, `You now have more Warhols. Enjoy! The link for the content is ${ taskURL }`, { markup });
-
-        });
-
-      }
-
-    });
+    DisplayCreativeContent( msg.from.id, taskNumber, markup );
 
   }
   
@@ -1201,6 +1177,51 @@ function AddCreativeContent( userID, userName, newContent ){
     if( error ) throw error;
 
   });
+
+}
+
+
+function DisplayCreativeContent( userID, taskNumber, markup ){
+
+  // Read the creative table so we can extract the content associated with
+    // the content description chosen by the user.
+    connection.query('SELECT * FROM tasks', function( error, rows ){
+
+      if ( error ) throw error;
+        
+      // Var because it needs to be used within the GetBalance function for a callback.  
+      var warholValue;
+      var newBalance;
+      var taskURL;
+        
+      let contentSelector;
+      
+      // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
+      if ( taskNumber >= 1 && taskNumber <= 5 ) {
+        
+        // Retrieve the corresponding item number from the random selection made when the user selected the /creative option.
+        // We use minus 1 to offset the reading of the array.
+        contentSelector = currentCreativeSelection[ ( taskNumber - 1 ) ];
+
+        taskURL = rows[ contentSelector ].url; // Content address.
+        warholValue = rows[ contentSelector ].price; // Content price, as in how many Warhols are earned by watching this media.
+
+        // Reset the random list to nothing so that if someone decides to use a command with a number nothing will happen.
+        currentCreativeSelection = [];
+
+        GetBalance( userID, function(error, result){ // Function talks to database and requires a callback.
+          
+          newBalance = ( warholValue + result );
+
+          AddWarhols( userID, newBalance ); // Function talks to database but does not require a callback.
+
+            return bot.sendMessage( userID, `You now have more Warhols. Enjoy! The link for the content is ${ taskURL }`, { markup });
+
+        });
+
+      }
+
+    });
 
 }
 
