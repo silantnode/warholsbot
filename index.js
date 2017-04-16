@@ -514,8 +514,6 @@ bot.on( SPECULATIVE_ECON, msg => {
   );
 
   return bot.sendMessage( msg.from.id, `Are you ready to take some risks and maybe get some rewards?. How would you like to invest your Warhols: \n /market exchange of flavors \n /ranking of cultural appreciation`, { markup } );
-
-  });
   
 });
 
@@ -1255,7 +1253,6 @@ function LastInteraction( userID, callback ){
 
 // Convert milliseconds into human understandable time
 
-/*
 
 function timeConversion( millisec ) {
 
@@ -1295,7 +1292,7 @@ function timeConversion( millisec ) {
 
 }
 
-*/
+
 
       // TO DO:
 
