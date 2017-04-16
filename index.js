@@ -709,12 +709,7 @@ bot.on( '/*' , msg => {
 
           GetBalance( users[ randomUser ].owner, function( error, theirBalance ){
           
-            // console.log(users[randomUser].owner_name);
-            // console.log(theirBalance);
-
             let theirNewBalance = ( theirBalance + warholAmount );
-
-            // console.log(theirNewBalance);
 
             AddWarhols( users[ randomUser ].owner, theirNewBalance );
 
