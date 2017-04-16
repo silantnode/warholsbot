@@ -661,43 +661,9 @@ bot.on( '/*' , msg => {
   
   if ( currentGiftSelection.length == 5 ) {
 
-    connection.query('SELECT * FROM gifts', function( error, rows ){
+    let taskNumber = Number( ( (msg.text).slice( 1, 2 ) ) );
 
-    if ( error ) throw error;
-
-    // Copy the text from the user.
-    let readText = msg.text; 
-
-    // Setup containers for reading entries from the selected task as well as updating the users Warhols balance.
-    var giftNumber;
-    var giftDescription;
-    var contentSelector;
-    var warholValue; // The Warhol value of the gift as determined by random.
-    var newBalance; // The new balance that will result.
-      
-    // Read from the second character in the message string.
-    let ReadGiftNumber = readText.slice( 1, 2 );
-
-    // Make sure that the text is only a number.
-    giftNumber = Number( ReadGiftNumber );
-    
-    // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
-    if ( giftNumber >= 1 && giftNumber <= 5 ) {
-
-        // Retrieve the corresponding item number from the random selection made when the user selected the /creative option.
-        // We use minus 1 to offset the reading of the array.
-        contentSelector = currentGiftSelection[ ( giftNumber - 1 ) ];
-        giftDescription = rows[ contentSelector ].description;
-          
-      // Need to add an extra step to prompt the user with a 'yes' or 'no' answer if they will commit to the gift.
-
-        currentGiftSelection = [];
-
-        return bot.sendMessage( msg.from.id, `Will you ${ giftDescription }? \n /yes or /no ?`, { markup });
-          
-      }
-
-    });
+    DisplayGiftContent( msg.from.id, taskNumber, markup );
     
   }
 
@@ -1199,6 +1165,37 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
 
         });
 
+      }
+
+    });
+
+}
+
+
+function DisplayGiftContent( userID, giftNumber, markup ){
+
+  connection.query('SELECT * FROM gifts', function( error, rows ){
+
+    if ( error ) throw error;
+
+    // Setup containers for reading entries from the selected task as well as updating the users Warhols balance.
+    var giftDescription;
+    var contentSelector;
+    
+    // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
+    if ( giftNumber >= 1 && giftNumber <= 5 ) {
+
+        // Retrieve the corresponding item number from the random selection made when the user selected the /creative option.
+        // We use minus 1 to offset the reading of the array.
+        contentSelector = currentGiftSelection[ ( giftNumber - 1 ) ];
+        giftDescription = rows[ contentSelector ].description;
+          
+        // Need to add an extra step to prompt the user with a 'yes' or 'no' answer if they will commit to the gift.
+
+        currentGiftSelection = [];
+
+        return bot.sendMessage( userID, `Will you ${ giftDescription }? \n /yes or /no ?`, { markup });
+          
       }
 
     });
