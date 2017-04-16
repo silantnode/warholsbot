@@ -185,9 +185,8 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
 // Command for testing functions.
 
+
 bot.on( '/test', msg => {
-
-
 
 });
 
@@ -260,11 +259,11 @@ bot.on( SPEND_BUTTON, msg => {
 
       if ( balance < 5 ){
 
-          let markup = bot.keyboard([
-            [ GET_BUTTON ]], { resize: true }
-          );
+        let markup = bot.keyboard([
+           [ GET_BUTTON ]], { resize: true }
+        );
 
-          return bot.sendMessage( msg.from.id, `You don’t have enough Warhols in your account. You need at least 5 Warhols and your balance is ${ balance }. You should /get some Warhols first.`);
+        return bot.sendMessage( msg.from.id, `You don’t have enough Warhols in your account. You need at least 5 Warhols and your balance is ${ balance }. You should /get some Warhols first.`);
 
       } else {
 
@@ -513,8 +512,6 @@ bot.on( SPECULATIVE_ECON, msg => {
     [ SPEC_MARKET ],[ SPEC_RANKING ],[ BACK_BUTTON ]], { resize: true }
 
   );
-
-  GetBalance( msg.from.id, function( error, balance ){
 
   return bot.sendMessage( msg.from.id, `Are you ready to take some risks and maybe get some rewards?. How would you like to invest your Warhols: \n /market exchange of flavors \n /ranking of cultural appreciation`, { markup } );
 
@@ -816,6 +813,15 @@ bot.on( '/*' , msg => {
       }
 
     });
+
+  }
+
+  if ( marketFlavor != 0 ) {
+
+    console.log('Lets now listen for speculation market activity.');
+
+    let readText = msg.text;
+    let warholAmount = readText.slice( 1, 4 );
 
   }
 
