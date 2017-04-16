@@ -177,17 +177,8 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
 // Command for testing functions.
 
-var currentBalance;
 
 bot.on( '/test', msg => {
-
-  GetBalance( msg.from.id, function( error, balance ){
-    currentBalance = balance;
-    console.log(balance);
-    console.log(currentBalance);
-  });
-
-  console.log(balance);
 
 });
 
