@@ -183,7 +183,11 @@ bot.on( '/test', msg => {
 
   GetBalance( msg.from.id, function( error, balance ){
     currentBalance = balance;
+    console.log(balance);
+    console.log(currentBalance);
   });
+
+  console.log(currentBalance);
 
 });
 
