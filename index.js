@@ -800,6 +800,15 @@ bot.on( '/*' , msg => {
 
   }
 
+  if ( marketFlavor != 0 ) {
+
+    console.log('Lets now listen for speculation market activity.');
+
+    let readText = msg.text;
+    let warholAmount = readText.slice( 1, 4 );
+
+  }
+
 });
 
 
