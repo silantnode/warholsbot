@@ -1276,7 +1276,7 @@ function timeConversion(millisec) {
         } else if (days == 1) {
             return days + " day";   // added exception for singe day
         } else {
-            return days + " days"
+            return days + " days";
         }
     }
 
