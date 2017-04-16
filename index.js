@@ -191,6 +191,10 @@ bot.on( BALANCE_BUTTON, msg => {
     [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
   );
 
+// check if the fountain has been activated and if so display message (compare last activity with last fountain date)
+// check if market has closed (compare last activity with current date, check market closure inbetween)
+// if market closures happened, see if any bets were won. Display message of sorry or congratulation
+
   GetBalance( msg.from.id, function( error, result ){
 
     // Check what the balance is... 
@@ -504,12 +508,14 @@ bot.on( SPEC_MARKET , msg => {
     );
 
       // new connection to retrieve next market closure dates
-      connection.query('SELECT close_time FROM market WHERE event = ?', [eventName], function (error, results, fields) {
+      connection.query('SELECT close_time, id FROM market WHERE event = ?', [eventName], function (error, results, fields) {
         if (error) throw error;
 
       var currentDate = new Date();
       var i = 0;
       for (i = 0; i < results.length; i++) {
+        var marketClosureId = results[i].id;
+          console.log(marketClosureId);
         var dateDifference = (results[i].close_time-currentDate);
         var timetoClosing = timeConversion(dateDifference);
              if (dateDifference > 600000) { break; } // choose the first date at least 10 minutes in the future
