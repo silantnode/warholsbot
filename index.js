@@ -649,17 +649,9 @@ bot.on( '/*' , msg => {
 
   if ( currentCreativeSelection.length == 5 ) {
 
-    // Copy the text from the user.
-    let readText = msg.text; 
-
-    // Setup containers for reading entries from the selected content as well as updating the users Warhols balance.
-    let taskNumber;
-
-    // Read from the second character in the message string.
-    let ReadTaskNumber = readText.slice( 1, 2 );
-
+    // Extract the number value from the user input
     // Make sure that what the text is only a number.
-    taskNumber = Number( ReadTaskNumber );
+    let taskNumber = Number( ( (msg.text).slice( 1, 2 ) ) );
 
     DisplayCreativeContent( msg.from.id, taskNumber, markup );
 
