@@ -188,19 +188,7 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
 bot.on( '/test', msg => {
 
-  var tableName = 'tasks';
 
-  connection.query('SELECT * FROM ' + tableName, function( error, rows ){
-
-    if ( error ) throw error;
-
-    console.log(rows[0].description);
-
-  });
-/*
-  string columnName = "xy";
-  string sql = "SELECT id AS " + columnName + " FROM table_name";
-*/
 
 });
 
