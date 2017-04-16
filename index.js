@@ -127,6 +127,10 @@ var marketFlavor = 0;
 
 var betDate = 0;
 
+// Holds id of next market closure for a bet
+
+var marketClosureId = 0;
+
 // The user starts the bot with the /start command.
 
 bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
@@ -520,7 +524,7 @@ console.log('betDate - ', betDate);
       var currentDate = new Date();
       var i = 0;
       for (i = 0; i < results.length; i++) {
-        var marketClosureId = results[i].id;
+          marketClosureId = results[i].id;
           console.log('marketClosureId - ', marketClosureId);
         var dateDifference = (results[i].close_time-currentDate);
         var timetoClosing = timeConversion(dateDifference);
@@ -585,7 +589,7 @@ bot.on( '/five', msg => {  // amount chosen to invest
          }
          else  {  var betOwner = (msg.from.first_name);
          }
-    let newBet = { time: betDate, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
+    let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
     connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
     
       if( error ) throw error;
@@ -873,7 +877,7 @@ bot.on( YES_BUTTON, msg => {
          }
          else  {  var contentName = (msg.from.first_name );
          }
-         
+
          if (typeof msg.from.username != "undefined") // if the user does not have a username
          {  var contentUser = (' - @' + msg.from.username);
          }
