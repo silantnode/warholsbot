@@ -247,11 +247,11 @@ bot.on( SPEND_BUTTON, msg => {
 
       if ( balance < 5 ){
 
-          let markup = bot.keyboard([
-            [ GET_BUTTON ]], { resize: true }
-          );
+        let markup = bot.keyboard([
+           [ GET_BUTTON ]], { resize: true }
+        );
 
-          return bot.sendMessage( msg.from.id, `You don’t have enough Warhols in your account. You need at least 5 Warhols and your balance is ${ balance }. You should /get some Warhols first.`);
+        return bot.sendMessage( msg.from.id, `You don’t have enough Warhols in your account. You need at least 5 Warhols and your balance is ${ balance }. You should /get some Warhols first.`);
 
       } else {
 
