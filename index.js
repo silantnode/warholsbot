@@ -1255,30 +1255,43 @@ function LastInteraction( userID, callback ){
 
 // Convert milliseconds into human understandable time
 
-function timeConversion(millisec) {
+function timeConversion( millisec ) {
 
-        var seconds = (millisec / 1000).toFixed(0);
+  var seconds = ( millisec / 1000 ).toFixed(0);
 
-        var minutes = (millisec / (1000 * 60)).toFixed(0);
+  var minutes = ( millisec / ( 1000 * 60 ) ).toFixed(0);
 
-        var hours = (millisec / (1000 * 60 * 60)).toFixed(0);
+  var hours = ( millisec / ( 1000 * 60 * 60 ) ).toFixed(0);
 
-        var days = (millisec / (1000 * 60 * 60 * 24)).toFixed(0);
+  var days = ( millisec / ( 1000 * 60 * 60 * 24 ) ).toFixed(0);
 
-        if (seconds < 60) {
-            return seconds + " seconds";
-        } else if (minutes < 60) {
-            return minutes + " minutes";
-        } else if (hours == 1) {
-            return hours + " hour";  // added exception for single hour
-        } else if (hours < 24) {
-            return hours + " hours";
-        } else if (days == 1) {
-            return days + " day";   // added exception for singe day
-        } else {
-            return days + " days";
-        }
-    }
+  if ( seconds < 60 ) {
+
+      return seconds + " seconds";
+
+  } else if ( minutes < 60 ) {
+
+      return minutes + " minutes";
+
+  } else if ( hours == 1 ) {
+
+      return hours + " hour";  // added exception for single hour
+
+  } else if ( hours < 24 ) {
+
+      return hours + " hours";
+
+  } else if ( days == 1 ) {
+
+      return days + " day";   // added exception for singe day
+
+  } else {
+
+      return days + " days";
+
+  }
+
+}
 
       // TO DO:
 
