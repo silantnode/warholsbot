@@ -179,7 +179,11 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
 bot.on( '/test', msg => {
 
+  let currentBalance = GetBalance( msg.from.id, function( error, balance ){
+    
+  });
 
+  console.log(currentBalance);
 
 });
 
