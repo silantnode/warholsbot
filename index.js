@@ -59,7 +59,7 @@ const BACK_BUTTON = "/back";
 
 const GIFT_ECON = "/gift";
 const CREATIVE_ECON = "/creative";
-const SPECULATIVE_ECON = "/speculative";
+const SPECULATIVE_ECON = "/speculation";
 const PUBLISH_BUTTON = "/publish";
 
 const GIFT_FOUNTAIN = "/fountain";
@@ -124,6 +124,14 @@ var giftSpendMode = 0;
 // 1, 2, 3 etc correspond to the flavor color chosen
 
 var marketFlavor = 0;
+
+// Holds time of market bets
+
+var betDate = 0;
+
+// Holds id of next market closure for a bet
+
+var marketClosureId = 0;
 
 // The user starts the bot with the /start command.
 
@@ -518,7 +526,9 @@ bot.on( SPECULATIVE_ECON, msg => {
 
 bot.on( SPEC_MARKET , msg => {
 
-  // check if user has enough balance, if not ask to choose other value
+betDate = new Date(); // this will be the time of their bet if they place one
+console.log('betDate - ', betDate);
+  // to do: check if user has enough balance, if not ask to choose other value
 
 
     let markup = bot.keyboard([
@@ -532,8 +542,8 @@ bot.on( SPEC_MARKET , msg => {
       var currentDate = new Date();
       var i = 0;
       for (i = 0; i < results.length; i++) {
-        var marketClosureId = results[i].id;
-          console.log(marketClosureId);
+          marketClosureId = results[i].id;
+          console.log('marketClosureId - ', marketClosureId);
         var dateDifference = (results[i].close_time-currentDate);
         var timetoClosing = timeConversion(dateDifference);
              if (dateDifference > 600000) { break; } // choose the first date at least 10 minutes in the future
@@ -597,7 +607,7 @@ bot.on( '/five', msg => {  // amount chosen to invest
          }
          else  {  var betOwner = (msg.from.first_name);
          }
-    let newBet = { time: currentDate, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
+    let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
     connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
     
       if( error ) throw error;
@@ -856,15 +866,26 @@ bot.on( YES_BUTTON, msg => {
       SubtractWarhols( msg.from.id, 10 );
 
       // Post to WarholsChannel New Content
+         if (typeof msg.from.last_name != "undefined") // if the user does not have a last name
+         {  var contentName = (msg.from.first_name+' '+ msg.from.last_name);
+         }
+         else  {  var contentName = (msg.from.first_name );
+         }
+
+         if (typeof msg.from.username != "undefined") // if the user does not have a username
+         {  var contentUser = (' - @' + msg.from.username);
+         }
+         else  {  var contentUser = (' ');
+         }
       requestify.post('https://maker.ifttt.com/trigger/new_content/with/key/' + custom_data[5] , { // IFTTT secret key.
-        value1: ('@' + msg.from.username ) , // telegram user.
+        value1: ( contentName + contentUser ) , // telegram user.
         value2: contentSubmission[1] , // content title.
         value3: contentSubmission[0] // content URL.
       })
       .then(function(response) {
         // Get the response and write to console
         response.body;
-        console.log('Response: ' + response.body);
+        console.log('IFTTT: ' + response.body);
 
       }); // End of WarholsChannel content posting routine.
 
