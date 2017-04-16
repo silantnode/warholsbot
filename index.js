@@ -187,7 +187,7 @@ bot.on( '/test', msg => {
     console.log(currentBalance);
   });
 
-  console.log(currentBalance);
+  console.log(balance);
 
 });
 
