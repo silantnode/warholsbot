@@ -1199,8 +1199,6 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
         
         let viewedIncrement = ( ( rows[ contentSelector ].viewed ) + 1 ); // Update how many times the chosen content has been viewed.
 
-        console.log(viewedIncrement);
-
         connection.query('UPDATE tasks SET viewed = ? WHERE task_id = ?', [ viewedIncrement , taskID ] , function( error, viewResult ){
 
           if (error) throw error;
