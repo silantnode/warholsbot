@@ -698,57 +698,11 @@ bot.on( '/*' , msg => {
 
   if ( currentCreativeSelection.length == 5 ) {
 
-    // Read the creative table so we can extract the content associated with
-    // the content description chosen by the user.
-    connection.query('SELECT * FROM tasks', function( error, rows ){
+    // Extract the number value from the user input
+    // Make sure that what the text is only a number.
+    let taskNumber = Number( ( (msg.text).slice( 1, 2 ) ) );
 
-      if ( error ) throw error;
-
-      // Copy the text from the user.
-      let readText = msg.text; 
-
-      // Setup containers for reading entries from the selected content as well as updating the users Warhols balance.
-      let taskNumber;
-        
-      // Var because it needs to be used within the GetBalance function for a callback.  
-      var warholValue;
-      var newBalance;
-      var taskURL;
-        
-      let contentSelector;
-        
-      // Read from the second character in the message string.
-      let ReadTaskNumber = readText.slice( 1, 2 );
-
-      // Make sure that what the text is only a number.
-      taskNumber = Number( ReadTaskNumber );
-
-      // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
-      if ( taskNumber >= 1 && taskNumber <= 5 ) {
-        
-        // Retrieve the corresponding item number from the random selection made when the user selected the /creative option.
-        // We use minus 1 to offset the reading of the array.
-        contentSelector = currentCreativeSelection[ ( taskNumber - 1 ) ];
-
-        taskURL = rows[ contentSelector ].url; // Content address.
-        warholValue = rows[ contentSelector ].price; // Content price, as in how many Warhols are earned by watching this media.
-
-        // Reset the random list to nothing so that if someone decides to use a command with a number nothing will happen.
-        currentCreativeSelection = [];
-
-        GetBalance( msg.from.id, function(error, result){ // Function talks to database and requires a callback.
-          
-          newBalance = ( warholValue + result );
-
-          AddWarhols( msg.from.id, newBalance ); // Function talks to database but does not require a callback.
-
-            return bot.sendMessage( msg.from.id, `You now have more Warhols. Enjoy! The link for the content is ${ taskURL }`, { markup });
-
-        });
-
-      }
-
-    });
+    DisplayCreativeContent( msg.from.id, taskNumber, markup );
 
   }
   
@@ -756,51 +710,17 @@ bot.on( '/*' , msg => {
   
   if ( currentGiftSelection.length == 5 ) {
 
-    connection.query('SELECT * FROM gifts', function( error, rows ){
+    let taskNumber = Number( ( ( msg.text ).slice( 1, 2 ) ) );
 
-    if ( error ) throw error;
-
-    // Copy the text from the user.
-    let readText = msg.text; 
-
-    // Setup containers for reading entries from the selected task as well as updating the users Warhols balance.
-    var giftNumber;
-    var giftDescription;
-    var contentSelector;
-    var warholValue; // The Warhol value of the gift as determined by random.
-    var newBalance; // The new balance that will result.
-      
-    // Read from the second character in the message string.
-    let ReadGiftNumber = readText.slice( 1, 2 );
-
-    // Make sure that the text is only a number.
-    giftNumber = Number( ReadGiftNumber );
-    
-    // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
-    if ( giftNumber >= 1 && giftNumber <= 5 ) {
-
-        // Retrieve the corresponding item number from the random selection made when the user selected the /creative option.
-        // We use minus 1 to offset the reading of the array.
-        contentSelector = currentGiftSelection[ ( giftNumber - 1 ) ];
-        giftDescription = rows[ contentSelector ].description;
-          
-      // Need to add an extra step to prompt the user with a 'yes' or 'no' answer if they will commit to the gift.
-
-        currentGiftSelection = [];
-
-        return bot.sendMessage( msg.from.id, `Will you ${ giftDescription }? \n /yes or /no ?`, { markup });
-          
-      }
-
-    });
+    DisplayGiftContent( msg.from.id, taskNumber, markup );
     
   }
 
   if ( warholMode == 2 ) { // Make sure we are in spend mode.
     
     // Read from the second character in the message string.
-    let readText = msg.text;
-    let warholAmount = readText.slice( 1, 3 );
+  
+    let warholAmount = Number( ( ( msg.text ).slice( 1, 3 ) ) );
     
     // Check if the amount they have selected does not exceed the amount available in their account.
     GetBalance( msg.from.id, function( error, userBalance ){
@@ -810,54 +730,11 @@ bot.on( '/*' , msg => {
         return bot.sendMessage( msg.from.id, `You do not have enough warhols. Please choose a smaller amount or /get more warhols.`);
 
       } else if ( userBalance >= warholAmount ){
-
+        
         if ( giftSpendMode == 1 ){ // They have chosen to give to a random person.
-
-          connection.query( 'SELECT * FROM accounts', function( error, users ){
-
-          if( error ) throw error;
         
-          // Choose one user at random.
-
-          // But first we have to make sure that the current user is not
-          // accidentally giving themselves Warhols.
-
-          let theOthers = [];
-
-          for( let i = 0; i < users.length; i++ ){
-
-            if ( users[i].owner != msg.from.id ){
-
-              theOthers.push(users[i].owner);
-
-            }
-
-          }
-
-          var randomUser = ( Math.ceil( Math.random() * theOthers.length ) - 1 );
-
-          GetBalance( users[ randomUser ].owner, function( error, theirBalance ){
-          
-            // console.log(users[randomUser].owner_name);
-            // console.log(theirBalance);
-
-            let theirNewBalance = ( theirBalance + warholAmount );
-
-            // console.log(theirNewBalance);
-
-            AddWarhols( users[ randomUser ].owner, theirNewBalance );
-
-            SubtractWarhols( msg.from.id, warholAmount );
-
-          });        
-
-          warholMode = 0;
-          giftSpendMode = 0;
+          GiveWarholsRandom( msg.from.id, warholAmount, markup );
         
-          return bot.sendMessage( msg.from.id, `Thank you for your gift! Your Warhols have been anonymously sent to a random person.`, { markup });
-
-          });
-
         } else if ( giftSpendMode == 2 ) { // They have chosen to give to the fountain.
 
           ShareTheWealth( msg.from.id, warholAmount );
@@ -874,8 +751,7 @@ bot.on( '/*' , msg => {
 
     console.log('Lets now listen for speculation market activity.');
 
-    let readText = msg.text;
-    let warholAmount = readText.slice( 1, 4 );
+    let warholAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
 
   }
 
@@ -1437,7 +1313,7 @@ function newMarketActivity( userID, callback ){
           console.log ('winning bets: ' + iii);
           console.log ('total winnings: ' + betCreditTotal);
           console.log ('has market closed: ' + newMarketClosure);
-          
+
 
              connection.query('SELECT balance FROM accounts WHERE owner =' + userID , function( error, result ){
       
