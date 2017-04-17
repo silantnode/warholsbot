@@ -1167,7 +1167,7 @@ function AddCreativeContent( userID, userName, newContent ){
   
   let currentTDS = new Date();
 
-  let loadContent = { owner: userID, owner_name: userName, description: newContent[1] , url: newContent[0], price: 2, tds: currentTDS };
+  let loadContent = { owner: userID, owner_name: userName, description: newContent[1] , url: newContent[0], price: 2, date_created: currentTDS };
 
   connection.query('INSERT into tasks SET ?', loadContent, function( error, result ){
 
