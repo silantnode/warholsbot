@@ -1186,34 +1186,24 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
 
       if ( error ) throw error;
         
-      // Var because it needs to be used within the GetBalance function for a callback.  
-      var warholValue;
-      var newBalance;
-      var taskURL;
-        
-      let contentSelector;
-      
       // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
       if ( taskNumber >= 1 && taskNumber <= 5 ) {
         
         // Retrieve the corresponding item number from the random selection made when the user selected the /creative option.
         // We use minus 1 to offset the reading of the array.
-        contentSelector = currentCreativeSelection[ ( taskNumber - 1 ) ];
+        let contentSelector = currentCreativeSelection[ ( taskNumber - 1 ) ];
 
-        taskURL = rows[ contentSelector ].url; // Content address.
-        warholValue = rows[ contentSelector ].price; // Content price, as in how many Warhols are earned by watching this media.
+        let taskID = rows[ contentSelector ].task_id;
+        let taskURL = rows[ contentSelector ].url; // Content address.
+        let warholValue = rows[ contentSelector ].price; // Content price, as in how many Warhols are earned by watching this media.
         
-        connection.query('SELECT viewed FROM tasks WHERE' + taskNumber, function( error, timesViewed ){
+        let viewedIncrement = ( ( rows[ contentSelector ].viewed ) + 1 ); // Update how many times the chosen content has been viewed.
+
+        console.log(viewedIncrement);
+
+        connection.query('UPDATE tasks SET viewed = ? WHERE task_id = ?', [ viewedIncrement , taskID ] , function( error, viewResult ){
 
           if (error) throw error;
-
-          let viewedIncrement = ( timesViewed[0].viewed + 1 );
-
-          connection.query('UPDATE tasks SET viewed = ? WHERE task_id = ?', [ viewedIncrement , taskNumber ], function( error, viewResult ){
-
-            if (error) throw error;
-
-          });
         
         });
 
@@ -1222,7 +1212,7 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
 
         GetBalance( userID, function(error, result){ // Function talks to database and requires a callback.
           
-          newBalance = ( warholValue + result );
+          let newBalance = ( warholValue + result );
 
           AddWarhols( userID, newBalance ); // Function talks to database but does not require a callback.
 
