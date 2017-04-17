@@ -1155,7 +1155,7 @@ function GetGiftsContent( callback ){
       // Randomly select 5 items from the table.
       while( currentGiftSelection.length < MAX_LIST_DISPLAY ){
         // Set up the numbers usig minus 1 so that the numbers will read the list properly.
-        let randNum = ( Math.ceil( Math.random() * rows.length ) ); // Temporarily removed -1
+        let randNum = ( Math.ceil( Math.random() * rows.length -1 ) ); // Temporarily removed -1
 
         if( currentGiftSelection.indexOf( randNum ) > -1 ) continue;
 
