@@ -20,6 +20,8 @@ const connection = mysql.createConnection({
 
 connection.connect( function (error){
   
+  if( error ) throw error;
+
   if (error) {
 
     console.log('Error connecting to Db');
@@ -71,21 +73,23 @@ const SPEC_FLAVOR_2 = "/green";
 const SPEC_FLAVOR_3 = "/orange";
 const SPEC_FLAVOR_4 = "/purple";
 
+const SPEC_MULTIPLIER = 2; // How many times to multiply the bet if user wins in the market
+
 const MIN_DISTRO = 2; // The minimum amount of warhols required per amount of users for an even distrobution of warhols from the fountain.
-const MAX_BONUS = 1; // The maximum bonus amount of warhols included in the distrobution from the fountain.
+const GIFT_MULTIPLYER = 2; // The maximum bonus amount of warhols included in the distrobution from the fountain.
 
 const YES_BUTTON = "/yes";
 const NO_BUTTON = "/no";
 
 const MAX_LIST_DISPLAY = 5; // Maximum number of items to be displayed for the user to choose from whenever they are presented with multiple choice selections.
 const RAND_GIFT_RANGE = 10; // Range setting for randomly giving out Warhols.
-const MAX_COUPON = 10;
+const MAX_COUPON = 10; // The amount one receives if they have a coupon
 
 const DESCRIPTION_MAX_LENGTH = 140; // How long a description of content is allowed to be.
 
 // Identify the event for which the Warhols will be used - this will provide a subset of market closing dates to work with
 
- var eventName = 'test';
+const eventName = 'test';
 
 // Holds the random selection of five items to be selected from by the user. The list is changed every time the user selects the 'creative' option when selecting 'get'
 // It also serves to filter out any numbered commands (i.e. /4, /21, etc.)
@@ -130,6 +134,26 @@ var betDate = 0;
 // Holds id of next market closure for a bet
 
 var marketClosureId = 0;
+
+// Date of last market closure
+
+var lastMarketClosing = 0;
+
+// array for storing market winners
+
+var marketWinners = [];
+
+// id and flavor for a specific bet by a user
+
+var betInfo = 0;
+
+// cumulative credit of all bets won by a user in period checked
+
+var betCreditTotal = 0;
+
+// variable to hold updated balance after added market winnings
+
+var balancePlusBet = 0; 
 
 // The user starts the bot with the /start command.
 
@@ -183,9 +207,22 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
 // Command for testing functions.
 
+
 bot.on( '/test', msg => {
 
+});
 
+
+
+bot.on( '/help', msg => {
+
+  return bot.sendMessage( msg.from.id, `A list of common commands available to use for interacting with warhols bot.\n 
+  /start - Starts the warholsbot.\n
+  /back - Returns you to the start menu from anywhere.\n
+  /spend - Starts the process of spending warhols and can be used anywhere.\n
+  /balance - Check how many warhols you have. Can be accessed anywhere.\n\n
+  You may see other commands as you step through the procedures provided by each of the above commands. These commands are process specific and will not work out of context.
+  `);
 
 });
 
@@ -199,31 +236,60 @@ bot.on( BALANCE_BUTTON, msg => {
     [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
   );
 
-// check if the fountain has been activated and if so display message (compare last activity with last fountain date)
-// check if market has closed (compare last activity with current date, check market closure inbetween)
- newMarketActivity( msg.from.id, function( error, callback ){
- console.log(callback);
-});
+// to do: check if the fountain has been activated and if so display message (compare last activity with last fountain date)
 
 
-// if market closures happened, see if any bets were won. Display message of sorry or congratulation
+  GetBalance( msg.from.id, function( error, result ){  // at this point "result" loads the balance since last interaction, bets not processed yet
 
-  GetBalance( msg.from.id, function( error, result ){
+  // check if there are new market closures that can lead to new balance
 
-    // Check what the balance is... 
-    if ( result == 0 ) {
+      newMarketActivity( msg.from.id, function( error, newMarketNewBalance ){ // this function's result is an array with two values
+      var anyClosures = newMarketNewBalance[0];  // first value of array is 1 for new closures, 0 for none of such
+      var betsBalance = newMarketNewBalance[1];  // second result of array is new updated user balance with any new bets won
+      console.log('callback -- anyClosures: ' + anyClosures);
+      console.log('callback -- new balance after winnings: ' + betsBalance);   
+      console.log('previous balance: ' + result);
+
+      var wonWarhols = (betsBalance-result); // Warhols won, can be zero if no wins
+
+      if ( anyClosures == 1 ) {
+
+        if (betsBalance > result) {  // if new balance is higher, user won Warhols on market - YAY to speculation!
+
+          return bot.sendMessage( msg.from.id, `The market has closed and you have won ${ wonWarhols } Warhols. Your new balance is ${ betsBalance } Warhols. Use the /spend to change this situation.`, { markup });
+
+        }
+        else {
+
+          return bot.sendMessage( msg.from.id, `The market has closed and unfortunately you didn't win. You currently have ${ betsBalance } Warhols. Use the /spend to change this situation.`, { markup });
+
+        } 
+      
+      }
+
+      else { // markets have not closed, just diplay "old" balance which has not changed
+
+        // Check what the balance is... 
+        if ( result == 0 ) {
         // If there are no Warhols on the account encourage them to get some Warhols.
-        return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Use the /get command to change this situation.`, { markup });
+          return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Use the /get command to change this situation.`, { markup });
         
-    } else {
-        // If they have Warhols encourage them to spend the Warhols.
-        return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Use the /spend to change this situation.`, { markup });
+         } else {
+        // If they have Warhols encourage them to spend some Warhols.
+          return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Use the /spend to change this situation.`, { markup });
+       
+        }
 
-    }
+      }
 
-  });
+      }); // end of market check routine
 
-});
+
+
+
+  });  // end of getBalance function
+
+}); // end of bot.on balance button
 
 
 // Get warhols.
@@ -247,13 +313,13 @@ bot.on( SPEND_BUTTON, msg => {
 
     GetBalance( msg.from.id, function( error, balance ){
 
-      if ( balance <= 5 ){
+      if ( balance < 5 ){
 
-          let markup = bot.keyboard([
-            [ GET_BUTTON ]], { resize: true }
-          );
+        let markup = bot.keyboard([
+           [ GET_BUTTON ]], { resize: true }
+        );
 
-          return bot.sendMessage( msg.from.id, `You don’t have enough Warhols in your account. You need at least 5 Warhols and your balance is ${ balance }. You should /get some Warhols first.`);
+        return bot.sendMessage( msg.from.id, `You don’t have enough Warhols in your account. You need at least 5 Warhols and your balance is ${ balance }. You should /get some Warhols first.`);
 
       } else {
 
@@ -498,14 +564,12 @@ bot.on( [ GIFT_RANDOM, GIFT_FOUNTAIN ], msg => {
 bot.on( SPECULATIVE_ECON, msg => {
 
   let markup = bot.keyboard([
+
     [ SPEC_MARKET ],[ SPEC_RANKING ],[ BACK_BUTTON ]], { resize: true }
+
   );
 
-GetBalance( msg.from.id, function( error, balance ){
-
-      return bot.sendMessage( msg.from.id, `Are you ready to take some risks and maybe get some rewards?. How would you like to invest your Warhols: \n /market exchange of flavors \n /ranking of cultural appreciation`, { markup } );
-
-    });
+  return bot.sendMessage( msg.from.id, `Are you ready to take some risks and maybe get some rewards?. How would you like to invest your Warhols: \n /market exchange of flavors \n /ranking of cultural appreciation`, { markup } );
   
 });
 
@@ -594,7 +658,7 @@ bot.on( '/five', msg => {  // amount chosen to invest
          }
          else  {  var betOwner = (msg.from.first_name);
          }
-    let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
+    let newBet = { time: betDate, event: eventName, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
     connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
     
       if( error ) throw error;
@@ -736,97 +800,82 @@ bot.on( '/*' , msg => {
     
     // Read from the second character in the message string.
     let readText = msg.text;
-    let amountSelection = readText.slice( 1, 2 );
-
-    // Make sure that what the text is only a number.
-    let warholAmount = Number( amountSelection );
-
-    // SubtractWarhols( msg.from.id, warholAmount ); // We can already subtract from the user account... why not?
+    let warholAmount = readText.slice( 1, 3 );
     
-    if ( giftSpendMode == 1 ){ // They have chosen to give to a random person.
+    // Check if the amount they have selected does not exceed the amount available in their account.
+    GetBalance( msg.from.id, function( error, userBalance ){
 
-      connection.query( 'SELECT * FROM accounts', function( error, users ){
+      if ( userBalance < warholAmount ){
 
-        if( error ) throw error;
+        return bot.sendMessage( msg.from.id, `You do not have enough warhols. Please choose a smaller amount or /get more warhols.`);
+
+      } else if ( userBalance >= warholAmount ){
+
+        if ( giftSpendMode == 1 ){ // They have chosen to give to a random person.
+
+          connection.query( 'SELECT * FROM accounts', function( error, users ){
+
+          if( error ) throw error;
         
-        // Choose one user at random.
+          // Choose one user at random.
 
-        // But first we have to make sure that the current user is not
-        // accidentally giving themselves Warhols.
+          // But first we have to make sure that the current user is not
+          // accidentally giving themselves Warhols.
 
-        let theOthers = [];
+          let theOthers = [];
 
-        for( let i = 0; i < users.length; i++){
+          for( let i = 0; i < users.length; i++ ){
 
-          if ( users[i].owner != msg.from.id ){
+            if ( users[i].owner != msg.from.id ){
 
-            theOthers.push(users[i].owner);
+              theOthers.push(users[i].owner);
+
+            }
 
           }
+
+          var randomUser = ( Math.ceil( Math.random() * theOthers.length ) - 1 );
+
+          GetBalance( users[ randomUser ].owner, function( error, theirBalance ){
+          
+            // console.log(users[randomUser].owner_name);
+            // console.log(theirBalance);
+
+            let theirNewBalance = ( theirBalance + warholAmount );
+
+            // console.log(theirNewBalance);
+
+            AddWarhols( users[ randomUser ].owner, theirNewBalance );
+
+            SubtractWarhols( msg.from.id, warholAmount );
+
+          });        
+
+          warholMode = 0;
+          giftSpendMode = 0;
+        
+          return bot.sendMessage( msg.from.id, `Thank you for your gift! Your Warhols have been anonymously sent to a random person.`, { markup });
+
+          });
+
+        } else if ( giftSpendMode == 2 ) { // They have chosen to give to the fountain.
+
+          ShareTheWealth( msg.from.id, warholAmount );
 
         }
 
-        var randomUser = ( Math.ceil( Math.random() * theOthers.length ) - 1 );
+      }
 
-        GetBalance( users[ randomUser ].owner, function( error, theirBalance ){
-          
-          // console.log(users[randomUser].owner_name);
-          // console.log(theirBalance);
+    });
 
-          let theirNewBalance = ( theirBalance + warholAmount );
+  }
 
-          // console.log(theirNewBalance);
+  if ( marketFlavor != 0 ) {
 
-          AddWarhols( users[ randomUser ].owner, theirNewBalance );
+    console.log('Lets now listen for speculation market activity.');
 
-          SubtractWarhols( msg.from.id, warholAmount );
-
-        });        
-
-        warholMode = 0;
-        giftSpendMode = 0;
-        
-        return bot.sendMessage( msg.from.id, `Thank you for your gift! Your Warhols have been anonymously sent to a random person.`, { markup });
-
-      });
-
-
-    } else if ( giftSpendMode == 2 ) { // They have chosen to give to the fountain.
-
-      
-
-      // Get the current balance of the fountain.
-      // Add the Warhols contributed.
-      // Check if the fountain is full yet.
-      // If the fountain is overflowing notify the user?
-
-      let newReservoirBalance;
-
-      GetFountainBalance( function( error, fountainBalance ){
-
-        newReservoirBalance = ( fountainBalance + warholAmount );
-      
-        AddToFountain( newReservoirBalance );
-
-        SubtractWarhols( msg.from.id, warholAmount );
-
-        connection.query( 'SELECT * FROM accounts', function( error, howmanyusers ){
-
-          if( error ) throw error;
-
-          if ( newReservoirBalance >= ( ( MIN_DISTRO * howmanyusers.length ) + MAX_BONUS ) ){
-
-            ShareTheWealth( newReservoirBalance );
-            
-          }
-
-        });
-        
-        return bot.sendMessage( msg.from.id, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
-
-      });
-      
-    }      
+    let readText = msg.text;
+    let warholAmount = readText.slice( 1, 4 );
 
   }
 
@@ -860,9 +909,9 @@ bot.on( YES_BUTTON, msg => {
 
       warholMode = 0;
 
-      return bot.sendMessage( msg.from.id, `Enjoy! Your account has benn credited with ${ warholValue } Warhols`, { markup });
+      return bot.sendMessage( msg.from.id, `Enjoy! Your account has been credited with ${ warholValue } Warhols`, { markup });
 
-    } else if ( warholMode == 2 ){
+    } else if ( warholMode == 2 ){ // Verify that they are in spend mode.
       
       let markup = bot.keyboard([
         [ BACK_BUTTON ]], { resize: true }
@@ -1024,12 +1073,80 @@ function AddToFountain( contribution ){
 
 
 
+function ShareTheWealth( userID, fountainContribution ){
+
+  let markup = bot.keyboard([
+    [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+  );
+
+  GetFountainBalance( function( error, fountainBalance ){
+    
+    // Add the new contribution of warhols to the current reservoir balance including the multiplier. 
+    let newReservoirBalance = ( fountainBalance + ( fountainContribution * GIFT_MULTIPLYER ) ) ;
+
+    // Send the newly calculated value to the reservoir.
+    AddToFountain( newReservoirBalance );
+
+    // Subtract the contribution of the warhols from the user account.
+    SubtractWarhols( userID, fountainContribution );
+
+    // Find out how many warhols users there are.
+    connection.query( 'SELECT * FROM accounts', function( error, howmanyusers ){
+
+      if( error ) throw error;
+
+      // Check if the reservoir is full enough for a distrobution of warhols to all the users.
+      if ( newReservoirBalance >= ( ( MIN_DISTRO * howmanyusers.length ) ) ){
+
+        connection.query( 'SELECT * FROM accounts', function( error, members ){
+
+          if( error ) throw error;
+
+          // Round down the number resulting from dividing the new reservoir balance with the number of warhols users.
+          let distroAmount =  Math.floor( ( newReservoirBalance / members.length ) ); 
+
+          // Distribute the awarded warhols to all the users.
+          for (let i = 0; i < members.length; i++ ){
+
+            GetBalance( members[i].owner, function( error, currentBalance ){
+
+              let newBalance = ( distroAmount + currentBalance );
+
+              AddWarhols( members[i].owner, newBalance );
+
+              newBalance = 0;
+
+            });
+
+          }
+
+          SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
+
+          warholMode = 0;
+          giftSpendMode = 0;
+
+          return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
+
+        });
+        
+      }
+
+    });
+
+  });
+
+}
+
+
 function SubtractFromFountain( amount, members, currentBalance ){
 
+  // Multiply the amount of members with the amount each member received.
   let resetBalance = ( amount * members );
 
-  resetBalance = ( resetBalance - currentBalance );
+  // Subtract the total amount awarded from the reservoir account.
+  resetBalance = ( currentBalance - resetBalance );
 
+  // Update the reservoir.
   connection.query('UPDATE fountain SET reservoir = ? WHERE id =?', [ resetBalance, 1 ], function( error, current ){
 
     if ( error ) throw error;
@@ -1037,42 +1154,6 @@ function SubtractFromFountain( amount, members, currentBalance ){
   });
 
 }
-
-
-
-function ShareTheWealth( newReservoirBalance ){
-
-  // How many user accounts
-  // Divide the pooled warhols by the amount of accounts
-  // Update all of the warhol balances on all of the accounts
-  console.log('The fountain has been activated!');
-
-  connection.query( 'SELECT * FROM accounts', function( error, members ){
-
-    if( error ) throw error;
-
-    let distroAmount =  Math.round( ( newReservoirBalance / members.length ) );
-
-    console.log( distroAmount );
-
-    for (let i = 0; i < members.length; i++ ){
-
-      GetBalance( members[i].owner, function( error, currentBalance ){
-
-        let newBalance = ( distroAmount + currentBalance );
-
-        AddWarhols( members[i].owner, newBalance );
-
-      });
-
-    }
-
-    SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
-
-  });
-
-}
-
 
 
 // Selects five random entries from the creative content for the user to choose from.
@@ -1228,40 +1309,155 @@ function LastInteraction( userID, callback ){
 
 // Convert milliseconds into human understandable time
 
-function timeConversion(millisec) {
 
-        var seconds = (millisec / 1000).toFixed(0);
+function timeConversion( millisec ) {
 
-        var minutes = (millisec / (1000 * 60)).toFixed(0);
+  var seconds = ( millisec / 1000 ).toFixed(0);
 
-        var hours = (millisec / (1000 * 60 * 60)).toFixed(0);
+  var minutes = ( millisec / ( 1000 * 60 ) ).toFixed(0);
 
-        var days = (millisec / (1000 * 60 * 60 * 24)).toFixed(0);
+  var hours = ( millisec / ( 1000 * 60 * 60 ) ).toFixed(0);
 
-        if (seconds < 60) {
-            return seconds + " seconds";
-        } else if (minutes < 60) {
-            return minutes + " minutes";
-        } else if (hours == 1) {
-            return hours + " hour";  // added exception for single hour
-        } else if (hours < 24) {
-            return hours + " hours";
-        } else if (days == 1) {
-            return days + " day";   // added exception for singe day
-        } else {
-            return days + " days"
-        }
-    }
+  var days = ( millisec / ( 1000 * 60 * 60 * 24 ) ).toFixed(0);
+
+  if ( seconds < 60 ) {
+
+      return seconds + " seconds";
+
+  } else if ( minutes < 60 ) {
+
+      return minutes + " minutes";
+
+  } else if ( hours == 1 ) {
+
+      return hours + " hour";  // added exception for single hour
+
+  } else if ( hours < 24 ) {
+
+      return hours + " hours";
+
+  } else if ( days == 1 ) {
+
+      return days + " day";   // added exception for singe day
+
+  } else {
+
+      return days + " days";
+
+  }
+
+}
+
+
 
 // Checks for new Market closures since bets placed
 
 function newMarketActivity( userID, callback ){
 
-    connection.query('SELECT * FROM market_bets WHERE user =' + userID , function( error, result ){
+
+      let marketActivityDisplay = 0;
+      // Retrieve last market closure date
+      connection.query('SELECT close_time, id, winner FROM market WHERE event = ?', [eventName], function (error, result, fields) {
+        if (error) throw error;
+
+        var currentDate = new Date();
+        var i = 0;
+        for (i = 0; i < result.length; i++) {
+          if (currentDate > result[i].close_time) {
+                lastMarketClosing = result[i].close_time;
+                marketClosureId = result[i].id;
+                var dateDifference = (currentDate-lastMarketClosing);
+                marketWinners[i] = (result[i].winner + '' + result[i].id);
+           //     console.log(marketWinners[i]);
+                console.log('closure ' + (i+1) + ': id ' + marketClosureId + ' - ' + timeConversion(dateDifference) + ' ago. Winner: ' + result[i].winner);
+        }
+        else { break; }
+        }
+      });
+
+    // check if any bets by user
+    connection.query('SELECT * FROM market_bets WHERE event = ? AND user = ?',[eventName, userID], function( error, result ){
       
         if ( error ) return error;
 
-          return callback( error, result );
+          var i = 0;
+          var ii = 0;
+          var iii = 0;
+          betCreditTotal = 0; // reset previous value of winnings
+          var newMarketClosure = 0 ; // reset previous value of market closure
+
+          for (i = 0; i < result.length; i++) {
+              betInfo = (result[i].flavor + '' + result[i].market_id); // put together on a string closure id and flavor of bet
+              
+
+              if (result[i].credited == 0) { // check for any bets still not processed
+                var credText = 'not credited yet' ;
+                newMarketClosure = 1 ;
+                ii++;
+
+                if (marketWinners.indexOf(betInfo) === -1) {  // bet did not win - *sigh*
+                    console.log(betInfo + ' is NOT a winner');
+
+                             // connection query to update credited field to 1 - bet processed!
+                             connection.query( 'UPDATE market_bets SET credited = 1 WHERE user = ? AND market_id = ? AND flavor = ?', [ userID, betInfo.substring(1) , betInfo.substring(0, 1) ], function( error, current ){
+                
+                             if ( error ) throw error;
+                             
+                             });
+
+                }
+                else { // bet is a winner - YAY!
+                    console.log(betInfo + ' is a winner');
+                    var betCredit = (result[i].amount * SPEC_MULTIPLIER) // multiply bet
+                    betCreditTotal = (betCreditTotal+betCredit); // add value won on this bet with other winnings
+                    iii++;
+                    console.log('betCredit: ' + betCredit);
+                    console.log('betCreditTotal: ' + betCreditTotal);
+                    console.log(betInfo.substring(0, 1)); // get back closure id from string
+                    console.log(betInfo.substring(1));  // get back bet flavor from string
+
+                             // connection query to update credited field to 1 - bet processed!
+                             connection.query( 'UPDATE market_bets SET credited = 1 WHERE user = ? AND market_id = ? AND flavor = ?', [ userID, betInfo.substring(1) , betInfo.substring(0, 1) ], function( error, current ){
+                
+                             if ( error ) throw error;
+                             
+                             });
+
+                }
+
+              } else {
+                var credText = 'already credited' ;
+                
+              }
+          console.log(result[i].name + ' bet ' + result[i].amount + ' Warhols on flavor ' + result[i].flavor + ' at market id ' + result[i].market_id + ' during event ' + result[i].event+ ' - ' + credText);
+                        
+          }
+
+          console.log ('number of uncredited bets: ' + ii);
+          console.log ('winning bets: ' + iii);
+          console.log ('total winnings: ' + betCreditTotal);
+          console.log ('has market closed: ' + newMarketClosure);
+          
+
+             connection.query('SELECT balance FROM accounts WHERE owner =' + userID , function( error, result ){
+      
+             if ( error ) return error;
+
+             var balance = result[0].balance;
+             console.log('current balance: ' + balance);
+             var balancePlusBet = (balance + betCreditTotal);
+             console.log('new balance: ' + balancePlusBet);
+
+             AddWarhols( userID, balancePlusBet ); // update users balance
+
+//            return callback( error, result[0].balance );
+
+          marketActivityDisplay = (' new balance after winnings: ' + balancePlusBet);
+          console.log('marketActivityDisplay1: ' + marketActivityDisplay);
+          var newMarketNewBalance = [newMarketClosure, balancePlusBet];
+          return callback( error, newMarketNewBalance );
+        
+             });
 
     });
 
