@@ -775,7 +775,6 @@ bot.on( YES_BUTTON, msg => {
 
         if ( error ) throw error;
 
-        console.log(timesViewed[0].viewed);
         console.log(currentGiftSelection[0]);        
 
         let viewedIncrement = ( ( timesViewed[0].viewed ) + 1 );
