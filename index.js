@@ -758,7 +758,6 @@ bot.on( '/*' , msg => {
 });
 
 
-
 // These two are only relevant for the end routine of a user who has chosen to earn Warhols through the gift economy.
 // I could do an overall better implementation of this but for now I am just trying to get this project done. I am sure you understand how deadlines work.
 
@@ -1339,7 +1338,7 @@ function newMarketActivity( userID, callback ){
 
 }
 
-      // TO DO:
+      // FOUNTAIN TO DO:
 
       // Compare current date with last interaction date.
 
