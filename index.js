@@ -915,7 +915,7 @@ function GiveWarholsRandom( userID, warholAmount, markup ){
 
     for( let i = 0; i < users.length; i++ ){
 
-      if ( users[i].owner != msg.from.id ){
+      if ( users[i].owner != userID ){
 
         theOthers.push(users[i].owner);
 
@@ -931,7 +931,7 @@ function GiveWarholsRandom( userID, warholAmount, markup ){
 
       AddWarhols( users[ randomUser ].owner, theirNewBalance );
 
-      SubtractWarhols( msg.from.id, warholAmount );
+      SubtractWarhols( userID, warholAmount );
 
     });        
 
