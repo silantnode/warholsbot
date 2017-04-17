@@ -379,15 +379,26 @@ bot.on('ask.coupon', msg => {
                 if( error ) throw error;
 
               });
+              
               // Record the Telegram user id of the person who used the code.
               connection.query( 'UPDATE coupons SET owner = ? WHERE id = ?', [ msg.from.id , uniqueCode[i].id ], function( error, claiment ){
 
                 if( error ) throw error;
 
               });
+
+              // Record the time and date the coupon was claimed.
+
+              let currentDate = new Date();
+
+              connection.query( 'UPDATE coupons SET tds = ? WHERE id = ?', [ currentDate , uniqueCode[i].id ], function( error, dateConfirmation ){
+
+                if( error ) throw error;
+
+              });
                 
               // Give the user their warhols.
-              GetBalance( members[i].owner, function( error, currentBalance ){
+              GetBalance( msg.from.id, function( error, currentBalance ){
 
                 let newBalance = ( MAX_COUPON + currentBalance );
 
