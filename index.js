@@ -1155,7 +1155,7 @@ function GetGiftsContent( callback ){
       // Randomly select 5 items from the table.
       while( currentGiftSelection.length < MAX_LIST_DISPLAY ){
         // Set up the numbers usig minus 1 so that the numbers will read the list properly.
-        let randNum = ( Math.ceil( Math.random() * rows.length ) -1 );
+        let randNum = ( Math.ceil( Math.random() * rows.length ) ); // Temporarily removed -1
 
         if( currentGiftSelection.indexOf( randNum ) > -1 ) continue;
 
@@ -1255,7 +1255,7 @@ function DisplayGiftContent( userID, giftNumber, markup ){
     // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
     if ( giftNumber >= 1 && giftNumber <= 5 ) {
 
-        // Retrieve the corresponding item number from the random selection made when the user selected the /creative option.
+        // Retrieve the corresponding item number from the random selection made when the user selected the /gift option.
         // We use minus 1 to offset the reading of the array.
         let contentSelector = currentGiftSelection[ ( giftNumber - 1 ) ];
         let giftDescription = rows[ contentSelector ].description;
