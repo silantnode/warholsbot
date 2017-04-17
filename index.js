@@ -216,27 +216,28 @@ bot.on( BALANCE_BUTTON, msg => {
     [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
   );
 
-// check if the fountain has been activated and if so display message (compare last activity with last fountain date)
-// check if market has closed (compare last activity with current date, check market closure inbetween)
- newMarketActivity( msg.from.id, function( error, callback ){
- console.log(callback);
-});
+  // check if the fountain has been activated and if so display message (compare last activity with last fountain date)
+  // check if market has closed (compare last activity with current date, check market closure inbetween)
+  newMarketActivity( msg.from.id, function( error, callback ){
 
+    console.log( callback );
 
-// if market closures happened, see if any bets were won. Display message of sorry or congratulation
+  });
+
+  // if market closures happened, see if any bets were won. Display message of sorry or congratulation
 
   GetBalance( msg.from.id, function( error, result ){
 
-    // Check what the balance is... 
-    if ( result == 0 ) {
-        // If there are no Warhols on the account encourage them to get some Warhols.
-        return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Use the /get command to change this situation.`, { markup });
+  // Check what the balance is... 
+  if ( result == 0 ) {
+    // If there are no Warhols on the account encourage them to get some Warhols.
+    return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Use the /get command to change this situation.`, { markup });
         
-    } else {
-        // If they have Warhols encourage them to spend the Warhols.
-        return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Use the /spend to change this situation.`, { markup });
+  } else {
+    // If they have Warhols encourage them to spend the Warhols.
+    return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Use the /spend to change this situation.`, { markup });
 
-    }
+  }
 
   });
 
@@ -528,36 +529,45 @@ bot.on( SPECULATIVE_ECON, msg => {
 
 bot.on( SPEC_MARKET , msg => {
 
-betDate = new Date(); // this will be the time of their bet if they place one
-console.log('betDate - ', betDate);
+  betDate = new Date(); // this will be the time of their bet if they place one
+  console.log('betDate - ', betDate);
   // to do: check if user has enough balance, if not ask to choose other value
 
 
-    let markup = bot.keyboard([
-      [SPEC_FLAVOR_1],[SPEC_FLAVOR_2],[SPEC_FLAVOR_3],[ BACK_BUTTON ]], { resize: true }
-    );
+  let markup = bot.keyboard([
 
-      // new connection to retrieve next market closure dates
-      connection.query('SELECT close_time, id FROM market WHERE event = ?', [eventName], function (error, results, fields) {
-        if (error) throw error;
+    [SPEC_FLAVOR_1],[SPEC_FLAVOR_2],[SPEC_FLAVOR_3],[ BACK_BUTTON ]], { resize: true }
 
-      var currentDate = new Date();
-      var i = 0;
-      for (i = 0; i < results.length; i++) {
-          marketClosureId = results[i].id;
-          console.log('marketClosureId - ', marketClosureId);
-        var dateDifference = (results[i].close_time-currentDate);
-        var timetoClosing = timeConversion(dateDifference);
-             if (dateDifference > 600000) { break; } // choose the first date at least 10 minutes in the future
-       
-      }
-          return bot.sendMessage( msg.from.id, `The Warhols exchange market will close in ` + timetoClosing + `. In which flavor would you like to invest? \n `+ SPEC_FLAVOR_1 +` Warhols \n `+ SPEC_FLAVOR_2 +` Warhols \n `+ SPEC_FLAVOR_3 +` Warhols`, { markup } );
-        });
+  );
 
+  // new connection to retrieve next market closure dates
+  connection.query('SELECT close_time, id FROM market WHERE event = ?', [eventName], function (error, results, fields) {
     
-      // end retrieving market closure dates
+    if (error) throw error;
+    
+    var currentDate = new Date();
+    
+    var i = 0;
+      
+    for (i = 0; i < results.length; i++) {
 
- });
+      marketClosureId = results[i].id;
+      
+      console.log('marketClosureId - ', marketClosureId);
+      
+      var dateDifference = (results[i].close_time-currentDate);
+      var timetoClosing = timeConversion(dateDifference);
+        
+      if (dateDifference > 600000) { break; } // choose the first date at least 10 minutes in the future
+      
+    }
+
+    return bot.sendMessage( msg.from.id, `The Warhols exchange market will close in ` + timetoClosing + `. In which flavor would you like to invest? \n `+ SPEC_FLAVOR_1 +` Warhols \n `+ SPEC_FLAVOR_2 +` Warhols \n `+ SPEC_FLAVOR_3 +` Warhols`, { markup } );
+    });
+
+    // end retrieving market closure dates
+
+});
 
 
 // assign marketFlavor variable according to the choice of flavor by the user
@@ -566,22 +576,25 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
   if ( msg.text == SPEC_FLAVOR_1 ) {
 
-  marketFlavor = 1; 
-  console.log(marketFlavor);
+    marketFlavor = 1; 
+    console.log(marketFlavor);
+
   } else if ( msg.text == SPEC_FLAVOR_2 ) {
 
-  marketFlavor = 2; 
-  console.log(marketFlavor);
+    marketFlavor = 2; 
+    console.log(marketFlavor);
+
   } else if ( msg.text == SPEC_FLAVOR_3 ) {
 
-  marketFlavor = 3; 
-  console.log(marketFlavor);
+    marketFlavor = 3; 
+    console.log(marketFlavor);
+
   }
 
-    var flavorName = msg.text.substr(1);
-      return bot.sendMessage( msg.from.id, `How many shares of ` + flavorName + ` Warhols you want to buy? \n /five \n /ten \n /20 \n /50 \n /100`);
+  var flavorName = msg.text.substr(1);
+  return bot.sendMessage( msg.from.id, `How many shares of ` + flavorName + ` Warhols you want to buy? \n /five \n /ten \n /20 \n /50 \n /100`);
 
-  });
+});
 
 
 
@@ -589,50 +602,63 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
 bot.on( '/five', msg => {  // amount chosen to invest
 
-    var betAmount = 5;
-// check if user has enough balance, if not ask to choose other value
+  var betAmount = 5;
+  // check if user has enough balance, if not ask to choose other value
 
   GetBalance( msg.from.id, function( error, result ){
 
-    // Check what the balance is... 
-    if ( result < betAmount ) {
-        return bot.sendMessage( msg.from.id, `You currently have only ${ result } Warhols. Please start with a lower investment.`, { markup: 'hide' });
+  // Check what the balance is... 
+  if ( result < betAmount ) {
+
+    return bot.sendMessage( msg.from.id, `You currently have only ${ result } Warhols. Please start with a lower investment.`, { markup: 'hide' });
         
-    } else {   // Continue with the investment.
+  } else {   // Continue with the investment.
         
-     console.log('they have enough Warhols - ', result);
-// write to market bets database: user id, user name, flavor, amount, time bet placed
+    console.log('they have enough Warhols - ', result);
+    
+    // write to market bets database: user id, user name, flavor, amount, time bet placed
 
     var currentDate = new Date();
-      if (typeof msg.from.last_name != "undefined") // if the user does not have a last name
-         {  var betOwner = (msg.from.first_name +' '+ msg.from.last_name);
-         }
-         else  {  var betOwner = (msg.from.first_name);
-         }
+
+    if (typeof msg.from.last_name != "undefined"){ // if the user does not have a last name
+
+      var betOwner = (msg.from.first_name +' '+ msg.from.last_name);
+
+    } else {
+
+      var betOwner = (msg.from.first_name);
+
+    }
+
     let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
+    
     connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
     
       if( error ) throw error;
-    
-     console.log('New bet from:', betOwner);
+      
+      console.log('New bet from:', betOwner);
 
     });
-// deduct warhols from users account
 
-  SubtractWarhols( msg.from.id, betAmount );
-  setLastDate( msg.from.id ); // set last interaction date
+    // deduct warhols from users account
 
-// send message with thanks, display home menu
-   let markup = bot.keyboard([
-       [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
-   );
-   return bot.sendMessage( msg.from.id, `Thanks for your investment! You will get a notification when the market closes. Good luck!`, { markup } );
+    SubtractWarhols( msg.from.id, betAmount );
+    setLastDate( msg.from.id ); // set last interaction date
 
+    // send message with thanks, display home menu
 
-      } // end if balance enough
+    let markup = bot.keyboard([
+      [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+    );
+
+    return bot.sendMessage( msg.from.id, `Thanks for your investment! You will get a notification when the market closes. Good luck!`, { markup } );
+
+    } // end if balance enough
 
   });
- });
+
+});
+
 
 // Checks if a user has selected content from a provided random list. 
 // '/*' listens for any activity entered by the user and then filters out the resulting strings of
