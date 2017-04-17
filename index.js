@@ -661,7 +661,7 @@ bot.on( '/*' , msg => {
   
   if ( currentGiftSelection.length == 5 ) {
 
-    let taskNumber = Number( ( (msg.text).slice( 1, 2 ) ) );
+    let taskNumber = Number( ( ( msg.text ).slice( 1, 2 ) ) );
 
     DisplayGiftContent( msg.from.id, taskNumber, markup );
     
@@ -670,8 +670,8 @@ bot.on( '/*' , msg => {
   if ( warholMode == 2 ) { // Make sure we are in spend mode.
     
     // Read from the second character in the message string.
-    let readText = msg.text;
-    let warholAmount = readText.slice( 1, 3 );
+  
+    let warholAmount = Number( ( ( msg.text ).slice( 1, 3 ) ) );
     
     // Check if the amount they have selected does not exceed the amount available in their account.
     GetBalance( msg.from.id, function( error, userBalance ){
@@ -681,49 +681,11 @@ bot.on( '/*' , msg => {
         return bot.sendMessage( msg.from.id, `You do not have enough warhols. Please choose a smaller amount or /get more warhols.`);
 
       } else if ( userBalance >= warholAmount ){
-
+        
         if ( giftSpendMode == 1 ){ // They have chosen to give to a random person.
-
-          connection.query( 'SELECT * FROM accounts', function( error, users ){
-
-          if( error ) throw error;
         
-          // Choose one user at random.
-
-          // But first we have to make sure that the current user is not
-          // accidentally giving themselves Warhols.
-
-          let theOthers = [];
-
-          for( let i = 0; i < users.length; i++ ){
-
-            if ( users[i].owner != msg.from.id ){
-
-              theOthers.push(users[i].owner);
-
-            }
-
-          }
-
-          var randomUser = ( Math.ceil( Math.random() * theOthers.length ) - 1 );
-
-          GetBalance( users[ randomUser ].owner, function( error, theirBalance ){
-          
-            let theirNewBalance = ( theirBalance + warholAmount );
-
-            AddWarhols( users[ randomUser ].owner, theirNewBalance );
-
-            SubtractWarhols( msg.from.id, warholAmount );
-
-          });        
-
-          warholMode = 0;
-          giftSpendMode = 0;
+          GiveWarholsRandom( msg.from.id, warholAmount, markup );
         
-          return bot.sendMessage( msg.from.id, `Thank you for your gift! Your Warhols have been anonymously sent to a random person.`, { markup });
-
-          });
-
         } else if ( giftSpendMode == 2 ) { // They have chosen to give to the fountain.
 
           ShareTheWealth( msg.from.id, warholAmount );
@@ -937,6 +899,50 @@ function AddToFountain( contribution ){
 
 }
 
+
+function GiveWarholsRandom( userID, warholAmount, markup ){
+
+  connection.query( 'SELECT * FROM accounts', function( error, users ){
+
+    if( error ) throw error;
+
+    // Choose one user at random.
+
+    // But first we have to make sure that the current user is not
+    // accidentally giving themselves Warhols.
+
+    let theOthers = [];
+
+    for( let i = 0; i < users.length; i++ ){
+
+      if ( users[i].owner != userID ){
+
+        theOthers.push(users[i].owner);
+
+      }
+
+    }
+
+    var randomUser = ( Math.ceil( Math.random() * theOthers.length ) - 1 );
+
+    GetBalance( users[ randomUser ].owner, function( error, theirBalance ){
+
+      let theirNewBalance = ( theirBalance + warholAmount );
+
+      AddWarhols( users[ randomUser ].owner, theirNewBalance );
+
+      SubtractWarhols( userID, warholAmount );
+
+    });        
+
+    warholMode = 0;
+    giftSpendMode = 0;
+
+    return bot.sendMessage( userID, `Thank you for your gift! Your Warhols have been anonymously sent to a random person.`, { markup });
+
+  });
+
+}
 
 
 function ShareTheWealth( userID, fountainContribution ){
