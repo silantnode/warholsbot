@@ -764,7 +764,7 @@ bot.on( YES_BUTTON, msg => {
 
       return bot.sendMessage( msg.from.id, `Enjoy! Your account has been credited with ${ warholValue } Warhols`, { markup });
 
-    } else if ( warholMode == 2 ){ // Verify that they are in spend mode.
+    } else if ( warholMode == 2 ) { // Verify that they are in spend mode.
       
       let markup = bot.keyboard([
         [ BACK_BUTTON ]], { resize: true }
@@ -779,23 +779,36 @@ bot.on( YES_BUTTON, msg => {
       SubtractWarhols( msg.from.id, 10 );
 
       // Post to WarholsChannel New Content
-         if (typeof msg.from.last_name != "undefined") // if the user does not have a last name
-         {  var contentName = (msg.from.first_name+' '+ msg.from.last_name);
-         }
-         else  {  var contentName = (msg.from.first_name );
-         }
+      if ( typeof msg.from.last_name != "undefined" ){ // if the user does not have a last name
 
-         if (typeof msg.from.username != "undefined") // if the user does not have a username
-         {  var contentUser = (' - @' + msg.from.username);
-         }
-         else  {  var contentUser = (' ');
-         }
+        var contentName = ( msg.from.first_name+' '+ msg.from.last_name );
+
+      } else {  
+        
+        var contentName = ( msg.from.first_name );
+
+      }
+
+      if ( typeof msg.from.username != "undefined" ){ // if the user does not have a username
+
+           var contentUser = ( ' - @' + msg.from.username );
+
+      } else  {  
+        
+        var contentUser = (' ');
+      
+      }
+      
       requestify.post('https://maker.ifttt.com/trigger/new_content/with/key/' + custom_data[5] , { // IFTTT secret key.
+
         value1: ( contentName + contentUser ) , // telegram user.
         value2: contentSubmission[1] , // content title.
         value3: contentSubmission[0] // content URL.
+
       })
-      .then(function(response) {
+
+      .then( function( response ) {
+
         // Get the response and write to console
         response.body;
         console.log('IFTTT: ' + response.body);
@@ -806,7 +819,7 @@ bot.on( YES_BUTTON, msg => {
 
       return bot.sendMessage( msg.from.id, `Excellent! Your content is now available for viewing and 10 Warhols have been subtracted from your account.`, { markup });
 
-    } 
+  } 
 
 });
 
@@ -839,9 +852,8 @@ bot.on('/last', msg => {
 
 bot.on('/date', msg => {
   // Compare current date and /last date.
+  DateCompare ( msg.from.id );
 
-  
-      DateCompare ( msg.from.id );
 });
 
 
@@ -1228,60 +1240,63 @@ function DisplayGiftContent( userID, giftNumber, markup ){
 
 }
 
+
 // Update last interaction date
 
 function setLastDate( userID ){
     
-    var currentDate = new Date();
+  var currentDate = new Date();
 
-    connection.query( 'UPDATE accounts SET date_last = ? WHERE owner = ?', [ currentDate, userID ], function( error, current ){
+  connection.query( 'UPDATE accounts SET date_last = ? WHERE owner = ?', [ currentDate, userID ], function( error, current ){
                 
-     if ( error ) throw error;
+    if ( error ) throw error;
 
-
-   });
+  });
 
 }
+
 
 // Check for time since last interaction
 
 function DateCompare( userID ){
 
-      var currentDate = new Date();
+  var currentDate = new Date();
 
-    connection.query('SELECT date_last FROM accounts WHERE owner =' + userID , function( error, result ){
+  connection.query('SELECT date_last FROM accounts WHERE owner =' + userID , function( error, result ){
       
-        if ( error ) return error;
+    if ( error ) return error;
 
-          var previousDate = result[0].date_last; // magical command to get one result into a variable
+    var previousDate = result[0].date_last; // magical command to get one result into a variable
 
-          var sincelastDate = Math.abs(currentDate-previousDate);  // difference in milliseconds
+    var sincelastDate = Math.abs(currentDate-previousDate);  // difference in milliseconds
 
           // console.log(result);
           // console.log('Last here: ' + result[0].date_last );
           // console.log('Time now: ' + currentDate );
           // console.log('Difference: ' + timeConversion(sincelastDate) );
-    });
+
+  });
 
 }
+
+
 
 // Get last interaction date
 
 function LastInteraction( userID, callback ){
 
-    connection.query('SELECT date_last FROM accounts WHERE owner =' + userID , function( error, result ){
+  connection.query('SELECT date_last FROM accounts WHERE owner =' + userID , function( error, result ){
       
-        if ( error ) return error;
+    if ( error ) return error;
 
-          return callback( error, result[0].date_last );
+    return callback( error, result[0].date_last );
 
-    });
+  });
 
 }
 
 
 // Convert milliseconds into human understandable time
-
 
 function timeConversion( millisec ) {
 
@@ -1327,25 +1342,25 @@ function timeConversion( millisec ) {
 
 function newMarketActivity( userID, callback ){
 
-    connection.query('SELECT * FROM market_bets WHERE user =' + userID , function( error, result ){
+  connection.query('SELECT * FROM market_bets WHERE user =' + userID , function( error, result ){
       
-        if ( error ) return error;
+    if ( error ) return error;
 
-          return callback( error, result );
+    return callback( error, result );
 
-    });
+  });
 
 }
 
-      // TO DO:
+// TO DO:
 
-      // Compare current date with last interaction date.
+// Compare current date with last interaction date.
 
-      // Check for fountain overflows in that period and how much they were.   
+// Check for fountain overflows in that period and how much they were.   
 
-      // Add overflown Warhols to users account.
-       
-      // If appropriate send them a message notifying of fountain or market and new balance.
+// Add overflown Warhols to users account.
+  
+// If appropriate send them a message notifying of fountain or market and new balance.
     
 // Last line of code, all functions should be above here
 bot.connect();
