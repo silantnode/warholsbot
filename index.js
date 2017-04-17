@@ -1165,7 +1165,9 @@ function GetGiftsContent( callback ){
 // Adds creative content submitted by the user.
 function AddCreativeContent( userID, userName, newContent ){
   
-  let loadContent = { owner: userID, owner_name: userName, description: newContent[1] , url: newContent[0], price: 2, Date() };
+  let currentTDS = new Date();
+
+  let loadContent = { owner: userID, owner_name: userName, description: newContent[1] , url: newContent[0], price: 2, tds: currentTDS };
 
   connection.query('INSERT into tasks SET ?', loadContent, function( error, result ){
 
