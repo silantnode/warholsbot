@@ -758,18 +758,39 @@ bot.on( YES_BUTTON, msg => {
         [ BACK_BUTTON ]], { resize: true }
       );
 
-      var warholValue;
-      var newBalance;
-
-      warholValue = (Math.ceil( Math.random() * RAND_GIFT_RANGE ) -1 );          
+      var warholValue = (Math.ceil( Math.random() * RAND_GIFT_RANGE ) -1 );          
 
       GetBalance( msg.from.id, function( error, result ){
+
+        let newBalance;
 
         newBalance = ( warholValue + result );
           
         AddWarhols( msg.from.id, newBalance );
             
       });
+
+      
+      connection.query('SELECT viewed FROM gifts WHERE task_id =' + currentGiftSelection[0] , function( error, timesViewed ){
+
+        if ( error ) throw error;
+
+        console.log(timesViewed[0].viewed);
+        console.log(currentGiftSelection[0]);        
+
+        let viewedIncrement = ( ( timesViewed[0].viewed ) + 1 );
+        
+        connection.query('UPDATE gifts SET viewed = ? WHERE task_id = ?', [ viewedIncrement, currentGiftSelection[0] ], function( error, viewResult ){
+
+          if ( error ) throw error;
+
+          currentGiftSelection = [];
+
+        });
+
+      });
+        
+      // 
 
       warholMode = 0;
 
@@ -1131,7 +1152,7 @@ function GetGiftsContent( callback ){
       let giftSelector;
       let actualGiftID;
 
-    // Randomly select 5 items from the table.
+      // Randomly select 5 items from the table.
       while( currentGiftSelection.length < MAX_LIST_DISPLAY ){
         // Set up the numbers usig minus 1 so that the numbers will read the list properly.
         let randNum = ( Math.ceil( Math.random() * rows.length ) -1 );
@@ -1231,21 +1252,20 @@ function DisplayGiftContent( userID, giftNumber, markup ){
 
     if ( error ) throw error;
 
-    // Setup containers for reading entries from the selected task as well as updating the users Warhols balance.
-    var giftDescription;
-    var contentSelector;
-    
     // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
     if ( giftNumber >= 1 && giftNumber <= 5 ) {
 
         // Retrieve the corresponding item number from the random selection made when the user selected the /creative option.
         // We use minus 1 to offset the reading of the array.
-        contentSelector = currentGiftSelection[ ( giftNumber - 1 ) ];
-        giftDescription = rows[ contentSelector ].description;
-          
-        // Need to add an extra step to prompt the user with a 'yes' or 'no' answer if they will commit to the gift.
+        let contentSelector = currentGiftSelection[ ( giftNumber - 1 ) ];
+        let giftDescription = rows[ contentSelector ].description;
+        
+        currentGiftSelection = []; // Reset the gift selection.
 
-        currentGiftSelection = [];
+        currentGiftSelection[0] = contentSelector; // Remember the selection of the user.
+        
+        console.log( currentGiftSelection[0] );
+        // Need to add an extra step to prompt the user with a 'yes' or 'no' answer if they will commit to the gift.
 
         return bot.sendMessage( userID, `Will you ${ giftDescription }? \n /yes or /no ?`, { markup });
           
