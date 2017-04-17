@@ -728,8 +728,7 @@ bot.on( '/*' , msg => {
 
     console.log('Lets now listen for speculation market activity.');
 
-    let readText = msg.text;
-    let warholAmount = readText.slice( 1, 4 );
+    let warholAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
 
   }
 
