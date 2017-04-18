@@ -1156,7 +1156,7 @@ function GetGiftsContent( callback ){
 
       // Randomly select 5 items from the gifts table.
       while( currentGiftSelection.length < MAX_LIST_DISPLAY ){
-        // Set up the numbers usig minus 1 so that the numbers will read the list properly.
+        // Set up the numbers using minus 1 so that the numbers will read the list properly.
         let randNum = ( Math.ceil( Math.random() * rows.length ) ); // Temporarily removed -1
 
         if( currentGiftSelection.indexOf( randNum ) > -1 ) continue;
@@ -1166,7 +1166,6 @@ function GetGiftsContent( callback ){
       }
 
       console.log(currentGiftSelection);
-
     // Prepare all of the tasks for display.
     // Keep track of which items were selected inside currentCreativeSelection as an array.
 
@@ -1183,7 +1182,7 @@ function GetGiftsContent( callback ){
         console.log(rows[currentGiftSelection[i]].description);
         */
 
-        giftListDisplay += rows[ currentGiftSelection[i] ].description; // The description of the gift
+        giftListDisplay += rows[ ( currentGiftSelection[i] - 1 ) ].description; // The description of the gift
 
         giftListDisplay += '\n \n'; // Spaces for the string for the next line
         
