@@ -1175,9 +1175,12 @@ function GetGiftsContent( callback ){
         giftListDisplay += '/' + ( i + 1 ) + ' '; // The number the user will select
         giftSelector = currentGiftSelection[i]; // The number id from the random list
 
+        /*
         console.log(giftSelector);
         console.log(currentGiftSelection[i]);
         console.log(rows[ giftSelector ].description);
+        console.log(rows[currentGiftSelection[i]].description);
+        */
 
         giftListDisplay += rows[ giftSelector ].description; // The description of the gift
 
