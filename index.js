@@ -1162,22 +1162,12 @@ function GetGiftsContent( callback ){
 
       }
 
-      console.log(currentGiftSelection);
     // Prepare all of the tasks for display.
     // Keep track of which items were selected inside currentCreativeSelection as an array.
 
     for ( let i = 0; i < ( currentGiftSelection.length ) ; i++ ) {
         
         giftListDisplay += '/' + ( i + 1 ) + ' '; // The number the user will select
-        
-        // giftSelector = currentGiftSelection[i]; // The number id from the random list
-
-        /*
-        console.log(giftSelector);
-        console.log(currentGiftSelection[i]);
-        console.log(rows[ giftSelector ].description);
-        console.log(rows[currentGiftSelection[i]].description);
-        */
 
         giftListDisplay += rows[ ( currentGiftSelection[i] - 1 ) ].description; // The description of the gift
 
