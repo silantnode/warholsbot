@@ -775,9 +775,6 @@ bot.on( YES_BUTTON, msg => {
 
         if ( error ) throw error;
 
-        console.log(timesViewed[0].viewed);
-        console.log(currentGiftSelection[0]);        
-
         let viewedIncrement = ( ( timesViewed[0].viewed ) + 1 );
         
         connection.query('UPDATE gifts SET viewed = ? WHERE task_id = ?', [ viewedIncrement, currentGiftSelection[0] ], function( error, viewResult ){
