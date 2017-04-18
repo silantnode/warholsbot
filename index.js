@@ -1270,7 +1270,8 @@ function DisplayGiftContent( userID, giftNumber, markup ){
         // Retrieve the corresponding item number from the random selection made when the user selected the /gift option.
         // We use minus 1 to offset the reading of the array.
         let contentSelector = currentGiftSelection[ ( giftNumber - 1 ) ];
-        let giftDescription = rows[ contentSelector ].description;
+        console.log(contentSelector);
+        let giftDescription = rows[ ( contentSelector - 1 ) ].description;
         
         currentGiftSelection = []; // Reset the gift selection.
 
