@@ -1173,7 +1173,8 @@ function GetGiftsContent( callback ){
     for ( let i = 0; i < ( currentGiftSelection.length ) ; i++ ) {
         
         giftListDisplay += '/' + ( i + 1 ) + ' '; // The number the user will select
-        giftSelector = currentGiftSelection[i]; // The number id from the random list
+        
+        // giftSelector = currentGiftSelection[i]; // The number id from the random list
 
         /*
         console.log(giftSelector);
@@ -1182,7 +1183,7 @@ function GetGiftsContent( callback ){
         console.log(rows[currentGiftSelection[i]].description);
         */
 
-        giftListDisplay += rows[ giftSelector ].description; // The description of the gift
+        giftListDisplay += rows[ currentGiftSelection[i] ].description; // The description of the gift
 
         giftListDisplay += '\n \n'; // Spaces for the string for the next line
         
