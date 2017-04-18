@@ -1172,11 +1172,13 @@ function GetGiftsContent( callback ){
 
     for ( let i = 0; i < ( currentGiftSelection.length ) ; i++ ) {
         
-        giftListDisplay += '/' + ( i + 1 ) + ' ';
-        giftSelector = currentGiftSelection[i];
-        actualGiftID = rows[ giftSelector ].task_id;
-        giftListDisplay += rows[ giftSelector ].description;
-        giftListDisplay += '\n \n';
+        giftListDisplay += '/' + ( i + 1 ) + ' '; // The number the user will select
+        giftSelector = currentGiftSelection[i]; // The number id from the random list
+        console.log(giftSelector);
+        // actualGiftID = rows[ giftSelector ].task_id;
+        // console.log(actualGiftID);
+        giftListDisplay += rows[ giftSelector ].description; // The description of the gift
+        giftListDisplay += '\n \n'; // Spaces for the string for the next line
         
     }
 
