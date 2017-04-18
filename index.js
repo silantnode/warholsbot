@@ -1141,9 +1141,11 @@ function GetCreativeContent( callback ){
 
 
 // Selects five random items from the gifts for users to choose from.
+// Function is called when the user selects '/gift' in '/get' mode.
 
 function GetGiftsContent( callback ){
 
+  // Retrieve the list of gifts available from the gifts table.
   connection.query('SELECT * FROM gifts', function( error, rows ){
 
       if ( error ) throw error;
@@ -1152,7 +1154,7 @@ function GetGiftsContent( callback ){
       let giftSelector;
       let actualGiftID;
 
-      // Randomly select 5 items from the table.
+      // Randomly select 5 items from the gifts table.
       while( currentGiftSelection.length < MAX_LIST_DISPLAY ){
         // Set up the numbers usig minus 1 so that the numbers will read the list properly.
         let randNum = ( Math.ceil( Math.random() * rows.length ) ); // Temporarily removed -1
@@ -1162,6 +1164,8 @@ function GetGiftsContent( callback ){
         currentGiftSelection[ currentGiftSelection.length ] = randNum;
 
       }
+
+      console.log(currentGiftSelection);
 
     // Prepare all of the tasks for display.
     // Keep track of which items were selected inside currentCreativeSelection as an array.
