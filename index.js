@@ -606,7 +606,7 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
   warholMode = 3;
 
   var flavorName = msg.text.substr(1);
-  return bot.sendMessage( msg.from.id, `How many shares of ` + flavorName + ` Warhols you want to buy? \n /five \n /ten \n /20 \n /50 \n /100`);
+  return bot.sendMessage( msg.from.id, `How many shares of ` + flavorName + ` Warhols you want to buy? \n /5 \n /10 \n /20 \n /50 \n /100`);
 
 });
 
