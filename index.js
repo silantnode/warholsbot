@@ -1021,7 +1021,7 @@ function ShareTheWealth( userID, fountainContribution ){
 
   let markup = bot.keyboard([
     [ BACK_BUTTON ], { resize: true }
-  );
+  ]);
 
   GetFountainBalance( function( error, fountainBalance ){
     
