@@ -544,9 +544,9 @@ GetBalance( msg.from.id, function( error, balance ){
 
 bot.on( SPEC_MARKET , msg => {
 
-betDate = new Date(); // this will be the time of their bet if they place one
-console.log('betDate - ', betDate);
-  // to do: check if user has enough balance, if not ask to choose other value
+    betDate = new Date(); // this will be the time of their bet if they place one
+    //console.log('betDate - ', betDate);
+    // to do: check if user has enough balance, if not ask to choose other value
 
 
     let markup = bot.keyboard([
