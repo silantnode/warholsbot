@@ -641,7 +641,7 @@ bot.on( '/five', msg => {  // amount chosen to invest
 
          }
 
-    let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
+    let newBet = { time: betDate, event: eventName, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
 
     connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
     
