@@ -1071,13 +1071,13 @@ function ShareTheWealth( userID, fountainContribution ){
 
           console.log('The fountain was activated');
 
-          // return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
+          // 
 
         });
         
       } else {
 
-        console.log('The fountain received a contribution');
+        return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
 
       }
 
