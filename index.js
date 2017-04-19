@@ -211,22 +211,22 @@ bot.on( '/help', msg => {
 
 bot.on( BALANCE_BUTTON, msg => {
   
-  // Display commands as handy buttons in the telegram interface.
-  let markup = bot.keyboard([
-    [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
-  );
+    // Display commands as handy buttons in the telegram interface.
+    let markup = bot.keyboard([
+        [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+    );
 
-// check if the fountain has been activated and if so display message (compare last activity with last fountain date)
-// check if market has closed (compare last activity with current date, check market closure inbetween)
- newMarketActivity( msg.from.id, function( error, callback ){
+    // check if the fountain has been activated and if so display message (compare last activity with last fountain date)
+    // check if market has closed (compare last activity with current date, check market closure inbetween)
+    newMarketActivity( msg.from.id, function( error, callback ){
 
- // console.log( callback );
+        // console.log( callback );
 
-});
+    });
 
 // if market closures happened, see if any bets were won. Display message of sorry or congratulation
 
-  GetBalance( msg.from.id, function( error, result ){
+    GetBalance( msg.from.id, function( error, result ){
 
     // Check what the balance is... 
     if ( result == 0 ) {
