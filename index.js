@@ -568,7 +568,7 @@ bot.on( SPEC_MARKET , msg => {
 
           marketClosureId = results[i].id;
 
-          console.log('marketClosureId - ', marketClosureId);
+          // console.log('marketClosureId - ', marketClosureId);
 
         var dateDifference = (results[i].close_time-currentDate);
         var timetoClosing = timeConversion(dateDifference);
