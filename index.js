@@ -500,7 +500,7 @@ bot.on( [ GIFT_RANDOM, GIFT_FOUNTAIN ], msg => {
 
   // Ask the user how many Warhols they want to spend.
   
-  if ( warholMode == 2 ) {
+  if ( warholMode == 2 ) { // Make sure they are in spend mode.
 
     if ( msg.text == '/random' ) {
 
@@ -686,7 +686,7 @@ bot.on( '/*' , msg => {
 
   // They selected creative economy.
   
-  if ( warholdMode == 1 ) { // Maks sure they are in get mode.
+  if ( warholMode == 1 ) { // Maks sure they are in get mode.
 
     if ( currentCreativeSelection.length == 5 ) {
 
