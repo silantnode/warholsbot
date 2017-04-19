@@ -528,11 +528,11 @@ bot.on( SPECULATIVE_ECON, msg => {
 
   );
 
-GetBalance( msg.from.id, function( error, balance ){
+  GetBalance( msg.from.id, function( error, balance ){
+    
+    return bot.sendMessage( msg.from.id, `Are you ready to take some risks and maybe get some rewards?. How would you like to invest your Warhols: \n /market exchange of flavors \n /ranking of cultural appreciation`, { markup } );
 
-      return bot.sendMessage( msg.from.id, `Are you ready to take some risks and maybe get some rewards?. How would you like to invest your Warhols: \n /market exchange of flavors \n /ranking of cultural appreciation`, { markup } );
-
-    });
+  });
   
 });
 
