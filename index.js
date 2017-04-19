@@ -172,8 +172,6 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
     
       if( error ) throw error;
     
-      // console.log('Last insert ID:', result.insertId);
-
     });
 
     return bot.sendMessage( msg.from.id, `Welcome ${ msg.from.first_name }! You're new here, right? That's ok! we created an account for you. Use the commands below to interact with your account.`, { markup } );
