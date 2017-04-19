@@ -739,7 +739,7 @@ bot.on( '/*' , msg => {
 
   }
 
-  /*
+  
   if ( marketFlavor != 0 ) {
 
     console.log('Lets now listen for speculation market activity.');
@@ -747,7 +747,6 @@ bot.on( '/*' , msg => {
     let warholAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
 
   }
-  */
 
 });
 
