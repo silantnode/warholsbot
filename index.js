@@ -1314,11 +1314,6 @@ function DateCompare( userID ){
 
           var sincelastDate = Math.abs(currentDate-previousDate);  // difference in milliseconds
 
-          // console.log(result);
-          // console.log('Last here: ' + result[0].date_last );
-          // console.log('Time now: ' + currentDate );
-          // console.log('Difference: ' + timeConversion(sincelastDate) );
-
     });
 
 }
