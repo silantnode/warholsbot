@@ -592,17 +592,17 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
   if ( msg.text == SPEC_FLAVOR_1 ) {
 
   marketFlavor = 1; 
-  console.log(marketFlavor);
+  // console.log(marketFlavor);
 
   } else if ( msg.text == SPEC_FLAVOR_2 ) {
 
   marketFlavor = 2; 
-  console.log(marketFlavor);
+  // console.log(marketFlavor);
 
   } else if ( msg.text == SPEC_FLAVOR_3 ) {
 
   marketFlavor = 3; 
-  console.log(marketFlavor);
+  // console.log(marketFlavor);
 
   }
 
