@@ -792,16 +792,6 @@ bot.on( '/*' , msg => {
 
     });
 
-  /*
-  if ( marketFlavor != 0 ) {
-
-    console.log('Lets now listen for speculation market activity.');
-
-    let warholAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
-
-  }
-  */
-
   }
 
 });
