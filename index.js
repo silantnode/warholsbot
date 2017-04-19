@@ -1069,13 +1069,15 @@ function ShareTheWealth( userID, fountainContribution ){
           warholMode = 0;
           giftSpendMode = 0;
 
+          console.log('The fountain was activated');
+
           return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
 
         });
         
       } else {
 
-        console.log();
+        console.log('The fountain received a contribution');
 
       }
 
