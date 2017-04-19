@@ -685,28 +685,30 @@ bot.on( '/*' , msg => {
   );
 
   // They selected creative economy.
-
-  if ( currentCreativeSelection.length == 5 ) {
-
-    // Extract the number value from the user input
-    // Make sure that what the text is only a number.
-    let taskNumber = Number( ( (msg.text).slice( 1, 2 ) ) );
-
-    DisplayCreativeContent( msg.from.id, taskNumber, markup );
-
-  }
   
-  // They selected 'gift' economy.
-  
-  if ( currentGiftSelection.length == 5 ) {
+  if ( warholdMode == 1 ) { // Maks sure they are in get mode.
 
-    let taskNumber = Number( ( ( msg.text ).slice( 1, 2 ) ) );
+    if ( currentCreativeSelection.length == 5 ) {
 
-    DisplayGiftContent( msg.from.id, taskNumber, markup );
+        // Extract the number value from the user input
+        // Make sure that what the text is only a number.
+        let taskNumber = Number( ( (msg.text).slice( 1, 2 ) ) );
+
+        DisplayCreativeContent( msg.from.id, taskNumber, markup );
+
+    }
     
-  }
+    // They selected 'gift' economy.
+    
+    if ( currentGiftSelection.length == 5 ) {
 
-  if ( warholMode == 2 ) { // Make sure we are in spend mode.
+        let taskNumber = Number( ( ( msg.text ).slice( 1, 2 ) ) );
+
+        DisplayGiftContent( msg.from.id, taskNumber, markup );
+        
+    }
+
+  } else if ( warholMode == 2 ) { // Make sure we are in spend mode.
     
     // Read from the second character in the message string.
   
