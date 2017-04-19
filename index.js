@@ -651,7 +651,7 @@ bot.on( '/five', msg => {  // amount chosen to invest
     
       if( error ) throw error;
     
-     console.log('New bet from:', betOwner);
+     // console.log('New bet from:', betOwner);
 
     });
 
