@@ -680,9 +680,9 @@ bot.on( '/five', msg => {  // amount chosen to invest
 
 bot.on( '/*' , msg => {
   
-  let markup = bot.keyboard([
-    [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
-  );
+    let markup = bot.keyboard([
+        [ BACK_BUTTON ]], { resize: true }
+    );
 
   // They selected creative economy.
   
