@@ -1023,8 +1023,6 @@ function ShareTheWealth( userID, fountainContribution ){
     [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
   );
 
-  console.log(fountainContribution);
-
   GetFountainBalance( function( error, fountainBalance ){
     
     // Add the new contribution of warhols to the current reservoir balance including the multiplier. 
