@@ -107,7 +107,8 @@ var contentSubmission = [];
 // Set by /get, /spend. 
 // 1 is get.
 // 2 is spend.
-// This allows me to use the same command set of '/gift', '/creative' and '/speculative' twice by simply checking the mode whenever these commands are called. Probably not the best approach but it was the first solution I came up with so I decided to run with it and deal with the consequences later.
+// 3 is speculation that is both part of get and spend.
+// This allows me to use the same command set of '/gift', '/creative' and '/speculative' twice by simply checking the mode whenever these commands are called. Especially critical for control of flow when the user inputs commands with numbers! Probably not the best approach but it was the first solution I came up with so I decided to run with it and deal with the consequences later.
 
 var warholMode = 0;
 
@@ -733,7 +734,7 @@ bot.on( '/*' , msg => {
 
     });
 
-  }
+  } else if ( warholMode == 3 ){ // Make sure we are in speculation mode.
 
   /*
   if ( marketFlavor != 0 ) {
@@ -744,6 +745,8 @@ bot.on( '/*' , msg => {
 
   }
   */
+
+  }
 
 });
 
