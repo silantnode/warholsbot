@@ -629,7 +629,7 @@ bot.on( '/five', msg => {  // amount chosen to invest
         
     } else {   // Continue with the investment.
         
-     console.log('they have enough Warhols - ', result);
+     // console.log('they have enough Warhols - ', result);
 
 // write to market bets database: user id, user name, flavor, amount, time bet placed
 
