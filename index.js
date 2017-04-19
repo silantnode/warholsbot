@@ -220,7 +220,7 @@ bot.on( BALANCE_BUTTON, msg => {
 // check if market has closed (compare last activity with current date, check market closure inbetween)
  newMarketActivity( msg.from.id, function( error, callback ){
 
- console.log( callback );
+ // console.log( callback );
 
 });
 
@@ -1262,14 +1262,13 @@ function DisplayGiftContent( userID, giftNumber, markup ){
         // Retrieve the corresponding item number from the random selection made when the user selected the /gift option.
         // We use minus 1 to offset the reading of the array.
         let contentSelector = currentGiftSelection[ ( giftNumber - 1 ) ];
-        console.log(contentSelector);
+        
         let giftDescription = rows[ ( contentSelector - 1 ) ].description;
         
         currentGiftSelection = []; // Reset the gift selection.
 
         currentGiftSelection[0] = contentSelector; // Remember the selection of the user.
         
-        console.log( currentGiftSelection[0] );
         // Need to add an extra step to prompt the user with a 'yes' or 'no' answer if they will commit to the gift.
 
         return bot.sendMessage( userID, `Will you ${ giftDescription }? \n /yes or /no ?`, { markup });
