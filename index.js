@@ -107,7 +107,8 @@ var contentSubmission = [];
 // Set by /get, /spend. 
 // 1 is get.
 // 2 is spend.
-// This allows me to use the same command set of '/gift', '/creative' and '/speculative' twice by simply checking the mode whenever these commands are called. Probably not the best approach but it was the first solution I came up with so I decided to run with it and deal with the consequences later.
+// 3 is speculation that is both part of get and spend.
+// This allows me to use the same command set of '/gift', '/creative' and '/speculative' twice by simply checking the mode whenever these commands are called. Especially critical for control of flow when the user inputs commands with numbers! Probably not the best approach but it was the first solution I came up with so I decided to run with it and deal with the consequences later.
 
 var warholMode = 0;
 
@@ -528,11 +529,11 @@ bot.on( SPECULATIVE_ECON, msg => {
 
   );
 
-GetBalance( msg.from.id, function( error, balance ){
+  GetBalance( msg.from.id, function( error, balance ){
+    
+    return bot.sendMessage( msg.from.id, `Are you ready to take some risks and maybe get some rewards?. How would you like to invest your Warhols: \n /market exchange of flavors \n /ranking of cultural appreciation`, { markup } );
 
-      return bot.sendMessage( msg.from.id, `Are you ready to take some risks and maybe get some rewards?. How would you like to invest your Warhols: \n /market exchange of flavors \n /ranking of cultural appreciation`, { markup } );
-
-    });
+  });
   
 });
 
@@ -602,10 +603,12 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
   }
 
-    var flavorName = msg.text.substr(1);
-      return bot.sendMessage( msg.from.id, `How many shares of ` + flavorName + ` Warhols you want to buy? \n /five \n /ten \n /20 \n /50 \n /100`);
+  warholMode = 3;
 
-  });
+  var flavorName = msg.text.substr(1);
+  return bot.sendMessage( msg.from.id, `How many shares of ` + flavorName + ` Warhols you want to buy? \n /5 \n /10 \n /20 \n /50 \n /100`);
+
+});
 
 
 
@@ -613,67 +616,65 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
 bot.on( '/five', msg => {  // amount chosen to invest
 
-    var betAmount = 5;
-// check if user has enough balance, if not ask to choose other value
+  var betAmount = 5;
+  // check if user has enough balance, if not ask to choose other value
 
   GetBalance( msg.from.id, function( error, result ){
 
-    // Check what the balance is... 
+  // Check what the balance is... 
     if ( result < betAmount ) {
 
         return bot.sendMessage( msg.from.id, `You currently have only ${ result } Warhols. Please start with a lower investment.`, { markup: 'hide' });
         
     } else {   // Continue with the investment.
         
-     // console.log('they have enough Warhols - ', result);
+    // console.log('they have enough Warhols - ', result);
 
-// write to market bets database: user id, user name, flavor, amount, time bet placed
+    // write to market bets database: user id, user name, flavor, amount, time bet placed
 
     var currentDate = new Date();
 
       if (typeof msg.from.last_name != "undefined"){ // if the user does not have a last name
 
-           var betOwner = (msg.from.first_name +' '+ msg.from.last_name);
+        var betOwner = (msg.from.first_name +' '+ msg.from.last_name);
 
-         } else {  
+      } else {  
 
-           var betOwner = (msg.from.first_name);
+        var betOwner = (msg.from.first_name);
 
-         }
+      }
+
 
     let newBet = { time: betDate, event: eventName, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
 
-    connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
+      connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
     
-      if( error ) throw error;
+        if( error ) throw error;
     
-     
-    });
+      });
 
-// deduct warhols from users account
+      // deduct warhols from users account
 
-  SubtractWarhols( msg.from.id, betAmount );
-  setLastDate( msg.from.id ); // set last interaction date
+      SubtractWarhols( msg.from.id, betAmount );
+      setLastDate( msg.from.id ); // set last interaction date
 
-// send message with thanks, display home menu
+      // send message with thanks, display home menu
 
-   let markup = bot.keyboard([
-       [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
-   );
+      let markup = bot.keyboard([
+        [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+      );
 
-   return bot.sendMessage( msg.from.id, `Thanks for your investment! You will get a notification when the market closes. Good luck!`, { markup } );
+      return bot.sendMessage( msg.from.id, `Thanks for your investment! You will get a notification when the market closes. Good luck!`, { markup } );
 
-      } // end if balance enough
+    } // end if balance enough
 
   });
 
- });
+});
 
 
-// Checks if a user has selected content from a provided random list. 
-// '/*' listens for any activity entered by the user and then filters out the resulting strings of
-// text to see if the second character is a number between 1 and 5.
-
+// '/*' listens for any activity entered by the user and then filters out the resulting strings. Checks the mode that
+// the user is in to determine how to react to the numbers we are listening for.
 
 bot.on( '/*' , msg => {
   
@@ -734,17 +735,65 @@ bot.on( '/*' , msg => {
 
     });
 
+  } else if ( warholMode == 3 ){ // Make sure we are in speculation mode.
+
+    let betAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
+
+    // check if user has enough balance, if not ask to choose other value
+
+    GetBalance( msg.from.id, function( error, result ){
+
+      // Check what the balance is... 
+      if ( result < betAmount ) {
+
+        return bot.sendMessage( msg.from.id, `You currently have only ${ result } Warhols. Please start with a lower investment.`, { markup: 'hide' });
+        
+      } else {   // Continue with the investment.
+        
+      // console.log('they have enough Warhols - ', result);
+
+      // write to market bets database: user id, user name, flavor, amount, time bet placed
+
+        var currentDate = new Date();
+
+        if (typeof msg.from.last_name != "undefined"){ // if the user does not have a last name
+
+          var betOwner = (msg.from.first_name +' '+ msg.from.last_name);
+
+        } else {  
+
+          var betOwner = (msg.from.first_name);
+
+        }
+
+        let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
+
+        connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
+    
+          if( error ) throw error;
+    
+        });
+
+        // deduct warhols from users account
+
+        SubtractWarhols( msg.from.id, betAmount );
+        setLastDate( msg.from.id ); // set last interaction date
+
+        // send message with thanks, display home menu
+
+        let markup = bot.keyboard([
+          [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+        );
+
+        warholMode = 0;
+
+        return bot.sendMessage( msg.from.id, `Thanks for your investment! You will get a notification when the market closes. Good luck!`, { markup } );
+
+      } // end if balance enough
+
+    });
+
   }
-
-  /*
-  if ( marketFlavor != 0 ) {
-
-    console.log('Lets now listen for speculation market activity.');
-
-    let warholAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
-
-  }
-  */
 
 });
 
