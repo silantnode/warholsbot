@@ -613,61 +613,60 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
 bot.on( '/five', msg => {  // amount chosen to invest
 
-    var betAmount = 5;
-// check if user has enough balance, if not ask to choose other value
+  var betAmount = 5;
+  // check if user has enough balance, if not ask to choose other value
 
   GetBalance( msg.from.id, function( error, result ){
 
-    // Check what the balance is... 
+  // Check what the balance is... 
     if ( result < betAmount ) {
 
         return bot.sendMessage( msg.from.id, `You currently have only ${ result } Warhols. Please start with a lower investment.`, { markup: 'hide' });
         
     } else {   // Continue with the investment.
         
-     // console.log('they have enough Warhols - ', result);
+    // console.log('they have enough Warhols - ', result);
 
-// write to market bets database: user id, user name, flavor, amount, time bet placed
+    // write to market bets database: user id, user name, flavor, amount, time bet placed
 
     var currentDate = new Date();
 
       if (typeof msg.from.last_name != "undefined"){ // if the user does not have a last name
 
-           var betOwner = (msg.from.first_name +' '+ msg.from.last_name);
+        var betOwner = (msg.from.first_name +' '+ msg.from.last_name);
 
-         } else {  
+      } else {  
 
-           var betOwner = (msg.from.first_name);
+        var betOwner = (msg.from.first_name);
 
-         }
+      }
 
-    let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
+      let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
 
-    connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
+      connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
     
-      if( error ) throw error;
+        if( error ) throw error;
     
-     
-    });
+      });
 
-// deduct warhols from users account
+      // deduct warhols from users account
 
-  SubtractWarhols( msg.from.id, betAmount );
-  setLastDate( msg.from.id ); // set last interaction date
+      SubtractWarhols( msg.from.id, betAmount );
+      setLastDate( msg.from.id ); // set last interaction date
 
-// send message with thanks, display home menu
+      // send message with thanks, display home menu
 
-   let markup = bot.keyboard([
-       [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
-   );
+      let markup = bot.keyboard([
+        [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+      );
 
-   return bot.sendMessage( msg.from.id, `Thanks for your investment! You will get a notification when the market closes. Good luck!`, { markup } );
+      return bot.sendMessage( msg.from.id, `Thanks for your investment! You will get a notification when the market closes. Good luck!`, { markup } );
 
-      } // end if balance enough
+    } // end if balance enough
 
   });
 
- });
+});
 
 
 // Checks if a user has selected content from a provided random list. 
