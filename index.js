@@ -649,8 +649,7 @@ bot.on( '/five', msg => {  // amount chosen to invest
     
       if( error ) throw error;
     
-     // console.log('New bet from:', betOwner);
-
+     
     });
 
 // deduct warhols from users account
