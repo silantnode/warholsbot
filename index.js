@@ -1020,7 +1020,7 @@ function GiveWarholsRandom( userID, warholAmount, markup ){
 function ShareTheWealth( userID, fountainContribution ){
 
   let markup = bot.keyboard([
-    [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+    [ BACK_BUTTON ], { resize: true }
   );
 
   GetFountainBalance( function( error, fountainBalance ){
@@ -1073,6 +1073,10 @@ function ShareTheWealth( userID, fountainContribution ){
 
         });
         
+      } else {
+
+        console.log();
+
       }
 
     });
