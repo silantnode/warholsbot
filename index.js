@@ -188,8 +188,6 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
 bot.on( '/test', msg => {
 
-
-
 });
 
 
