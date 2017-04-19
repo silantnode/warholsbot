@@ -1069,9 +1069,7 @@ function ShareTheWealth( userID, fountainContribution ){
           warholMode = 0;
           giftSpendMode = 0;
 
-          console.log('The fountain was activated');
-
-          // 
+          return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive 5 Warhols :D`, { markup });
 
         });
         
