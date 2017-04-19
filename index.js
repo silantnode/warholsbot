@@ -603,6 +603,8 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
   }
 
+  warholMode = 3;
+
   var flavorName = msg.text.substr(1);
   return bot.sendMessage( msg.from.id, `How many shares of ` + flavorName + ` Warhols you want to buy? \n /five \n /ten \n /20 \n /50 \n /100`);
 
@@ -735,7 +737,7 @@ bot.on( '/*' , msg => {
   } else if ( warholMode == 3 ){ // Make sure we are in speculation mode.
 
     let betAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
-    
+
     // check if user has enough balance, if not ask to choose other value
 
     GetBalance( msg.from.id, function( error, result ){
@@ -781,6 +783,8 @@ bot.on( '/*' , msg => {
         let markup = bot.keyboard([
           [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
         );
+
+        warholMode = 0;
 
         return bot.sendMessage( msg.from.id, `Thanks for your investment! You will get a notification when the market closes. Good luck!`, { markup } );
 
