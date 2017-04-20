@@ -201,6 +201,9 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
 bot.on( '/test', msg => {
 
+  warholMode = msg.from.id;
+  console.log(warholMode);
+  
 });
 
 
