@@ -1043,10 +1043,16 @@ function GetFountainBalance( callback ){
 
 function AddToFountain( contribution ){
 
-  connection.query('UPDATE fountain SET reservoir = ? WHERE id =?', [ contribution, 1 ], function( error, current ){
+  pool.getConnection(function(err, connection) {
 
-    if ( error ) throw error;
+    connection.query('UPDATE fountain SET reservoir = ? WHERE id =?', [ contribution, 1 ], function( error, current ){
 
+      connection.release();
+
+      if ( error ) throw error;
+
+    });
+  
   });
 
 }
