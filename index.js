@@ -18,7 +18,7 @@ const pool = mysql.createPool({
 
 });
 
-pool.connect( function (error){
+pool.getConnection( function (error){
   
   if( error ) throw error;
 
