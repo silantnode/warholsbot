@@ -1060,43 +1060,49 @@ function AddToFountain( contribution ){
 
 function GiveWarholsRandom( userID, warholAmount, markup ){
 
-  connection.query( 'SELECT * FROM accounts', function( error, users ){
+    pool.getConnection(function(err, connection) {
 
-    if( error ) throw error;
+      connection.query( 'SELECT * FROM accounts', function( error, users ){
 
-    // Choose one user at random.
+        connection.release();
 
-    // But first we have to make sure that the current user is not
-    // accidentally giving themselves Warhols.
+        if( error ) throw error;
 
-    let theOthers = [];
+        // Choose one user at random.
 
-    for( let i = 0; i < users.length; i++ ){
+        // But first we have to make sure that the current user is not
+        // accidentally giving themselves Warhols.
 
-      if ( users[i].owner != userID ){
+        let theOthers = [];
 
-        theOthers.push(users[i].owner);
+        for( let i = 0; i < users.length; i++ ){
 
-      }
+          if ( users[i].owner != userID ){
 
-    }
+            theOthers.push(users[i].owner);
 
-    var randomUser = ( Math.ceil( Math.random() * theOthers.length ) - 1 );
+          }
 
-    GetBalance( users[ randomUser ].owner, function( error, theirBalance ){
+        }
 
-      let theirNewBalance = ( theirBalance + warholAmount );
+        var randomUser = ( Math.ceil( Math.random() * theOthers.length ) - 1 );
 
-      AddWarhols( users[ randomUser ].owner, theirNewBalance );
+        GetBalance( users[ randomUser ].owner, function( error, theirBalance ){
 
-      SubtractWarhols( userID, warholAmount );
+          let theirNewBalance = ( theirBalance + warholAmount );
 
-    });        
+          AddWarhols( users[ randomUser ].owner, theirNewBalance );
 
-    warholMode = 0;
-    giftSpendMode = 0;
+          SubtractWarhols( userID, warholAmount );
 
-    return bot.sendMessage( userID, `Thank you for your gift! Your Warhols have been anonymously sent to a random person.`, { markup });
+        });        
+
+        warholMode = 0;
+        giftSpendMode = 0;
+
+        return bot.sendMessage( userID, `Thank you for your gift! Your Warhols have been anonymously sent to a random person.`, { markup });
+
+    });
 
   });
 
