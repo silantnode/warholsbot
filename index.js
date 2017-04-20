@@ -568,34 +568,38 @@ bot.on( SPEC_MARKET , msg => {
 
     );
 
+    pool.getConnection(function(err, connection) {
       // new connection to retrieve next market closure dates
       connection.query('SELECT close_time, id FROM market WHERE event = ?', [eventName], function (error, results, fields) {
 
         if (error) throw error;
 
-      var currentDate = new Date();
+        var currentDate = new Date();
 
-      var i = 0;
+        var i = 0;
 
-      for (i = 0; i < results.length; i++) {
+        for (i = 0; i < results.length; i++) {
 
           marketClosureId = results[i].id;
 
           // console.log('marketClosureId - ', marketClosureId);
 
-        var dateDifference = (results[i].close_time-currentDate);
-        var timetoClosing = timeConversion(dateDifference);
+          var dateDifference = (results[i].close_time-currentDate);
+          var timetoClosing = timeConversion(dateDifference);
 
-             if (dateDifference > 600000) { break; } // choose the first date at least 10 minutes in the future
+          if (dateDifference > 600000) { break; } // choose the first date at least 10 minutes in the future
        
-      }
+        }
 
-          return bot.sendMessage( msg.from.id, `The Warhols exchange market will close in ` + timetoClosing + `. In which flavor would you like to invest? \n `+ SPEC_FLAVOR_1 +` Warhols \n `+ SPEC_FLAVOR_2 +` Warhols \n `+ SPEC_FLAVOR_3 +` Warhols`, { markup } );
-        });
+        return bot.sendMessage( msg.from.id, `The Warhols exchange market will close in ` + timetoClosing + `. In which flavor would you like to invest? \n `+ SPEC_FLAVOR_1 +` Warhols \n `+ SPEC_FLAVOR_2 +` Warhols \n `+ SPEC_FLAVOR_3 +` Warhols`, { markup } );
     
-      // end retrieving market closure dates
+    });
+    
+    // end retrieving market closure dates
 
- });
+  });
+
+});
 
 
 // assign marketFlavor variable according to the choice of flavor by the user
