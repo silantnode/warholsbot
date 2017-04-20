@@ -1324,6 +1324,8 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
 
     connection.query('SELECT * FROM tasks', function( error, rows ){
 
+      connection.release();
+
       if ( error ) throw error;
           
       // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
