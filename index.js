@@ -139,6 +139,8 @@ var betDate = 0;
 
 var marketClosureId = 0;
 
+var allUsers = [];
+
 // The user starts the bot with the /start command.
 
 bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
@@ -164,10 +166,16 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
       if( error ) throw error;
 
+      for( let j = 0; j < rows.length; j++ ){
+
+        allUsers[j] = rows[j].owner;
+
+      }
+
       for( let i = 0; i < rows.length; i++ ){
 
         if( rows[i].owner == msg.from.id ){
-  
+
           // Send them a message welcoming them back. 
           return bot.sendMessage( msg.from.id, `Welcome back ${ msg.from.first_name }!`, { markup } );
           
@@ -202,7 +210,7 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 bot.on( '/test', msg => {
 
   warholMode = msg.from.id;
-  console.log(warholMode);
+  console.log(allUsers);
   
 });
 
