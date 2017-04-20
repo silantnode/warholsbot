@@ -1159,6 +1159,8 @@ function SubtractFromFountain( amount, members, currentBalance ){
   // Multiply the amount of members with the amount each member received.
   let resetBalance = ( amount * members );
 
+  makeFountainHistory( amount, resetBalance );
+
   // Subtract the total amount awarded from the reservoir account.
   resetBalance = ( currentBalance - resetBalance );
 
@@ -1168,8 +1170,6 @@ function SubtractFromFountain( amount, members, currentBalance ){
     if ( error ) throw error;
 
   });
-
-  makeFountainHistory( amount, resetBalance );
 
 }
 
