@@ -1115,11 +1115,15 @@ function ShareTheWealth( userID, fountainContribution ){
           warholMode = 0;
           giftSpendMode = 0;
 
+          cossole.log('Fountain activated');
+
           return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive 5 Warhols :D`, { markup });
 
         });
         
       } else {
+
+        cossole.log('Fountain received new funds');
 
         return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
 
