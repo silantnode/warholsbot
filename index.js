@@ -1203,6 +1203,10 @@ function GetCreativeContent( callback ){
 
     connection.query('SELECT * FROM tasks', function( error, rows ){
 
+      connection.release();
+
+      if ( error ) throw error;
+
       let taskListDisplay = 'Here is some awesome content created by the Warhols users. Choose one to view to get a reward of 2 Warhols: \n \n';
       let contentSelector;
       let actualTaskID;
@@ -1230,10 +1234,6 @@ function GetCreativeContent( callback ){
           taskListDisplay += '\n \n';
           
       } 
-
-      connection.release();
-
-      if ( error ) throw error;
 
       return callback( error, taskListDisplay );
 
