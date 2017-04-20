@@ -10,7 +10,7 @@ var requestify = require('requestify');
 // Create the connection to the database.
 const mysql = require('mysql');
 
-const connection = mysql.createConnection({
+const pool = mysql.createPool({
   host     : custom_data[1], // Host address of the database server.
   user     : custom_data[2], // Username for the coinspiration account.
   password : custom_data[3], // Password for the coinspiration account.
@@ -18,7 +18,7 @@ const connection = mysql.createConnection({
 
 });
 
-connection.connect( function (error){
+pool.getConnection( function (error){
   
   if( error ) throw error;
 
@@ -32,6 +32,16 @@ connection.connect( function (error){
   console.log('Connection established');
 
 });
+
+/*
+var mysql = require('mysql');
+var pool  = mysql.createPool({
+  host     : 'example.org',
+  user     : 'bob',
+  password : 'secret',
+  database : 'my_db'
+});
+*/
 
 // Initialize telebot
 
