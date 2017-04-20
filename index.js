@@ -956,9 +956,15 @@ bot.on('/date', msg => {
 
 function AddWarhols( userID, addedBalance ){
     
+  pool.getConnection(function(err, connection) {
+
     connection.query( 'UPDATE accounts SET balance = ? WHERE owner = ?', [ addedBalance, userID ], function( error, current ){
-                
-    if ( error ) throw error;
+
+      connection.release();
+
+      if ( error ) throw error;
+
+    });
 
   });
 
@@ -992,13 +998,19 @@ function SubtractWarhols( userID, subtractionAmount ){
 
 function GetBalance( msgID, callback ){
 
+  pool.getConnection(function(err, connection) {
+
     connection.query('SELECT balance FROM accounts WHERE owner =' + msgID , function( error, result ){
       
+        connection.release();
+        
         if ( error ) return error;
 
         return callback( error, result[0].balance );
         
     });
+
+  });
 
 }
 
@@ -1192,10 +1204,6 @@ function GetCreativeContent( callback ){
 
     connection.query('SELECT * FROM tasks', function( error, rows ){
 
-      connection.release();
-
-      if ( error ) throw error;
-
       let taskListDisplay = 'Here is some awesome content created by the Warhols users. Choose one to view to get a reward of 2 Warhols: \n \n';
       let contentSelector;
       let actualTaskID;
@@ -1223,6 +1231,10 @@ function GetCreativeContent( callback ){
           taskListDisplay += '\n \n';
           
       } 
+
+      connection.release();
+
+      if ( error ) throw error;
 
       return callback( error, taskListDisplay );
 
@@ -1296,36 +1308,41 @@ function AddCreativeContent( userID, userName, newContent ){
 
 function DisplayCreativeContent( userID, taskNumber, markup ){
 
-  // Read the creative table so we can extract the content associated with
+    // Read the creative table so we can extract the content associated with
     // the content description chosen by the user.
-    connection.query('SELECT * FROM tasks', function( error, rows ){
 
-      if ( error ) throw error;
-        
-      // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
-      if ( taskNumber >= 1 && taskNumber <= 5 ) {
-        
-        // Retrieve the corresponding item number from the random selection made when the user selected the /creative option.
-        // We use minus 1 to offset the reading of the array.
-        let contentSelector = currentCreativeSelection[ ( taskNumber - 1 ) ];
+    pool.getConnection( function( err, connection ) {
 
-        let taskID = rows[ contentSelector ].task_id;
-        let taskURL = rows[ contentSelector ].url; // Content address.
-        let warholValue = rows[ contentSelector ].price; // Content price, as in how many Warhols are earned by watching this media.
-        
-        let viewedIncrement = ( ( rows[ contentSelector ].viewed ) + 1 ); // Update how many times the chosen content has been viewed.
+      connection.query('SELECT * FROM tasks', function( error, rows ){
 
-        connection.query('UPDATE tasks SET viewed = ? WHERE task_id = ?', [ viewedIncrement , taskID ] , function( error, viewResult ){
+        if ( error ) throw error;
+          
+        // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
+        if ( taskNumber >= 1 && taskNumber <= 5 ) {
+          
+          // Retrieve the corresponding item number from the random selection made when the user selected the /creative option.
+          // We use minus 1 to offset the reading of the array.
+          let contentSelector = currentCreativeSelection[ ( taskNumber - 1 ) ];
+
+          let taskID = rows[ contentSelector ].task_id;
+          let taskURL = rows[ contentSelector ].url; // Content address.
+          let warholValue = rows[ contentSelector ].price; // Content price, as in how many Warhols are earned by watching this media.
+          
+          let viewedIncrement = ( ( rows[ contentSelector ].viewed ) + 1 ); // Update how many times the chosen content has been viewed.
+
+          connection.query('UPDATE tasks SET viewed = ? WHERE task_id = ?', [ viewedIncrement , taskID ] , function( error, viewResult ){
+          
+            connection.release();
 
           if (error) throw error;
-        
+          
         });
 
         // Reset the random list to nothing so that if someone decides to use a command with a number nothing will happen.
         currentCreativeSelection = [];
 
         GetBalance( userID, function(error, result){ // Function talks to database and requires a callback.
-          
+            
           let newBalance = ( warholValue + result );
 
           AddWarhols( userID, newBalance ); // Function talks to database but does not require a callback.
@@ -1337,6 +1354,8 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
       }
 
     });
+    
+  });
 
 }
 
