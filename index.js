@@ -1134,7 +1134,7 @@ function ShareTheWealth( userID, fountainContribution ){
 
           });
 
-          return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
+          return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive 5 Warhols :D`, { markup });
 
         });
         
@@ -1143,7 +1143,7 @@ function ShareTheWealth( userID, fountainContribution ){
 
         console.log('Fountain received new funds');
 
-        return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive 5 Warhols :D`, { markup });
+        return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
 
       }
 
