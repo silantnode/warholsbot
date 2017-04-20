@@ -33,15 +33,6 @@ pool.getConnection( function (error){
 
 });
 
-/*
-var mysql = require('mysql');
-var pool  = mysql.createPool({
-  host     : 'example.org',
-  user     : 'bob',
-  password : 'secret',
-  database : 'my_db'
-});
-*/
 
 // Initialize telebot
 
