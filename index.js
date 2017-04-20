@@ -1339,12 +1339,16 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
           
         let viewedIncrement = ( ( rows[ contentSelector ].viewed ) + 1 ); // Update how many times the chosen content has been viewed.
 
-        connection.query('UPDATE tasks SET viewed = ? WHERE task_id = ?', [ viewedIncrement , taskID ] , function( error, viewResult ){
-          
-          connection.release();
+        pool.getConnection( function( err, connection ) {
 
-          if (error) throw error;
-          
+          connection.query('UPDATE tasks SET viewed = ? WHERE task_id = ?', [ viewedIncrement , taskID ] , function( error, viewResult ){
+            
+            connection.release();
+
+            if (error) throw error;
+            
+          });
+
         });
 
         // Reset the random list to nothing so that if someone decides to use a command with a number nothing will happen.
