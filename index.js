@@ -156,6 +156,8 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
     connection.query( 'SELECT * FROM accounts', function( error, rows ){
 
+      connection.release();
+
       if( error ) throw error;
 
       for( let i = 0; i < rows.length; i++ ){
