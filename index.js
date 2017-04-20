@@ -305,7 +305,7 @@ bot.on( SPEND_BUTTON, msg => {
 
 bot.on( CREATIVE_ECON, msg => {
 
-  if ( warholMode == 1 ){
+  if ( warholMode == 1 ){ // We are in get mode...
 
     let markup = bot.keyboard([
       [ BACK_BUTTON ]], { resize: true }
@@ -318,7 +318,7 @@ bot.on( CREATIVE_ECON, msg => {
     
     });
 
-  } else if ( warholMode == 2 ){
+  } else if ( warholMode == 2 ){ // We are in spend mode...
 
     GetBalance( msg.from.id, function( error, balance ){
 
