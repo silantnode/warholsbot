@@ -1023,13 +1023,19 @@ function GetBalance( msgID, callback ){
 
 function GetFountainBalance( callback ){
 
-  connection.query('SELECT reservoir FROM fountain WHERE id =' + 1, function( error, result ){
+  pool.getConnection(function(err, connection) {
 
-        if ( error ) return error;
+    connection.query('SELECT reservoir FROM fountain WHERE id =' + 1, function( error, result ){
+      
+      connection.release();
 
-        return callback( error, result[0].reservoir );
+      if ( error ) return error;
+
+      return callback( error, result[0].reservoir );
         
     });
+
+  });
 
 }
 
