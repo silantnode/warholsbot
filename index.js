@@ -980,12 +980,18 @@ function SubtractWarhols( userID, subtractionAmount ){
 
       let newBalance = ( result - subtractionAmount );
 
-      connection.query( 'UPDATE accounts SET balance = ? WHERE owner =?', [ newBalance, userID ], function( error, current ){
+      pool.getConnection(function(err, connection) {
 
-      if ( error ) throw error;
+        connection.query( 'UPDATE accounts SET balance = ? WHERE owner =?', [ newBalance, userID ], function( error, current ){
 
-      // console.log('Changed ' + current.changedRows + ' rows');
+        connection.release();
+        
+        if ( error ) throw error;
 
+        // console.log('Changed ' + current.changedRows + ' rows');
+
+      });
+    
     });
 
   });
