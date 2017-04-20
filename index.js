@@ -1127,52 +1127,56 @@ function ShareTheWealth( userID, fountainContribution ){
     // Subtract the contribution of the warhols from the user account.
     SubtractWarhols( userID, fountainContribution );
 
+    pool.getConnection(function(err, connection) {
+
     // Find out how many warhols users there are.
-    connection.query( 'SELECT * FROM accounts', function( error, howmanyusers ){
+      connection.query( 'SELECT * FROM accounts', function( error, howmanyusers ){
 
-      if( error ) throw error;
+        if( error ) throw error;
 
-      // Check if the reservoir is full enough for a distrobution of warhols to all the users.
-      if ( newReservoirBalance >= ( ( MIN_DISTRO * howmanyusers.length ) ) ){
+        // Check if the reservoir is full enough for a distrobution of warhols to all the users.
+        if ( newReservoirBalance >= ( ( MIN_DISTRO * howmanyusers.length ) ) ){
 
-        connection.query( 'SELECT * FROM accounts', function( error, members ){
+          connection.query( 'SELECT * FROM accounts', function( error, members ){
 
-          if( error ) throw error;
+            connection.release();
 
-          // Round down the number resulting from dividing the new reservoir balance with the number of warhols users.
-          let distroAmount =  Math.floor( ( newReservoirBalance / members.length ) ); 
+            if( error ) throw error;
 
-          // Distribute the awarded warhols to all the users.
-          for (let i = 0; i < members.length; i++ ){
+            // Round down the number resulting from dividing the new reservoir balance with the number of warhols users.
+            let distroAmount =  Math.floor( ( newReservoirBalance / members.length ) ); 
 
-            GetBalance( members[i].owner, function( error, currentBalance ){
+            // Distribute the awarded warhols to all the users.
+            for (let i = 0; i < members.length; i++ ){
 
-              let newBalance = ( distroAmount + currentBalance );
+              GetBalance( members[i].owner, function( error, currentBalance ){
 
-              AddWarhols( members[i].owner, newBalance );
+                let newBalance = ( distroAmount + currentBalance );
 
-              newBalance = 0;
+                AddWarhols( members[i].owner, newBalance );
 
-            });
+                newBalance = 0;
 
-          }
+              });
 
-          SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
+            }
 
-          warholMode = 0;
-          giftSpendMode = 0;
+            SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
 
-          console.log('Fountain activated');
-          
-          // Requestify code here
-          
-          requestify.post('https://maker.ifttt.com/trigger/new_fountain/with/key/' + custom_data[5] , { // IFTTT secret key.
+            warholMode = 0;
+            giftSpendMode = 0;
+
+            console.log('Fountain activated');
+            
+            // Requestify code here
+            
+            requestify.post('https://maker.ifttt.com/trigger/new_fountain/with/key/' + custom_data[5] , { // IFTTT secret key.
 
             value1: distroAmount
 
-          })
+            })
 
-          .then( function( response ) {
+            .then( function( response ) {
 
             // Get the response and write to console
             response.body;
@@ -1183,8 +1187,8 @@ function ShareTheWealth( userID, fountainContribution ){
           return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive ${ distroAmount } Warhols :D`, { markup });
 
         });
-        
-        
+          
+          
       } else {
 
         console.log('Fountain received new funds');
