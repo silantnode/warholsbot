@@ -1134,7 +1134,7 @@ function ShareTheWealth( userID, fountainContribution ){
 
           });
 
-          return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive 5 Warhols :D`, { markup });
+          return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive ${ distroAmount } Warhols :D`, { markup });
 
         });
         
