@@ -1461,13 +1461,13 @@ function newMarketActivity( userID, callback ){
 
 }
 
-function makeFountainHistory( payout ){
+function makeFountainHistory( individual, grand ){
 
   let currentTDS = new Date();
 
-  let loadContent = { amount: payout, tds: currentTDS };
+  let loadContent = { amount_distro: individual, amount_total: grand, tds: currentTDS };
 
-  connection.query('INSERT into fountain-history SET ?', loadContent, function( error, result ){
+  connection.query('INSERT into fountain_history SET ?', loadContent, function( error, result ){
 
     if( error ) throw error;
 
