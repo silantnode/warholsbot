@@ -1461,6 +1461,9 @@ function newMarketActivity( userID, callback ){
 
 }
 
+
+// Records overflow of fountain, how much each user received, the total amount taken from the fountain and the date.
+
 function makeFountainHistory( individual, grand ){
 
   let currentTDS = new Date();
