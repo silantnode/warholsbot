@@ -1188,39 +1188,45 @@ function SubtractFromFountain( amount, members, currentBalance ){
 
 function GetCreativeContent( callback ){
 
-  connection.query('SELECT * FROM tasks', function( error, rows ){
+  pool.getConnection( function( err, connection ){
 
-    if ( error ) throw error;
+    connection.query('SELECT * FROM tasks', function( error, rows ){
 
-    let taskListDisplay = 'Here is some awesome content created by the Warhols users. Choose one to view to get a reward of 2 Warhols: \n \n';
-    let contentSelector;
-    let actualTaskID;
+      connection.release();
 
-    // Randomly select 5 items from the table.
-    while( currentCreativeSelection.length < MAX_LIST_DISPLAY ){
-        // Set up the numbers usig minus 1 so that the numbers will read the list properly.
-        let randNum = (Math.ceil( Math.random() * rows.length ) -1 );
+      if ( error ) throw error;
 
-        if( currentCreativeSelection.indexOf( randNum ) > -1 ) continue;
+      let taskListDisplay = 'Here is some awesome content created by the Warhols users. Choose one to view to get a reward of 2 Warhols: \n \n';
+      let contentSelector;
+      let actualTaskID;
 
-        currentCreativeSelection[ currentCreativeSelection.length ] = randNum;
+      // Randomly select 5 items from the table.
+      while( currentCreativeSelection.length < MAX_LIST_DISPLAY ){
+          // Set up the numbers usig minus 1 so that the numbers will read the list properly.
+          let randNum = (Math.ceil( Math.random() * rows.length ) -1 );
 
-    }
+          if( currentCreativeSelection.indexOf( randNum ) > -1 ) continue;
 
-    // Prepare all of the tasks for display.
-    // Keep track of which items were selected inside currentCreativeSelection as an array.
+          currentCreativeSelection[ currentCreativeSelection.length ] = randNum;
 
-    for ( let i = 0; i < ( currentCreativeSelection.length ) ; i++) {
-        
-        taskListDisplay += '/' + ( i + 1 ) + ' ';
-        contentSelector = currentCreativeSelection[i];
-        actualTaskID = rows[ contentSelector ].task_id;
-        taskListDisplay += rows[ contentSelector ].description;
-        taskListDisplay += '\n \n';
-        
-    } 
+      }
 
-    return callback( error, taskListDisplay );
+      // Prepare all of the tasks for display.
+      // Keep track of which items were selected inside currentCreativeSelection as an array.
+
+      for ( let i = 0; i < ( currentCreativeSelection.length ) ; i++) {
+          
+          taskListDisplay += '/' + ( i + 1 ) + ' ';
+          contentSelector = currentCreativeSelection[i];
+          actualTaskID = rows[ contentSelector ].task_id;
+          taskListDisplay += rows[ contentSelector ].description;
+          taskListDisplay += '\n \n';
+          
+      } 
+
+      return callback( error, taskListDisplay );
+
+    });
 
   });
 
