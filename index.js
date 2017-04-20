@@ -1577,11 +1577,17 @@ function makeFountainHistory( individual, grand ){
 
   let loadContent = { amount_distro: individual, amount_total: grand, tds: currentTDS };
 
-  connection.query('INSERT into fountain_history SET ?', loadContent, function( error, result ){
+  pool.getConnection(function(err, connection) {
 
-    if( error ) throw error;
+    connection.query('INSERT into fountain_history SET ?', loadContent, function( error, result ){
 
-  });  
+      connection.release();
+
+      if( error ) throw error;
+
+    });  
+
+  });
 
 }
 
