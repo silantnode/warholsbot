@@ -1404,30 +1404,36 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
 
 function DisplayGiftContent( userID, giftNumber, markup ){
 
-  connection.query('SELECT * FROM gifts', function( error, rows ){
+  pool.getConnection(function(err, connection) {
 
-    if ( error ) throw error;
+    connection.query('SELECT * FROM gifts', function( error, rows ){
 
-    // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
-    if ( giftNumber >= 1 && giftNumber <= 5 ) {
+      connection.release();
+      
+      if ( error ) throw error;
+
+      // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
+      if ( giftNumber >= 1 && giftNumber <= 5 ) {
 
         // Retrieve the corresponding item number from the random selection made when the user selected the /gift option.
         // We use minus 1 to offset the reading of the array.
         let contentSelector = currentGiftSelection[ ( giftNumber - 1 ) ];
-        
+          
         let giftDescription = rows[ ( contentSelector - 1 ) ].description;
-        
+          
         currentGiftSelection = []; // Reset the gift selection.
 
         currentGiftSelection[0] = contentSelector; // Remember the selection of the user.
-        
+          
         // Need to add an extra step to prompt the user with a 'yes' or 'no' answer if they will commit to the gift.
 
         return bot.sendMessage( userID, `Will you ${ giftDescription }? \n /yes or /no ?`, { markup });
-          
+            
       }
 
     });
+
+  });
 
 }
 
