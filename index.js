@@ -1065,9 +1065,10 @@ function GiveWarholsRandom( userID, warholAmount, markup ){
 
 function ShareTheWealth( userID, fountainContribution ){
 
+  
   let markup = bot.keyboard([
-    [ BACK_BUTTON ], { resize: true }
-  ]);
+    [ BACK_BUTTON ]], { resize: true }
+  );
 
   GetFountainBalance( function( error, fountainBalance ){
     
@@ -1116,16 +1117,18 @@ function ShareTheWealth( userID, fountainContribution ){
           giftSpendMode = 0;
 
           console.log('Fountain activated');
+          
+          // return bot.sendMessage( userID, `Thank you for your gift! Your Warhols have been anonymously sent to a random person.`, { markup });
 
-          return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive 5 Warhols :D`, { markup });
+            return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
 
-        });
+          });
         
+        return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive 5 Warhols :D`, { markup });
+
       } else {
 
         console.log('Fountain received new funds');
-
-        return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
 
       }
 
