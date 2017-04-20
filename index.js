@@ -984,11 +984,11 @@ function SubtractWarhols( userID, subtractionAmount ){
 
         connection.query( 'UPDATE accounts SET balance = ? WHERE owner =?', [ newBalance, userID ], function( error, current ){
 
-        connection.release();
+          connection.release();
         
-        if ( error ) throw error;
+          if ( error ) throw error;
 
-        // console.log('Changed ' + current.changedRows + ' rows');
+          // console.log('Changed ' + current.changedRows + ' rows');
 
       });
     
