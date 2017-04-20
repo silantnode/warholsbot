@@ -1130,11 +1130,11 @@ function ShareTheWealth( userID, fountainContribution ){
 
             // Get the response and write to console
             response.body;
-            console.log('IFTTT: ' + response.body);
+            // console.log('IFTTT: ' + response.body);
 
           });
 
-          return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive 5 Warhols :D`, { markup });
+          return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive ${ distroAmount } Warhols :D`, { markup });
 
         });
         
@@ -1158,6 +1158,8 @@ function SubtractFromFountain( amount, members, currentBalance ){
 
   // Multiply the amount of members with the amount each member received.
   let resetBalance = ( amount * members );
+
+  makeFountainHistory( amount, resetBalance );
 
   // Subtract the total amount awarded from the reservoir account.
   resetBalance = ( currentBalance - resetBalance );
@@ -1456,6 +1458,23 @@ function newMarketActivity( userID, callback ){
           return callback( error, result );
 
     });
+
+}
+
+
+// Records overflow of fountain, how much each user received, the total amount taken from the fountain and the date.
+
+function makeFountainHistory( individual, grand ){
+
+  let currentTDS = new Date();
+
+  let loadContent = { amount_distro: individual, amount_total: grand, tds: currentTDS };
+
+  connection.query('INSERT into fountain_history SET ?', loadContent, function( error, result ){
+
+    if( error ) throw error;
+
+  });  
 
 }
 
