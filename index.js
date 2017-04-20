@@ -1552,13 +1552,19 @@ function timeConversion( millisec ) {
 
 function newMarketActivity( userID, callback ){
 
+  pool.getConnection(function(err, connection) {
+
     connection.query('SELECT * FROM market_bets WHERE user =' + userID , function( error, result ){
       
-        if ( error ) return error;
+    connection.release();
 
-          return callback( error, result );
+    if ( error ) return error;
+
+    return callback( error, result );
 
     });
+
+  });
 
 }
 
