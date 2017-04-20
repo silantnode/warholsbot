@@ -1333,9 +1333,15 @@ function AddCreativeContent( userID, userName, newContent ){
 
   let loadContent = { owner: userID, owner_name: userName, description: newContent[1] , url: newContent[0], price: 2, date_created: currentTDS };
 
-  connection.query('INSERT into tasks SET ?', loadContent, function( error, result ){
+  pool.getConnection(function(err, connection) {
 
-    if( error ) throw error;
+    connection.query('INSERT into tasks SET ?', loadContent, function( error, result ){
+
+      connection.release();
+
+      if( error ) throw error;
+
+    });
 
   });
 
