@@ -139,8 +139,6 @@ var betDate = 0;
 
 var marketClosureId = 0;
 
-var allUsers = [];
-
 // The user starts the bot with the /start command.
 
 bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
@@ -209,10 +207,81 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
 bot.on( '/test', msg => {
 
+  
   warholMode = msg.from.id;
 
   console.log();
   
+});
+
+bot.on( '/setmode1', msg => {
+
+  pool.getConnection(function(err, connection) {
+
+    connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?', [ 1, msg.from.id ], function( error, updatedMode ){
+      
+      if ( error ) throw error;
+
+    });
+
+    connection.query('SELECT mode FROM accounts WHERE owner =' + msg.from.id , function( error, currentMode ){
+
+      connection.release();
+
+      if ( error ) throw error;
+      
+      console.log(currentMode[0].mode);
+
+    });
+
+  });
+  
+});
+
+bot.on( '/setmode2', msg => {
+
+  pool.getConnection(function(err, connection) {
+
+    connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?', [ 2, msg.from.id ], function( error, updatedMode ){
+    
+      if ( error ) throw error;
+
+    });
+
+    connection.query('SELECT mode FROM accounts WHERE owner =' + msg.from.id , function( error, currentMode ){
+
+      connection.release();
+
+      if ( error ) throw error;
+      
+      console.log(currentMode[0].mode);
+
+    });
+
+  });
+  
+});
+
+bot.on( '/getmode', msg => {
+
+  warholMode = msg.from.id;
+
+  pool.getConnection(function(err, connection) {
+
+    // SELECT viewed FROM gifts WHERE task_id =' + currentGiftSelection[0] , function( error, timesViewed ){
+
+    connection.query('SELECT mode FROM accounts WHERE owner =' + msg.from.id , function( error, currentMode ){
+
+      connection.release();
+
+      if ( error ) throw error;
+      
+      console.log(currentMode[0].mode);
+
+    });
+
+  });
+
 });
 
 
@@ -877,7 +946,7 @@ bot.on( YES_BUTTON, msg => {
 
         // Get the response and write to console
         response.body;
-        console.log('IFTTT: ' + response.body);
+        // console.log('IFTTT: ' + response.body);
 
       }); // End of WarholsChannel content posting routine.
 
