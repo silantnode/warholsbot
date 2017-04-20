@@ -314,7 +314,7 @@ bot.on( CREATIVE_ECON, msg => {
     GetCreativeContent( function( error, content ){
     
     // Display the tasks as text.
-    return bot.sendMessage( msg.from.id, `${ content }`, { markup } );
+      return bot.sendMessage( msg.from.id, `${ content }`, { markup } );
     
     });
 
