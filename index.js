@@ -1113,8 +1113,6 @@ function ShareTheWealth( userID, fountainContribution ){
 
           SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
 
-          makeFountainHistory( distroAmount );
-
           warholMode = 0;
           giftSpendMode = 0;
 
@@ -1170,6 +1168,8 @@ function SubtractFromFountain( amount, members, currentBalance ){
     if ( error ) throw error;
 
   });
+
+  makeFountainHistory( amount, resetBalance );
 
 }
 
