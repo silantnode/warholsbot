@@ -92,7 +92,7 @@ const DESCRIPTION_MAX_LENGTH = 140; // How long a description of content is allo
 
 // Identify the event for which the Warhols will be used - this will provide a subset of market closing dates to work with
 
- var eventName = 'test';
+var eventName = 'test';
 
 // Holds the random selection of five items to be selected from by the user. The list is changed every time the user selects the 'creative' option when selecting 'get'
 // It also serves to filter out any numbered commands (i.e. /4, /21, etc.)
@@ -210,7 +210,7 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 bot.on( '/test', msg => {
 
   warholMode = msg.from.id;
-  
+
   console.log();
   
 });
