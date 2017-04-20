@@ -1130,7 +1130,7 @@ function ShareTheWealth( userID, fountainContribution ){
 
             // Get the response and write to console
             response.body;
-            console.log('IFTTT: ' + response.body);
+            // console.log('IFTTT: ' + response.body);
 
           });
 
