@@ -1111,7 +1111,6 @@ function GiveWarholsRandom( userID, warholAmount, markup ){
 
 function ShareTheWealth( userID, fountainContribution ){
 
-  
   let markup = bot.keyboard([
     [ BACK_BUTTON ]], { resize: true }
   );
@@ -1143,59 +1142,61 @@ function ShareTheWealth( userID, fountainContribution ){
 
             if( error ) throw error;
 
-            // Round down the number resulting from dividing the new reservoir balance with the number of warhols users.
-            let distroAmount =  Math.floor( ( newReservoirBalance / members.length ) ); 
+              // Round down the number resulting from dividing the new reservoir balance with the number of warhols users.
+              let distroAmount =  Math.floor( ( newReservoirBalance / members.length ) ); 
 
-            // Distribute the awarded warhols to all the users.
-            for (let i = 0; i < members.length; i++ ){
+              // Distribute the awarded warhols to all the users.
+              for (let i = 0; i < members.length; i++ ){
 
-              GetBalance( members[i].owner, function( error, currentBalance ){
+                GetBalance( members[i].owner, function( error, currentBalance ){
 
-                let newBalance = ( distroAmount + currentBalance );
+                  let newBalance = ( distroAmount + currentBalance );
 
-                AddWarhols( members[i].owner, newBalance );
+                  AddWarhols( members[i].owner, newBalance );
 
-                newBalance = 0;
+                  newBalance = 0;
 
-              });
+                });
 
-            }
+              }
 
-            SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
+              SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
 
-            warholMode = 0;
-            giftSpendMode = 0;
+              warholMode = 0;
+              giftSpendMode = 0;
 
-            console.log('Fountain activated');
+              console.log('Fountain activated');
             
-            // Requestify code here
+              // Requestify code here
             
-            requestify.post('https://maker.ifttt.com/trigger/new_fountain/with/key/' + custom_data[5] , { // IFTTT secret key.
+              requestify.post('https://maker.ifttt.com/trigger/new_fountain/with/key/' + custom_data[5] , { // IFTTT secret key.
 
-            value1: distroAmount
+              value1: distroAmount
 
-            })
+              })
 
-            .then( function( response ) {
+              .then( function( response ) {
 
-            // Get the response and write to console
-            response.body;
-            // console.log('IFTTT: ' + response.body);
+              // Get the response and write to console
+              response.body;
+              // console.log('IFTTT: ' + response.body);
+
+            });
+
+            return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive ${ distroAmount } Warhols :D`, { markup });
 
           });
-
-          return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive ${ distroAmount } Warhols :D`, { markup });
-
-        });
           
           
-      } else {
+        } else {
 
-        console.log('Fountain received new funds');
+          console.log('Fountain received new funds');
 
-        return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
+          return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
 
-      }
+        }
+
+      });
 
     });
 
