@@ -1442,13 +1442,19 @@ function DisplayGiftContent( userID, giftNumber, markup ){
 
 function setLastDate( userID ){
     
-    var currentDate = new Date();
+  var currentDate = new Date();
+
+  pool.getConnection(function(err, connection) {
 
     connection.query( 'UPDATE accounts SET date_last = ? WHERE owner = ?', [ currentDate, userID ], function( error, current ){
-                
-     if ( error ) throw error;
 
-   });
+    connection.release();
+
+    if ( error ) throw error;
+
+    });
+
+  });
 
 }
 
