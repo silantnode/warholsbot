@@ -11,8 +11,10 @@ var requestify = require('requestify');
 const mysql = require('mysql');
 
 const pool = mysql.createPool({
-  
+
   connectionLimit : 100,
+  waitForConnections: true,
+  queueLimit: 100,
   host     : custom_data[1], // Host address of the database server.
   user     : custom_data[2], // Username for the coinspiration account.
   password : custom_data[3], // Password for the coinspiration account.
