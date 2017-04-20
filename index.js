@@ -786,18 +786,23 @@ bot.on( YES_BUTTON, msg => {
             
       });
 
-      
-      connection.query('SELECT viewed FROM gifts WHERE task_id =' + currentGiftSelection[0] , function( error, timesViewed ){
+      pool.getConnection(function(err, connection) {
 
-        if ( error ) throw error;
-
-        let viewedIncrement = ( ( timesViewed[0].viewed ) + 1 );
-        
-        connection.query('UPDATE gifts SET viewed = ? WHERE task_id = ?', [ viewedIncrement, currentGiftSelection[0] ], function( error, viewResult ){
+        connection.query('SELECT viewed FROM gifts WHERE task_id =' + currentGiftSelection[0] , function( error, timesViewed ){
 
           if ( error ) throw error;
 
-          currentGiftSelection = [];
+          let viewedIncrement = ( ( timesViewed[0].viewed ) + 1 );
+          
+          connection.query('UPDATE gifts SET viewed = ? WHERE task_id = ?', [ viewedIncrement, currentGiftSelection[0] ], function( error, viewResult ){
+
+            connection.release();
+
+            if ( error ) throw error;
+
+            currentGiftSelection = [];
+
+          });
 
         });
 
