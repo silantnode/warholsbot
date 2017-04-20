@@ -1313,31 +1313,31 @@ function AddCreativeContent( userID, userName, newContent ){
 
 function DisplayCreativeContent( userID, taskNumber, markup ){
 
-    // Read the creative table so we can extract the content associated with
-    // the content description chosen by the user.
+  // Read the creative table so we can extract the content associated with
+  // the content description chosen by the user.
 
-    pool.getConnection( function( err, connection ) {
+  pool.getConnection( function( err, connection ) {
 
-      connection.query('SELECT * FROM tasks', function( error, rows ){
+    connection.query('SELECT * FROM tasks', function( error, rows ){
 
-        if ( error ) throw error;
+      if ( error ) throw error;
           
-        // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
-        if ( taskNumber >= 1 && taskNumber <= 5 ) {
+      // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
+      if ( taskNumber >= 1 && taskNumber <= 5 ) {
           
-          // Retrieve the corresponding item number from the random selection made when the user selected the /creative option.
-          // We use minus 1 to offset the reading of the array.
-          let contentSelector = currentCreativeSelection[ ( taskNumber - 1 ) ];
+        // Retrieve the corresponding item number from the random selection made when the user selected the /creative option.
+        // We use minus 1 to offset the reading of the array.
+        let contentSelector = currentCreativeSelection[ ( taskNumber - 1 ) ];
 
-          let taskID = rows[ contentSelector ].task_id;
-          let taskURL = rows[ contentSelector ].url; // Content address.
-          let warholValue = rows[ contentSelector ].price; // Content price, as in how many Warhols are earned by watching this media.
+        let taskID = rows[ contentSelector ].task_id;
+        let taskURL = rows[ contentSelector ].url; // Content address.
+        let warholValue = rows[ contentSelector ].price; // Content price, as in how many Warhols are earned by watching this media.
           
-          let viewedIncrement = ( ( rows[ contentSelector ].viewed ) + 1 ); // Update how many times the chosen content has been viewed.
+        let viewedIncrement = ( ( rows[ contentSelector ].viewed ) + 1 ); // Update how many times the chosen content has been viewed.
 
-          connection.query('UPDATE tasks SET viewed = ? WHERE task_id = ?', [ viewedIncrement , taskID ] , function( error, viewResult ){
+        connection.query('UPDATE tasks SET viewed = ? WHERE task_id = ?', [ viewedIncrement , taskID ] , function( error, viewResult ){
           
-            connection.release();
+          connection.release();
 
           if (error) throw error;
           
