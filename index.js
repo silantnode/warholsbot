@@ -1111,6 +1111,8 @@ function ShareTheWealth( userID, fountainContribution ){
 
           }
 
+          connection.query( 'INSERT fountain-history')
+
           SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
 
           warholMode = 0;
@@ -1456,6 +1458,20 @@ function newMarketActivity( userID, callback ){
           return callback( error, result );
 
     });
+
+}
+
+function makeFountainHistory( payout ){
+
+  let currentTDS = new Date();
+
+  let loadContent = { amount: payout, tds: currentTDS };
+
+  connection.query('INSERT into fountain-history SET ?', loadContent, function( error, result ){
+
+    if( error ) throw error;
+
+  });  
 
 }
 
