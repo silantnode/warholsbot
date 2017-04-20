@@ -18,7 +18,7 @@ const pool = mysql.createPool({
 
 });
 
-pool.getConnection( function (error){
+pool.connect( function (error){
   
   if( error ) throw error;
 
@@ -160,33 +160,40 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
   currentGiftSelection = [];
 
   // Check the Warhols database to see if the user already has an account.
-  connection.query( 'SELECT * FROM accounts', function( error, rows ){
 
-    if( error ) throw error;
+  pool.getConnection( function( err, connection ) {
 
-    for( let i = 0; i < rows.length; i++ ){
+    connection.query( 'SELECT * FROM accounts', function( error, rows ){
 
-      if( rows[i].owner == msg.from.id ){
- 
-        // Send them a message welcoming them back. 
-        return bot.sendMessage( msg.from.id, `Welcome back ${ msg.from.first_name }!`, { markup } );
-        
-      }
-    
-    }
-
-    // If we get this far then it means the user does not have an account yet. So we create one for them.
-
-    let newOwner = { owner: msg.from.id, owner_name: msg.from.first_name, balance: 0 };
-    
-    connection.query('INSERT INTO accounts SET ?', newOwner, function( error, result ){
-    
       if( error ) throw error;
-    
+
+      for( let i = 0; i < rows.length; i++ ){
+
+        if( rows[i].owner == msg.from.id ){
+  
+          // Send them a message welcoming them back. 
+          return bot.sendMessage( msg.from.id, `Welcome back ${ msg.from.first_name }!`, { markup } );
+          
+        }
+      
+      }
+
+      // If we get this far then it means the user does not have an account yet. So we create one for them.
+
+      let newOwner = { owner: msg.from.id, owner_name: msg.from.first_name, balance: 0 };
+      
+      connection.query('INSERT INTO accounts SET ?', newOwner, function( error, result ){
+        
+        connection.release();
+
+        if( error ) throw error;
+      
+      });
+
+      return bot.sendMessage( msg.from.id, `Welcome ${ msg.from.first_name }! You're new here, right? That's ok! we created an account for you. Use the commands below to interact with your account.`, { markup } );
+
     });
-
-    return bot.sendMessage( msg.from.id, `Welcome ${ msg.from.first_name }! You're new here, right? That's ok! we created an account for you. Use the commands below to interact with your account.`, { markup } );
-
+  
   });
 
 });
