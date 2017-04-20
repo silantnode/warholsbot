@@ -1489,13 +1489,19 @@ function DateCompare( userID ){
 
 function LastInteraction( userID, callback ){
 
-    connection.query('SELECT date_last FROM accounts WHERE owner =' + userID , function( error, result ){
-      
-        if ( error ) return error;
+  pool.getConnection(function(err, connection) {
 
-          return callback( error, result[0].date_last );
+    connection.query('SELECT date_last FROM accounts WHERE owner =' + userID , function( error, result ){
+
+      connection.release();
+
+      if ( error ) return error;
+
+      return callback( error, result[0].date_last );
 
     });
+
+  });
 
 }
 
