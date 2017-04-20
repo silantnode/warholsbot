@@ -1249,8 +1249,10 @@ function GetCreativeContent( callback ){
 
 function GetGiftsContent( callback ){
 
-  // Retrieve the list of gifts available from the gifts table.
-  connection.query('SELECT * FROM gifts', function( error, rows ){
+  pool.getConnection(function(err, connection) {
+
+    // Retrieve the list of gifts available from the gifts table.
+    connection.query('SELECT * FROM gifts', function( error, rows ){
 
       if ( error ) throw error;
 
@@ -1269,21 +1271,23 @@ function GetGiftsContent( callback ){
 
       }
 
-    // Prepare all of the tasks for display.
-    // Keep track of which items were selected inside currentCreativeSelection as an array.
+      // Prepare all of the tasks for display.
+      // Keep track of which items were selected inside currentCreativeSelection as an array.
 
-    for ( let i = 0; i < ( currentGiftSelection.length ) ; i++ ) {
-        
+      for ( let i = 0; i < ( currentGiftSelection.length ) ; i++ ) {
+          
         giftListDisplay += '/' + ( i + 1 ) + ' '; // The number the user will select
 
         giftListDisplay += rows[ ( currentGiftSelection[i] - 1 ) ].description; // The description of the gift
 
         giftListDisplay += '\n \n'; // Spaces for the string for the next line
-        
-    }
+          
+      }
 
-    return callback ( error, giftListDisplay );
+      return callback ( error, giftListDisplay );
 
+    });
+  
   });
 
 }
