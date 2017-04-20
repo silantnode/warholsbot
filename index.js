@@ -1118,9 +1118,23 @@ function ShareTheWealth( userID, fountainContribution ){
 
           console.log('Fountain activated');
           
-          // return bot.sendMessage( userID, `Thank you for your gift! Your Warhols have been anonymously sent to a random person.`, { markup });
+          // Requestify code here
+          
+          requestify.post('https://maker.ifttt.com/trigger/new_fountain/with/key/' + custom_data[5] , { // IFTTT secret key.
 
-            return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
+            value1: distroAmount
+
+          })
+
+          .then( function( response ) {
+
+            // Get the response and write to console
+            response.body;
+            console.log('IFTTT: ' + response.body);
+
+          });
+
+          return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive 5 Warhols :D`, { markup });
 
         });
         
@@ -1129,7 +1143,7 @@ function ShareTheWealth( userID, fountainContribution ){
 
         console.log('Fountain received new funds');
 
-        return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive 5 Warhols :D`, { markup });
+        return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
 
       }
 
