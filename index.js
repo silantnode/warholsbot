@@ -1111,9 +1111,9 @@ function ShareTheWealth( userID, fountainContribution ){
 
           }
 
-          connection.query( 'INSERT fountain-history')
-
           SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
+
+          makeFountainHistory( distroAmount );
 
           warholMode = 0;
           giftSpendMode = 0;
