@@ -252,6 +252,27 @@ function getMode( userID, callback ){
 }
 
 
+function resetRandList( userID ){
+
+  pool.getConnection(function(err, connection) {
+
+    // SELECT viewed FROM gifts WHERE task_id =' + currentGiftSelection[0] , function( error, timesViewed ){
+
+    connection.query('UPDATE accounts SET rand_list WHERE owner =' + userID , function( error, resetList ){
+
+      connection.release();
+
+      if ( error ) throw error;
+
+      console.log('The random list selection for ' + userID + 'has been reset');
+
+    });
+
+  });
+
+}
+
+
 
 bot.on( '/help', msg => {
 
