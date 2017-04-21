@@ -332,7 +332,7 @@ bot.on( SPEND_BUTTON, msg => {
 
           return bot.sendMessage( msg.from.id, `You don’t have enough Warhols in your account. You need at least 5 Warhols and your balance is ${ balance }. You should /get some Warhols first.`);
 
-      } else {
+      } else { // If they have enough warhols they are provided with options for spending them.
 
         let markup = bot.keyboard([
           [ GIFT_ECON ],[ CREATIVE_ECON ],[ SPECULATIVE_ECON ]], { resize: true }
