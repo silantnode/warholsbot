@@ -1447,6 +1447,7 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
           });
 
           setMode( userID, 0 );
+          resetRandList( userID );
 
         });
 
