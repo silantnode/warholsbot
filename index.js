@@ -1398,7 +1398,6 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
           // let temp = [];
           let temp = currentList[0].rand_list.split(","); // 
           console.log( Number( temp[0] ) );
-
           
           let contentSelector = Number(temp[ ( taskNumber - 1 ) ]);
 
@@ -1425,6 +1424,8 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
             return bot.sendMessage( userID, `You now have more Warhols. Enjoy! The link for the content is ${ taskURL }`, { markup });
 
           });
+
+          setMode( userID, 0 );
 
         });
 
