@@ -212,9 +212,13 @@ function setMode( userID, newMode ){
   
   pool.getConnection(function(err, connection) {
 
-    connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?', [ newMode, msg.from.id ], function( error, updatedMode ){
+    connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?', [ newMode, userID ], function( error, updatedMode ){
       
+      connection.release();
+
       if ( error ) throw error;
+
+      console.log(userID +' '+ updatedMode);
 
     });
 
@@ -237,13 +241,15 @@ function getMode( userID, callback ){
 
       if ( error ) throw error;
       
+      console.log(userID +' '+ updatedMode);
+
       return callback( error, currentMode[0].mode );
 
     });
 
   });
 
-});
+}
 
 
 
@@ -305,7 +311,7 @@ bot.on( GET_BUTTON, msg => {
       [ GIFT_ECON ],[ CREATIVE_ECON ],[ SPECULATIVE_ECON ]], { resize: true }
     );
 
-    // setMode( msg.from.id, 1 ); // Entering get mode.
+    setMode( msg.from.id, 1 ); // Entering get mode.
 
     return bot.sendMessage( msg.from.id, `How do you want to get Warhols?`, { markup });
 
@@ -347,32 +353,34 @@ bot.on( SPEND_BUTTON, msg => {
 
 bot.on( CREATIVE_ECON, msg => {
 
-  
+  getMode( msg.from.id, function(error, currentMode){
 
-  if ( warholMode == 1 ){ // We are in get mode...
+    if ( currentMode == 1 ){ // We are in get mode...
 
-    let markup = bot.keyboard([
-      [ BACK_BUTTON ]], { resize: true }
-    );
+      let markup = bot.keyboard([
+        [ BACK_BUTTON ]], { resize: true }
+      );
 
-    GetCreativeContent( function( error, content ){
-    
-    // Display the tasks as text.
-      return bot.sendMessage( msg.from.id, `${ content }`, { markup } );
-    
-    });
+      GetCreativeContent( function( error, content ){
+      
+      // Display the tasks as text.
+        return bot.sendMessage( msg.from.id, `${ content }`, { markup } );
+      
+      });
 
-  } else if ( warholMode == 2 ){ // We are in spend mode...
+    } else if ( currentMode == 2 ){ // We are in spend mode...
 
-    GetBalance( msg.from.id, function( error, balance ){
+      GetBalance( msg.from.id, function( error, balance ){
 
-      return bot.sendMessage( msg.from.id, `You can /publish your content for 10 Warhols. Your current balance is ${ balance } Warhols`, { markup: 'hide' } );
+        return bot.sendMessage( msg.from.id, `You can /publish your content for 10 Warhols. Your current balance is ${ balance } Warhols`, { markup: 'hide' } );
 
-      // Function for reading url and descriptive text from the user and sending it to the database.
+        // Function for reading url and descriptive text from the user and sending it to the database.
 
-    });
+      });
 
-  }
+    }
+
+  });
 
 });
 
