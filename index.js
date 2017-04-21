@@ -139,9 +139,8 @@ var betDate = 0;
 
 var marketClosureId = 0;
 
-// The user starts the bot with the /start command.
 
-var allUsers = [];
+// The user starts the bot with the /start command.
 
 bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
   
