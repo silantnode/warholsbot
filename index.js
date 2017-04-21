@@ -256,15 +256,15 @@ function resetRandList( userID ){
 
   pool.getConnection(function(err, connection) {
 
-    // SELECT viewed FROM gifts WHERE task_id =' + currentGiftSelection[0] , function( error, timesViewed ){
-
-    connection.query('UPDATE accounts SET rand_list WHERE owner =' + userID , function( error, resetList ){
+    let resetList = "";
+    
+    connection.query( 'UPDATE accounts SET rand_list = ? WHERE owner = ?', [ resetList, userID ], function( error, resetList ){
 
       connection.release();
 
       if ( error ) throw error;
 
-      console.log('The random list selection for ' + userID + 'has been reset');
+      console.log('The random list selection for ' + userID + ' has been reset');
 
     });
 
