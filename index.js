@@ -141,6 +141,8 @@ var marketClosureId = 0;
 
 // The user starts the bot with the /start command.
 
+var allUsers = [];
+
 bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
   
   warholMode = 0;
@@ -163,12 +165,6 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
       connection.release();
 
       if( error ) throw error;
-
-      for( let j = 0; j < rows.length; j++ ){
-
-        allUsers[j] = rows[j].owner;
-
-      }
 
       for( let i = 0; i < rows.length; i++ ){
 
@@ -207,76 +203,42 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
 bot.on( '/test', msg => {
 
-  
-  warholMode = msg.from.id;
 
-  console.log();
-  
 });
 
-bot.on( '/setmode1', msg => {
 
+// Sets the mode of the user
+
+function setMode( userID, newMode ){ 
+  
   pool.getConnection(function(err, connection) {
 
-    connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?', [ 1, msg.from.id ], function( error, updatedMode ){
+    connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?', [ newMode, msg.from.id ], function( error, updatedMode ){
       
       if ( error ) throw error;
-
-    });
-
-    connection.query('SELECT mode FROM accounts WHERE owner =' + msg.from.id , function( error, currentMode ){
-
-      connection.release();
-
-      if ( error ) throw error;
-      
-      console.log(currentMode[0].mode);
 
     });
 
   });
-  
-});
 
-bot.on( '/setmode2', msg => {
+}
 
-  pool.getConnection(function(err, connection) {
 
-    connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?', [ 2, msg.from.id ], function( error, updatedMode ){
-    
-      if ( error ) throw error;
+// Gets the mode of the user
 
-    });
-
-    connection.query('SELECT mode FROM accounts WHERE owner =' + msg.from.id , function( error, currentMode ){
-
-      connection.release();
-
-      if ( error ) throw error;
-      
-      console.log(currentMode[0].mode);
-
-    });
-
-  });
-  
-});
-
-bot.on( '/getmode', msg => {
-
-  warholMode = msg.from.id;
+function getMode( userID, callback ){
 
   pool.getConnection(function(err, connection) {
 
     // SELECT viewed FROM gifts WHERE task_id =' + currentGiftSelection[0] , function( error, timesViewed ){
 
-    connection.query('SELECT mode FROM accounts WHERE owner =' + msg.from.id , function( error, currentMode ){
+    connection.query('SELECT mode FROM accounts WHERE owner =' + userID , function( error, currentMode ){
 
       connection.release();
 
       if ( error ) throw error;
       
-      console.log(currentMode[0].mode);
+      return callback( error, currentMode[0].mode );
 
     });
 
@@ -344,7 +306,7 @@ bot.on( GET_BUTTON, msg => {
       [ GIFT_ECON ],[ CREATIVE_ECON ],[ SPECULATIVE_ECON ]], { resize: true }
     );
 
-    warholMode = 1; // Entering get mode.
+    // setMode( msg.from.id, 1 ); // Entering get mode.
 
     return bot.sendMessage( msg.from.id, `How do you want to get Warhols?`, { markup });
 
@@ -371,7 +333,7 @@ bot.on( SPEND_BUTTON, msg => {
           [ GIFT_ECON ],[ CREATIVE_ECON ],[ SPECULATIVE_ECON ]], { resize: true }
         ); 
 
-        warholMode = 2; // Entering spend mode.
+        setMode( msg.from.id, 2 ); // Entering spend mode.
 
         return bot.sendMessage( msg.from.id, `How do you want to spend Warhols?`, { markup });
 
@@ -385,6 +347,8 @@ bot.on( SPEND_BUTTON, msg => {
 // The creative economy content, where everyone makes stuff but nobody keeps money.
 
 bot.on( CREATIVE_ECON, msg => {
+
+  
 
   if ( warholMode == 1 ){ // We are in get mode...
 
@@ -726,26 +690,23 @@ bot.on( '/*' , msg => {
     );
 
   // They selected creative economy.
-  
-  if ( warholMode == 1 ) { // Maks sure they are in get mode.
+  getMode( msg.from.id, function( error, currentMode ){; // Entering get mode.
 
-    if ( currentCreativeSelection.length == 5 ) {
+    if ( currentMode == 1 ) { // Maks sure they are in get mode.
 
-        // Extract the number value from the user input
-        // Make sure that what the text is only a number.
-        let taskNumber = Number( ( (msg.text).slice( 1, 2 ) ) );
+      // Extract the number value from the user input
+      // Make sure that what the text is only a number.
+      let taskNumber = Number( ( (msg.text).slice( 1, 2 ) ) );
 
-        DisplayCreativeContent( msg.from.id, taskNumber, markup );
+      DisplayCreativeContent( msg.from.id, taskNumber, markup );
 
     }
     
-    // They selected 'gift' economy.
+  // They selected 'gift' economy.
     
-    if ( currentGiftSelection.length == 5 ) {
+      let taskNumber = Number( ( ( msg.text ).slice( 1, 2 ) ) );
 
-        let taskNumber = Number( ( ( msg.text ).slice( 1, 2 ) ) );
-
-        DisplayGiftContent( msg.from.id, taskNumber, markup );
+      DisplayGiftContent( msg.from.id, taskNumber, markup );
         
     }
 
