@@ -252,6 +252,8 @@ function getMode( userID, callback ){
 }
 
 
+// Resets the random list field in the account of a specified user
+
 function resetRandList( userID ){
 
   pool.getConnection(function(err, connection) {
