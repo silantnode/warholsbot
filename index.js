@@ -1630,15 +1630,6 @@ function makeFountainHistory( individual, grand ){
 
 }
 
-      // TO DO:
-
-      // Compare current date with last interaction date.
-
-      // Check for fountain overflows in that period and how much they were.   
-
-      // Add overflown Warhols to users account.
-       
-      // If appropriate send them a message notifying of fountain or market and new balance.
     
 // Last line of code, all functions should be above here
 bot.connect();
