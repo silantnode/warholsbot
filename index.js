@@ -214,11 +214,11 @@ function setMode( userID, newMode ){
 
     connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?', [ newMode, userID ], function( error, updatedMode ){
       
+      console.log( userID +' updated to mode ' + newMode );
+
       connection.release();
 
       if ( error ) throw error;
-
-      console.log(userID +' '+ updatedMode);
 
     });
 
@@ -241,7 +241,7 @@ function getMode( userID, callback ){
 
       if ( error ) throw error;
       
-      console.log(userID +' '+ updatedMode);
+      console.log(userID +' has been updated to mode '+ currentMode[0].mode);
 
       return callback( error, currentMode[0].mode );
 
@@ -338,7 +338,7 @@ bot.on( SPEND_BUTTON, msg => {
           [ GIFT_ECON ],[ CREATIVE_ECON ],[ SPECULATIVE_ECON ]], { resize: true }
         ); 
 
-        setMode( msg.from.id, 2 ); // Entering spend mode.
+        setMode( msg.from.id, 3 ); // Entering spend mode.
 
         return bot.sendMessage( msg.from.id, `How do you want to spend Warhols?`, { markup });
 
@@ -361,9 +361,11 @@ bot.on( CREATIVE_ECON, msg => {
         [ BACK_BUTTON ]], { resize: true }
       );
 
-      GetCreativeContent( function( error, content ){
+      GetCreativeContent( msg.from.id, function( error, content ){
       
-      // Display the tasks as text.
+        setMode( msg.from.id, 2 ); // Change mode to get/creative
+
+        // Display the tasks as text.
         return bot.sendMessage( msg.from.id, `${ content }`, { markup } );
       
       });
@@ -692,14 +694,14 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
 bot.on( '/*' , msg => {
   
-    let markup = bot.keyboard([
-        [ BACK_BUTTON ]], { resize: true }
-    );
+  let markup = bot.keyboard([
+    [ BACK_BUTTON ]], { resize: true }
+  );
 
-  // They selected creative economy.
-  getMode( msg.from.id, function( error, currentMode ){; // Entering get mode.
+  
+  getMode( msg.from.id, function( error, currentMode ){ // Entering get mode.
 
-    if ( currentMode == 1 ) { // Maks sure they are in get mode.
+    if ( currentMode == 2 ) { // In get/creative mode.
 
       // Extract the number value from the user input
       // Make sure that what the text is only a number.
@@ -707,90 +709,86 @@ bot.on( '/*' , msg => {
 
       DisplayCreativeContent( msg.from.id, taskNumber, markup );
 
-    }
-    
-  // They selected 'gift' economy.
+    } else if ( currentMode == 3 ){ // In get/gift mode. 
     
       let taskNumber = Number( ( ( msg.text ).slice( 1, 2 ) ) );
 
       DisplayGiftContent( msg.from.id, taskNumber, markup );
         
-    }
-
-  } else if ( warholMode == 2 ) { // Make sure we are in spend mode.
+    } else if ( currentMode == 4 ) { // Make sure we are in spend/gift mode.
     
-    // Read from the second character in the message string.
-  
-    let warholAmount = Number( ( ( msg.text ).slice( 1, 3 ) ) );
+      // Read from the second character in the message string.
+      let warholAmount = Number( ( ( msg.text ).slice( 1, 3 ) ) );
     
-    // Check if the amount they have selected does not exceed the amount available in their account.
-    GetBalance( msg.from.id, function( error, userBalance ){
+      // Check if the amount they have selected does not exceed the amount available in their account.
+      GetBalance( msg.from.id, function( error, userBalance ){
 
-      if ( userBalance < warholAmount ){
+        if ( userBalance < warholAmount ){
 
-        return bot.sendMessage( msg.from.id, `You do not have enough warhols. Please choose a smaller amount or /get more warhols.`);
+          return bot.sendMessage( msg.from.id, `You do not have enough warhols. Please choose a smaller amount or /get more warhols.`);
 
-      } else if ( userBalance >= warholAmount ){
+        } else if ( userBalance >= warholAmount ){
         
-        if ( giftSpendMode == 1 ){ // They have chosen to give to a random person.
+          if ( giftSpendMode == 1 ){ // They have chosen to give to a random person.
         
-          GiveWarholsRandom( msg.from.id, warholAmount, markup );
+            GiveWarholsRandom( msg.from.id, warholAmount, markup );
         
-        } else if ( giftSpendMode == 2 ) { // They have chosen to give to the fountain.
+          } else if ( giftSpendMode == 2 ) { // They have chosen to give to the fountain.
 
-          ShareTheWealth( msg.from.id, warholAmount );
+            ShareTheWealth( msg.from.id, warholAmount );
+
+          }
 
         }
 
-      }
+      });
 
-    });
+    } else if ( warholMode == 7 ){ // Make sure we are in speculation mode.
 
-  } else if ( warholMode == 3 ){ // Make sure we are in speculation mode.
+      let betAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
 
-    let betAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
+      // check if user has enough balance, if not ask to choose other value
 
-    // check if user has enough balance, if not ask to choose other value
-
-    GetBalance( msg.from.id, function( error, result ){
+      GetBalance( msg.from.id, function( error, result ){
 
       // Check what the balance is... 
-      if ( result < betAmount ) {
+        if ( result < betAmount ) {
 
-        return bot.sendMessage( msg.from.id, `You currently have only ${ result } Warhols. Please start with a lower investment.`, { markup: 'hide' });
+          return bot.sendMessage( msg.from.id, `You currently have only ${ result } Warhols. Please start with a lower investment.`, { markup: 'hide' });
         
-      } else {   // Continue with the investment.
+        } else {   // Continue with the investment.
         
-      // console.log('they have enough Warhols - ', result);
+          // console.log('they have enough Warhols - ', result);
 
-      // write to market bets database: user id, user name, flavor, amount, time bet placed
+          // write to market bets database: user id, user name, flavor, amount, time bet placed
 
-        var currentDate = new Date();
+          var currentDate = new Date();
 
-        if (typeof msg.from.last_name != "undefined"){ // if the user does not have a last name
+          if (typeof msg.from.last_name != "undefined"){ // if the user does not have a last name
 
-          var betOwner = (msg.from.first_name +' '+ msg.from.last_name);
+            var betOwner = (msg.from.first_name +' '+ msg.from.last_name);
 
-        } else {  
+          } else {  
 
-          var betOwner = (msg.from.first_name);
+            var betOwner = (msg.from.first_name);
 
-        }
+          }
 
-        let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
+          let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
 
-        pool.getConnection(function(err, connection) {
+          pool.getConnection(function(err, connection) {
 
-          connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
+            connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
             
-            connection.release();
+              connection.release();
 
-            if( error ) throw error;
+              if( error ) throw error;
       
+            });
+
           });
 
-        });
-
+        }
         // deduct warhols from users account
 
         SubtractWarhols( msg.from.id, betAmount );
@@ -802,16 +800,16 @@ bot.on( '/*' , msg => {
           [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
         );
 
-        warholMode = 0;
+        // warholMode = 0;
 
         return bot.sendMessage( msg.from.id, `Thanks for your investment! You will get a notification when the market closes. Good luck!`, { markup } );
 
-      } // end if balance enough
+      }); // end if balance enough
+    
+    }
 
-    });
-
-  }
-
+  });
+  
 });
 
 
@@ -1246,38 +1244,51 @@ function SubtractFromFountain( amount, members, currentBalance ){
 
 // Selects five random entries from the creative content for the user to choose from.
 
-function GetCreativeContent( callback ){
+function GetCreativeContent( userID, callback ){
 
   pool.getConnection( function( err, connection ){
 
     connection.query('SELECT * FROM tasks', function( error, rows ){
 
-      connection.release();
-
       if ( error ) throw error;
 
+      let randomCreativeSelection = [];
       let taskListDisplay = 'Here is some awesome content created by the Warhols users. Choose one to view to get a reward of 2 Warhols: \n \n';
       let contentSelector;
       let actualTaskID;
 
       // Randomly select 5 items from the table.
-      while( currentCreativeSelection.length < MAX_LIST_DISPLAY ){
-          // Set up the numbers usig minus 1 so that the numbers will read the list properly.
-          let randNum = (Math.ceil( Math.random() * rows.length ) -1 );
+      while( randomCreativeSelection.length < MAX_LIST_DISPLAY ){
+        // Set up the numbers usig minus 1 so that the numbers will read the list properly.
+        let randNum = (Math.ceil( Math.random() * rows.length ) -1 );
 
-          if( currentCreativeSelection.indexOf( randNum ) > -1 ) continue;
+        if( randomCreativeSelection.indexOf( randNum ) > -1 ) continue;
 
-          currentCreativeSelection[ currentCreativeSelection.length ] = randNum;
+        randomCreativeSelection[ randomCreativeSelection.length ] = randNum;
 
       }
 
-      // Prepare all of the tasks for display.
-      // Keep track of which items were selected inside currentCreativeSelection as an array.
+      // 'UPDATE accounts SET mode = ? WHERE owner =?', [ newMode, userID ], function( error, updatedMode ){
+      
+      console.log(randomCreativeSelection);
 
-      for ( let i = 0; i < ( currentCreativeSelection.length ) ; i++) {
+      let temp = randomCreativeSelection.toString(); // Convert the temporary array into a string so we can save it on the database.
+
+      connection.query( 'UPDATE accounts SET rand_list = ? WHERE owner =?', [ temp, userID ], function( error, listCurrent ){
+
+        connection.release();
+
+        if ( error ) throw error;
+
+        // Prepare all of the tasks for display.
+        // Keep track of which items were selected inside currentCreativeSelection as an array.
+
+      });
+
+      for ( let i = 0; i < ( randomCreativeSelection.length ) ; i++) {
           
           taskListDisplay += '/' + ( i + 1 ) + ' ';
-          contentSelector = currentCreativeSelection[i];
+          contentSelector = randomCreativeSelection[i];
           actualTaskID = rows[ contentSelector ].task_id;
           taskListDisplay += rows[ contentSelector ].description;
           taskListDisplay += '\n \n';
@@ -1286,7 +1297,7 @@ function GetCreativeContent( callback ){
 
       return callback( error, taskListDisplay );
 
-    });
+      });
 
   });
 
@@ -1371,54 +1382,59 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
 
   pool.getConnection( function( err, connection ) {
 
-    connection.query('SELECT * FROM tasks', function( error, rows ){
+    connection.query( 'SELECT * FROM tasks', function( error, rows ){
 
-      connection.release();
+      if ( error ) throw error;    
 
-      if ( error ) throw error;
-          
       // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
       if ( taskNumber >= 1 && taskNumber <= 5 ) {
           
         // Retrieve the corresponding item number from the random selection made when the user selected the /creative option.
         // We use minus 1 to offset the reading of the array.
-        let contentSelector = currentCreativeSelection[ ( taskNumber - 1 ) ];
-
-        let taskID = rows[ contentSelector ].task_id;
-        let taskURL = rows[ contentSelector ].url; // Content address.
-        let warholValue = rows[ contentSelector ].price; // Content price, as in how many Warhols are earned by watching this media.
+        connection.query( 'SELECT rand_list FROM accounts WHERE owner =' + userID, function( error, currentList ){
           
-        let viewedIncrement = ( ( rows[ contentSelector ].viewed ) + 1 ); // Update how many times the chosen content has been viewed.
+          
+          // let temp = currentList[0].rand_list;
+          // let temp = [];
+          let temp = currentList[0].rand_list.split(","); // 
+          console.log( Number( temp[0] ) );
 
-        pool.getConnection( function( err, connection ) {
+          
+          let contentSelector = Number(temp[ ( taskNumber - 1 ) ]);
+
+          let taskID = rows[ contentSelector ].task_id;
+          let taskURL = rows[ contentSelector ].url; // Content address.
+          let warholValue = rows[ contentSelector ].price; // Content price, as in how many Warhols are earned by watching this media.
+          
+          let viewedIncrement = ( ( rows[ contentSelector ].viewed ) + 1 ); // Update how many times the chosen content has been viewed.
 
           connection.query('UPDATE tasks SET viewed = ? WHERE task_id = ?', [ viewedIncrement , taskID ] , function( error, viewResult ){
-            
+
             connection.release();
 
             if (error) throw error;
             
           });
 
-        });
+          GetBalance( userID, function(error, result){ // Function talks to database and requires a callback.
 
-        // Reset the random list to nothing so that if someone decides to use a command with a number nothing will happen.
-        currentCreativeSelection = [];
+            let newBalance = ( warholValue + result );
 
-        GetBalance( userID, function(error, result){ // Function talks to database and requires a callback.
-            
-          let newBalance = ( warholValue + result );
+            AddWarhols( userID, newBalance ); // Function talks to database but does not require a callback.
 
-          AddWarhols( userID, newBalance ); // Function talks to database but does not require a callback.
+            return bot.sendMessage( userID, `You now have more Warhols. Enjoy! The link for the content is ${ taskURL }`, { markup });
 
-          return bot.sendMessage( userID, `You now have more Warhols. Enjoy! The link for the content is ${ taskURL }`, { markup });
+          });
 
         });
 
       }
 
     });
-    
+
+    // Reset the random list to nothing so that if someone decides to use a command with a number nothing will happen.
+    // currentCreativeSelection = []
+
   });
 
 }
