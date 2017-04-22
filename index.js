@@ -152,8 +152,8 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
     [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
   );
   
-  currentCreativeSelection = [];
-  currentGiftSelection = [];
+  // currentCreativeSelection = [];
+  // currentGiftSelection = [];
 
   // Check the Warhols database to see if the user already has an account.
 
@@ -566,27 +566,33 @@ bot.on('ask.whatisit', msg => {
 
 bot.on( GIFT_ECON, msg => {
 
-    if ( warholMode == 1 ){ // If we are in get mode...
+    getMode( msg.from.id, function( error, currentMode ){
+    
+      if ( currentMode == 1 ){ // If we are in get mode...
 
-      let markup = bot.keyboard([
-        [ BACK_BUTTON ]], { resize: true }
-      );
+        let markup = bot.keyboard([
+          [ BACK_BUTTON ]], { resize: true }
+        );
 
-      GetGiftsContent( function( error, content ){
+        setMode( msg.from.id, 3 ); // Set to get/gift
 
-        return bot.sendMessage( msg.from.id, `${ content }`, { markup } );
+        GetGiftsContent( msg.from.id, function( error, content ){
 
-      });
+          return bot.sendMessage( msg.from.id, `${ content }`, { markup } );
 
-    } else if ( warholMode == 2 ) { // If we are in spend mode...
+        });
 
-      let markup = bot.keyboard([
-        [ GIFT_RANDOM ], [ GIFT_FOUNTAIN ] ], { resize: true }
-      );
+      } else if ( currentMode == 2 ) { // If we are in spend mode...
 
-      return bot.sendMessage( msg.from.id, `Give Warhols to everybody with the Warhols /fountain\nGive Warhols to a person at /random`, { markup });
+        let markup = bot.keyboard([
+          [ GIFT_RANDOM ], [ GIFT_FOUNTAIN ] ], { resize: true }
+        );
 
-    }
+        return bot.sendMessage( msg.from.id, `Give Warhols to everybody with the Warhols /fountain\nGive Warhols to a person at /random`, { markup });
+
+      }
+
+    });
 
 });
 
@@ -766,7 +772,7 @@ bot.on( '/*' , msg => {
 
       });
 
-    } else if ( warholMode == 7 ){ // Make sure we are in speculation mode.
+    } else if ( currentMode == 7 ){ // Make sure we are in speculation mode.
 
       let betAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
 
@@ -884,7 +890,7 @@ bot.on( YES_BUTTON, msg => {
         
       // 
 
-      warholMode = 0;
+      // warholMode = 0;
 
       return bot.sendMessage( msg.from.id, `Enjoy! Your account has been credited with ${ warholValue } Warhols`, { markup });
 
@@ -1330,38 +1336,52 @@ function GetCreativeContent( userID, callback ){
 // Selects five random items from the gifts for users to choose from.
 // Function is called when the user selects '/gift' in '/get' mode.
 
-function GetGiftsContent( callback ){
+function GetGiftsContent( userID, callback ){
 
   pool.getConnection(function(err, connection) {
 
     // Retrieve the list of gifts available from the gifts table.
-    connection.query('SELECT * FROM gifts', function( error, rows ){
+    connection.query('SELECT * FROM gifts', function( error, gifts ){
 
       if ( error ) throw error;
 
+      let randomGiftSelection = [];
       let giftListDisplay = 'Perform an act of kindness to pay forward for your Warhols. You will get rewarded a random amount by the gods of gratitude. \n \n';
-      let giftSelector;
-      let actualGiftID;
-
+      
       // Randomly select 5 items from the gifts table.
-      while( currentGiftSelection.length < MAX_LIST_DISPLAY ){
+      while( randomGiftSelection.length < MAX_LIST_DISPLAY ){
         // Set up the numbers using minus 1 so that the numbers will read the list properly.
-        let randNum = ( Math.ceil( Math.random() * rows.length ) ); // Temporarily removed -1
+        let randNum = ( Math.ceil( Math.random() * gifts.length ) ); // Temporarily removed -1
 
-        if( currentGiftSelection.indexOf( randNum ) > -1 ) continue;
+        if( randomGiftSelection.indexOf( randNum ) > -1 ) continue;
 
-        currentGiftSelection[ currentGiftSelection.length ] = randNum;
+        randomGiftSelection[ randomGiftSelection.length ] = randNum;
 
       }
 
       // Prepare all of the tasks for display.
       // Keep track of which items were selected inside currentCreativeSelection as an array.
 
-      for ( let i = 0; i < ( currentGiftSelection.length ) ; i++ ) {
+      console.log( randomGiftSelection );
+
+      let temp = randomGiftSelection.toString(); // Convert the temporary array into a string so we can save it on the database.
+
+      connection.query( 'UPDATE accounts SET rand_list = ? WHERE owner =?', [ temp, userID ], function( error, listCurrent ){
+
+        connection.release();
+
+        if ( error ) throw error;
+
+        // Prepare all of the tasks for display.
+        // Keep track of which items were selected inside currentCreativeSelection as an array.
+
+      });
+
+      for ( let i = 0; i < ( randomGiftSelection.length ) ; i++ ) {
           
         giftListDisplay += '/' + ( i + 1 ) + ' '; // The number the user will select
 
-        giftListDisplay += rows[ ( currentGiftSelection[i] - 1 ) ].description; // The description of the gift
+        giftListDisplay += gifts[ ( randomGiftSelection[i] - 1 ) ].description; // The description of the gift
 
         giftListDisplay += '\n \n'; // Spaces for the string for the next line
           
@@ -1405,7 +1425,7 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
 
   pool.getConnection( function( err, connection ) {
 
-    connection.query( 'SELECT * FROM tasks', function( error, rows ){
+    connection.query( 'SELECT * FROM tasks', function( error, creativeContent ){
 
       if ( error ) throw error;    
 
@@ -1416,7 +1436,6 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
         // We use minus 1 to offset the reading of the array.
         connection.query( 'SELECT rand_list FROM accounts WHERE owner =' + userID, function( error, currentList ){
           
-          
           // let temp = currentList[0].rand_list;
           // let temp = [];
           let temp = currentList[0].rand_list.split(","); // 
@@ -1424,11 +1443,11 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
           
           let contentSelector = Number(temp[ ( taskNumber - 1 ) ]);
 
-          let taskID = rows[ contentSelector ].task_id;
-          let taskURL = rows[ contentSelector ].url; // Content address.
-          let warholValue = rows[ contentSelector ].price; // Content price, as in how many Warhols are earned by watching this media.
+          let taskID = creativeContent[ contentSelector ].task_id; // The id of the content in the database table.
+          let taskURL = creativeContent[ contentSelector ].url; // Content address.
+          let warholValue = creativeContent[ contentSelector ].price; // Content price, as in how many Warhols are earned by watching this media.
           
-          let viewedIncrement = ( ( rows[ contentSelector ].viewed ) + 1 ); // Update how many times the chosen content has been viewed.
+          let viewedIncrement = ( ( creativeContent[ contentSelector ].viewed ) + 1 ); // Update how many times the chosen content has been viewed.
 
           connection.query('UPDATE tasks SET viewed = ? WHERE task_id = ?', [ viewedIncrement , taskID ] , function( error, viewResult ){
 
@@ -1469,29 +1488,42 @@ function DisplayGiftContent( userID, giftNumber, markup ){
 
   pool.getConnection(function(err, connection) {
 
-    connection.query('SELECT * FROM gifts', function( error, rows ){
+    connection.query('SELECT * FROM gifts', function( error, giftContent ){
 
-      connection.release();
-      
       if ( error ) throw error;
 
       // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
       if ( giftNumber >= 1 && giftNumber <= 5 ) {
 
-        // Retrieve the corresponding item number from the random selection made when the user selected the /gift option.
-        // We use minus 1 to offset the reading of the array.
-        let contentSelector = currentGiftSelection[ ( giftNumber - 1 ) ];
+        connection.query( 'SELECT rand_list FROM accounts WHERE owner =' + userID, function( error, currentList ){
           
-        let giftDescription = rows[ ( contentSelector - 1 ) ].description;
-          
-        currentGiftSelection = []; // Reset the gift selection.
+          // let temp = currentList[0].rand_list;
+          // let temp = [];
+          let temp = currentList[0].rand_list.split(","); // 
+          console.log( Number( temp[0] ) );
 
-        currentGiftSelection[0] = contentSelector; // Remember the selection of the user.
-          
-        // Need to add an extra step to prompt the user with a 'yes' or 'no' answer if they will commit to the gift.
+          let contentSelector = Number(temp[ ( giftNumber - 1 ) ]);
 
-        return bot.sendMessage( userID, `Will you ${ giftDescription }? \n /yes or /no ?`, { markup });
+          // Retrieve the corresponding item number from the random selection made when the user selected the /gift option.
+          // We use minus 1 to offset the reading of the array.
+          // let contentSelector = giftContent[ ( giftNumber - 1 ) ];
             
+          let giftDescription = giftContent[ ( contentSelector - 1 ) ].description;
+          
+          // connection.query( 'UPDATE accounts SET mode = ? WHERE owner = ?', [ newMode, userID ], function( error, updatedMode ){
+
+          connection.query( 'UPDATE accounts SET rand_list = ? WHERE owner = ?', [ contentSelector, userID ], function( error, selectionPending){
+
+            // currentGiftSelection[0] = contentSelector; // Remember the selection of the user.
+              
+            // Need to add an extra step to prompt the user with a 'yes' or 'no' answer if they will commit to the gift.
+
+            return bot.sendMessage( userID, `Will you ${ giftDescription }? \n /yes or /no ?`, { markup });
+
+          });
+            
+        });
+
       }
 
     });
