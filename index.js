@@ -848,108 +848,119 @@ bot.on( '/*' , msg => {
 
 bot.on( YES_BUTTON, msg => {
 
-    if ( warholMode == 1 ){ // Verify that they are in gift mode.
+    getMode( msg.from.id, function( error, currentMode ){
 
-      let markup = bot.keyboard([
-        [ BACK_BUTTON ]], { resize: true }
-      );
+      if ( currentMode == 3 ){ // Verify that they are in gift mode.
 
-      var warholValue = (Math.ceil( Math.random() * RAND_GIFT_RANGE ) -1 );          
+        let markup = bot.keyboard([
+          [ BACK_BUTTON ]], { resize: true }
+        );
 
-      GetBalance( msg.from.id, function( error, result ){
+        var warholValue = (Math.ceil( Math.random() * RAND_GIFT_RANGE ) -1 );          
 
-        let newBalance;
+        GetBalance( msg.from.id, function( error, result ){
 
-        newBalance = ( warholValue + result );
-          
-        AddWarhols( msg.from.id, newBalance );
+          let newBalance;
+
+          newBalance = ( warholValue + result );
             
-      });
+          AddWarhols( msg.from.id, newBalance );
+              
+        });
 
-      pool.getConnection(function(err, connection) {
+        pool.getConnection(function(err, connection) {
 
-        connection.query('SELECT viewed FROM gifts WHERE task_id =' + currentGiftSelection[0] , function( error, timesViewed ){
+          connection.query( 'SELECT rand_list FROM accounts WHERE owner =' + msg.from.id, function( error, selectedGift ){
 
-          if ( error ) throw error;
+            // let temp = Number( selectedGift[0].rand_list );
 
-          let viewedIncrement = ( ( timesViewed[0].viewed ) + 1 );
-          
-          connection.query('UPDATE gifts SET viewed = ? WHERE task_id = ?', [ viewedIncrement, currentGiftSelection[0] ], function( error, viewResult ){
+            connection.query( 'SELECT viewed FROM gifts WHERE task_id =' + selectedGift[0].rand_list, function( error, timesViewed ){
 
-            connection.release();
+              if ( error ) throw error;
 
-            if ( error ) throw error;
+              let viewedIncrement = ( ( timesViewed[0].viewed ) + 1 );
+              
+              connection.query('UPDATE gifts SET viewed = ? WHERE task_id = ?', [ viewedIncrement, selectedGift[0].rand_list ], function( error, viewResult ){
 
-            currentGiftSelection = [];
+                connection.release();
+
+                if ( error ) throw error;
+
+                resetRandList( msg.from.id );
+                setMode( msg.from.id, 0 );
+
+              });
+            
+            });
 
           });
 
         });
+          
+        // 
 
-      });
+        // warholMode = 0;
+
+        return bot.sendMessage( msg.from.id, `Enjoy! Your account has been credited with ${ warholValue } Warhols`, { markup });
+
+      } else if ( warholMode == 2 ) { // Verify that they are in spend mode.
         
-      // 
+        let markup = bot.keyboard([
+          [ BACK_BUTTON ]], { resize: true }
+        );
 
-      // warholMode = 0;
+        warholMode = 0;
 
-      return bot.sendMessage( msg.from.id, `Enjoy! Your account has been credited with ${ warholValue } Warhols`, { markup });
+        // Add the submitted content to the database.
+        AddCreativeContent( msg.from.id, msg.from.first_name, contentSubmission );
 
-    } else if ( warholMode == 2 ) { // Verify that they are in spend mode.
-      
-      let markup = bot.keyboard([
-        [ BACK_BUTTON ]], { resize: true }
-      );
+        // Subtract Warhols from the account of the user.
+        SubtractWarhols( msg.from.id, 10 );
 
-      warholMode = 0;
+        // Post to WarholsChannel New Content
+        if ( typeof msg.from.last_name != "undefined" ){ // if the user does not have a last name
 
-      // Add the submitted content to the database.
-      AddCreativeContent( msg.from.id, msg.from.first_name, contentSubmission );
+          var contentName = ( msg.from.first_name+' '+ msg.from.last_name );
 
-      // Subtract Warhols from the account of the user.
-      SubtractWarhols( msg.from.id, 10 );
+        } else {  
+          
+          var contentName = ( msg.from.first_name );
 
-      // Post to WarholsChannel New Content
-      if ( typeof msg.from.last_name != "undefined" ){ // if the user does not have a last name
+        }
 
-        var contentName = ( msg.from.first_name+' '+ msg.from.last_name );
+        if ( typeof msg.from.username != "undefined" ){ // if the user does not have a username
 
-      } else {  
+            var contentUser = ( ' - @' + msg.from.username );
+
+        } else  {  
+          
+          var contentUser = (' ');
         
-        var contentName = ( msg.from.first_name );
-
-      }
-
-      if ( typeof msg.from.username != "undefined" ){ // if the user does not have a username
-
-           var contentUser = ( ' - @' + msg.from.username );
-
-      } else  {  
+        }
         
-        var contentUser = (' ');
-      
-      }
-      
-      requestify.post('https://maker.ifttt.com/trigger/new_content/with/key/' + custom_data[5] , { // IFTTT secret key.
+        requestify.post('https://maker.ifttt.com/trigger/new_content/with/key/' + custom_data[5] , { // IFTTT secret key.
 
-        value1: ( contentName + contentUser ) , // telegram user.
-        value2: contentSubmission[1] , // content title.
-        value3: contentSubmission[0] // content URL.
+          value1: ( contentName + contentUser ) , // telegram user.
+          value2: contentSubmission[1] , // content title.
+          value3: contentSubmission[0] // content URL.
 
-      })
+        })
 
-      .then( function( response ) {
+        .then( function( response ) {
 
-        // Get the response and write to console
-        response.body;
-        // console.log('IFTTT: ' + response.body);
+          // Get the response and write to console
+          response.body;
+          // console.log('IFTTT: ' + response.body);
 
-      }); // End of WarholsChannel content posting routine.
+        }); // End of WarholsChannel content posting routine.
 
-      contentSubmission = [];
+        contentSubmission = [];
 
-      return bot.sendMessage( msg.from.id, `Excellent! Your content is now available for viewing and 10 Warhols have been subtracted from your account.`, { markup });
+        return bot.sendMessage( msg.from.id, `Excellent! Your content is now available for viewing and 10 Warhols have been subtracted from your account.`, { markup });
 
-  } 
+    }
+
+  });
 
 });
 
