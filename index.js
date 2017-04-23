@@ -94,13 +94,6 @@ const DESCRIPTION_MAX_LENGTH = 140; // How long a description of content is allo
 
 var eventName = 'test';
 
-// Holds the random selection of five items to be selected from by the user. The list is changed every time the user selects the 'creative' option when selecting 'get'
-// It also serves to filter out any numbered commands (i.e. /4, /21, etc.)
-
-var currentCreativeSelection = []; 
-var currentGiftSelection = [];
-
-
 // Holds two items submitted by a user in spend/creative mode: 
 // - url for the content.
 // - description of the content.
@@ -533,7 +526,7 @@ bot.on('ask.coupon', msg => {
 bot.on('ask.url', msg => {
   
   let content = msg.text;
-  
+
   if ( isUrl( content ) == true ){ // Check if the url is a valid one.
 
         contentSubmission[0] = content; // save the url for review by the user.
