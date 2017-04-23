@@ -1508,20 +1508,14 @@ function DisplayGiftContent( userID, giftNumber, markup ){
 
         connection.query( 'SELECT rand_list FROM accounts WHERE owner =' + userID, function( error, currentList ){
           
-          // let temp = currentList[0].rand_list;
-          // let temp = [];
           let temp = currentList[0].rand_list.split(","); // 
           
           let contentSelector = Number(temp[ ( giftNumber - 1 ) ]);
 
           // Retrieve the corresponding item number from the random selection made when the user selected the /gift option.
-          // We use minus 1 to offset the reading of the array.
-          // let contentSelector = giftContent[ ( giftNumber - 1 ) ];
             
           let giftDescription = giftContent[ ( contentSelector - 1 ) ].description;
           
-          // connection.query( 'UPDATE accounts SET mode = ? WHERE owner = ?', [ newMode, userID ], function( error, updatedMode ){
-
           connection.query( 'UPDATE accounts SET rand_list = ? WHERE owner = ?', [ contentSelector, userID ], function( error, selectionPending){
 
             // currentGiftSelection[0] = contentSelector; // Remember the selection of the user.
