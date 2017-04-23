@@ -260,7 +260,7 @@ function resetRandList( userID ){
 
     let resetList = "";
     
-    connection.query( 'UPDATE accounts SET rand_list = ? WHERE owner = ?', [ resetList, userID ], function( error, resetList ){
+    connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ resetList, userID ], function( error, resetList ){
 
       connection.release();
 
@@ -878,17 +878,17 @@ bot.on( YES_BUTTON, msg => {
 
         pool.getConnection(function(err, connection) {
 
-          connection.query( 'SELECT rand_list FROM accounts WHERE owner =' + msg.from.id, function( error, selectedGift ){
+          connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, selectedGift ){
 
-            // let temp = Number( selectedGift[0].rand_list );
+            // let temp = Number( selectedGift[0].temp_user_data );
 
-            connection.query( 'SELECT viewed FROM gifts WHERE task_id =' + selectedGift[0].rand_list, function( error, timesViewed ){
+            connection.query( 'SELECT viewed FROM gifts WHERE task_id =' + selectedGift[0].temp_user_data, function( error, timesViewed ){
 
               if ( error ) throw error;
 
               let viewedIncrement = ( ( timesViewed[0].viewed ) + 1 );
               
-              connection.query( 'UPDATE gifts SET viewed = ? WHERE task_id = ?', [ viewedIncrement, selectedGift[0].rand_list ], function( error, viewResult ){
+              connection.query( 'UPDATE gifts SET viewed = ? WHERE task_id = ?', [ viewedIncrement, selectedGift[0].temp_user_data ], function( error, viewResult ){
 
                 connection.release();
 
@@ -1322,7 +1322,7 @@ function GetCreativeContent( userID, callback ){
 
       let temp = randomCreativeSelection.toString(); // Convert the temporary array into a string so we can save it on the database.
 
-      connection.query( 'UPDATE accounts SET rand_list = ? WHERE owner =?', [ temp, userID ], function( error, listCurrent ){
+      connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner =?', [ temp, userID ], function( error, listCurrent ){
 
         connection.release();
 
@@ -1385,7 +1385,7 @@ function GetGiftsContent( userID, callback ){
 
       let temp = randomGiftSelection.toString(); // Convert the temporary array into a string so we can save it on the database.
 
-      connection.query( 'UPDATE accounts SET rand_list = ? WHERE owner =?', [ temp, userID ], function( error, listCurrent ){
+      connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner =?', [ temp, userID ], function( error, listCurrent ){
 
         connection.release();
 
@@ -1453,11 +1453,11 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
           
         // Retrieve the corresponding item number from the random selection made when the user selected the /creative option.
         // We use minus 1 to offset the reading of the array.
-        connection.query( 'SELECT rand_list FROM accounts WHERE owner =' + userID, function( error, currentList ){
+        connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + userID, function( error, currentList ){
           
-          // let temp = currentList[0].rand_list;
+          // let temp = currentList[0].temp_user_data;
           // let temp = [];
-          let temp = currentList[0].rand_list.split(","); // 
+          let temp = currentList[0].temp_user_data.split(","); // 
           console.log( Number( temp[0] ) );
           
           let contentSelector = Number(temp[ ( taskNumber - 1 ) ]);
@@ -1514,16 +1514,16 @@ function DisplayGiftContent( userID, giftNumber, markup ){
       // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
       if ( giftNumber >= 1 && giftNumber <= 5 ) {
 
-        connection.query( 'SELECT rand_list FROM accounts WHERE owner =' + userID, function( error, currentList ){
+        connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + userID, function( error, currentList ){
           
-          let temp = currentList[0].rand_list.split(","); // 
+          let temp = currentList[0].temp_user_data.split(","); // 
           
           let contentSelector = Number(temp[ ( giftNumber - 1 ) ]); // Pad the number so we can use it to retreive the selection from the array.
     
           let giftDescription = giftContent[ ( contentSelector - 1 ) ].description; // Get the description of the gift.
           
-          // Save the selection of the user in the rand_list field for the yes/no confirmation.
-          connection.query( 'UPDATE accounts SET rand_list = ? WHERE owner = ?', [ contentSelector, userID ], function( error, selectionPending){
+          // Save the selection of the user in the temp_user_data field for the yes/no confirmation.
+          connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ contentSelector, userID ], function( error, selectionPending){
 
             return bot.sendMessage( userID, `Will you ${ giftDescription }? \n /yes or /no ?`, { markup });
 
