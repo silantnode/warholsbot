@@ -533,7 +533,7 @@ bot.on('ask.coupon', msg => {
 bot.on('ask.url', msg => {
   
   let content = msg.text;
-
+  
   if ( isUrl( content ) == true ){ // Check if the url is a valid one.
 
         contentSubmission[0] = content; // save the url for review by the user.
