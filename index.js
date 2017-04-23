@@ -1517,11 +1517,7 @@ function DisplayGiftContent( userID, giftNumber, markup ){
           let giftDescription = giftContent[ ( contentSelector - 1 ) ].description;
           
           connection.query( 'UPDATE accounts SET rand_list = ? WHERE owner = ?', [ contentSelector, userID ], function( error, selectionPending){
-
-            // currentGiftSelection[0] = contentSelector; // Remember the selection of the user.
-              
-            // Need to add an extra step to prompt the user with a 'yes' or 'no' answer if they will commit to the gift.
-
+            
             return bot.sendMessage( userID, `Will you ${ giftDescription }? \n /yes or /no ?`, { markup });
 
           });
