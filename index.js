@@ -880,7 +880,7 @@ bot.on( YES_BUTTON, msg => {
 
               let viewedIncrement = ( ( timesViewed[0].viewed ) + 1 );
               
-              connection.query('UPDATE gifts SET viewed = ? WHERE task_id = ?', [ viewedIncrement, selectedGift[0].rand_list ], function( error, viewResult ){
+              connection.query( 'UPDATE gifts SET viewed = ? WHERE task_id = ?', [ viewedIncrement, selectedGift[0].rand_list ], function( error, viewResult ){
 
                 connection.release();
 
@@ -1361,8 +1361,8 @@ function GetGiftsContent( userID, callback ){
       
       // Randomly select 5 items from the gifts table.
       while( randomGiftSelection.length < MAX_LIST_DISPLAY ){
-        // Set up the numbers using minus 1 so that the numbers will read the list properly.
-        let randNum = ( Math.ceil( Math.random() * gifts.length ) ); // Temporarily removed -1
+        
+        let randNum = ( Math.ceil( Math.random() * gifts.length ) );
 
         if( randomGiftSelection.indexOf( randNum ) > -1 ) continue;
 
@@ -1511,8 +1511,7 @@ function DisplayGiftContent( userID, giftNumber, markup ){
           // let temp = currentList[0].rand_list;
           // let temp = [];
           let temp = currentList[0].rand_list.split(","); // 
-          console.log( Number( temp[0] ) );
-
+          
           let contentSelector = Number(temp[ ( giftNumber - 1 ) ]);
 
           // Retrieve the corresponding item number from the random selection made when the user selected the /gift option.
