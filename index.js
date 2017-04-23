@@ -361,7 +361,7 @@ bot.on( SPEND_BUTTON, msg => {
           [ GIFT_ECON ],[ CREATIVE_ECON ],[ SPECULATIVE_ECON ]], { resize: true }
         ); 
 
-        setMode( msg.from.id, 3 ); // Entering spend mode.
+        setMode( msg.from.id, 4 ); // Entering spend mode.
 
         return bot.sendMessage( msg.from.id, `How do you want to spend Warhols?`, { markup });
 
@@ -393,7 +393,7 @@ bot.on( CREATIVE_ECON, msg => {
       
       });
 
-    } else if ( currentMode == 2 ){ // We are in spend mode...
+    } else if ( currentMode == 4 ){ // We are in spend mode...
 
       GetBalance( msg.from.id, function( error, balance ){
 
@@ -416,8 +416,16 @@ bot.on( PUBLISH_BUTTON , msg => {
 
   // Need a way to prevent the publish command from being invoked or set warhol mode in case people want to short cut to publish without
   // stepping through all of the other menus.
+  
+  getMode( msg.from.id, function( error, currentMode){
 
-  return bot.sendMessage( msg.from.id, `Enter the URL for the content.`, { ask: 'url' });
+    if ( currentMode == 4 ){
+
+      return bot.sendMessage( msg.from.id, `Enter the URL for the content.`, { ask: 'url' });
+
+    }
+
+  });
 
 });
 
