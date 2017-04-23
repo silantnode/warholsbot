@@ -527,19 +527,35 @@ bot.on('ask.url', msg => {
   
   let content = msg.text;
 
-  if ( isUrl( content ) == true ){ // Check if the url is a valid one.
+  getMode( msg.from.id, function( error, currentMode ){
 
-        contentSubmission[0] = content; // save the url for review by the user.
-        return bot.sendMessage( msg.from.id, `Now enter a 140 character description of the content.`, { ask: 'whatisit' });
+    if ( isUrl( content ) == true ){ // Check if the url is a valid one.
 
-    } else {
+        pool.getConnection(function(err, connection) {
+
+          // connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?', [ newMode, userID ], function( error, updatedMode ){
+
+          connection.query( 'UPDATE accounts SET temp_user_data =?  WHERE = owner ?' + msg.from.id, [ content, userID ], function( error, confirmedContent){
+            
+            connection.release();
+
+            if ( error ) throw error;
+
+            return bot.sendMessage( msg.from.id, `Now enter a 140 character description of the content.`, { ask: 'whatisit' });
+
+          });
+
+        });
+
+      } else {
 
         return bot.sendMessage( msg.from.id, `You have not entered a valid web address. Please try again using the proper formatting.`, { ask: 'url'});
 
     }
 
-});
+  });
 
+});
 
 
 bot.on('ask.whatisit', msg => {
