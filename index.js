@@ -525,8 +525,7 @@ bot.on('ask.coupon', msg => {
 
 bot.on('ask.url', msg => {
   
-  let content = msg.text;
-
+  
   getMode( msg.from.id, function( error, currentMode ){
 
     if ( isUrl( content ) == true ){ // Check if the url is a valid one.
@@ -534,6 +533,8 @@ bot.on('ask.url', msg => {
         pool.getConnection(function(err, connection) {
 
           // connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?', [ newMode, userID ], function( error, updatedMode ){
+          
+          let content = msg.text;
 
           connection.query( 'UPDATE accounts SET temp_user_data =?  WHERE = owner ?' + msg.from.id, [ content, userID ], function( error, confirmedContent){
             
