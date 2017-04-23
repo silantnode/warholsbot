@@ -1345,7 +1345,7 @@ function GetCreativeContent( userID, callback ){
 
 
 // Selects five random items from the gifts for users to choose from.
-// Function is called when the user selects '/gift' in '/get' mode.
+// Function is called when the user selects '/gift' in '/get' mode (3).
 
 function GetGiftsContent( userID, callback ){
 
@@ -1364,7 +1364,7 @@ function GetGiftsContent( userID, callback ){
         
         let randNum = ( Math.ceil( Math.random() * gifts.length ) );
 
-        if( randomGiftSelection.indexOf( randNum ) > -1 ) continue;
+        if( randomGiftSelection.indexOf( randNum ) > -1 ) continue; // Makes sure that the random number selected does not already exist in the list.
 
         randomGiftSelection[ randomGiftSelection.length ] = randNum;
 
@@ -1510,14 +1510,13 @@ function DisplayGiftContent( userID, giftNumber, markup ){
           
           let temp = currentList[0].rand_list.split(","); // 
           
-          let contentSelector = Number(temp[ ( giftNumber - 1 ) ]);
-
-          // Retrieve the corresponding item number from the random selection made when the user selected the /gift option.
-            
-          let giftDescription = giftContent[ ( contentSelector - 1 ) ].description;
+          let contentSelector = Number(temp[ ( giftNumber - 1 ) ]); // Pad the number so we can use it to retreive the selection from the array.
+    
+          let giftDescription = giftContent[ ( contentSelector - 1 ) ].description; // Get the description of the gift.
           
+          // Save the selection of the user in the rand_list field for the yes/no confirmation.
           connection.query( 'UPDATE accounts SET rand_list = ? WHERE owner = ?', [ contentSelector, userID ], function( error, selectionPending){
-            
+
             return bot.sendMessage( userID, `Will you ${ giftDescription }? \n /yes or /no ?`, { markup });
 
           });
