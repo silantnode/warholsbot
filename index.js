@@ -525,10 +525,6 @@ bot.on('ask.coupon', msg => {
 
 bot.on('ask.url', msg => {
   
-  // let content = msg.text;
-  // console.log(content);
-  // console.log(msg.from.id);
-
   getMode( msg.from.id, function( error, currentMode ){
 
     if ( isUrl( msg.text ) == true ){ // Check if the url is a valid one.
