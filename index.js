@@ -396,7 +396,9 @@ bot.on( CREATIVE_ECON, msg => {
 
         } else {
 
-        return bot.sendMessage( msg.from.id, `You can /publish your content for 10 Warhols. Your current balance is ${ balance } Warhols`, { markup } );
+          setMode( msg.from.id, 9 );
+
+          return bot.sendMessage( msg.from.id, `You can /publish your content for 10 Warhols. Your current balance is ${ balance } Warhols`, { markup } );
 
         // Function for reading url and descriptive text from the user and sending it to the database.
 
@@ -420,7 +422,7 @@ bot.on( PUBLISH_BUTTON , msg => {
   
   getMode( msg.from.id, function( error, currentMode ){
 
-    if ( currentMode == 4 ){
+    if ( currentMode == 9 ){
 
       return bot.sendMessage( msg.from.id, `Enter the URL for the content.`, { ask: 'url' });
 
@@ -535,7 +537,7 @@ bot.on('ask.url', msg => {
   
   getMode( msg.from.id, function( error, currentMode ){
 
-    if ( currentMode == 4 ) {
+    if ( currentMode == 9 ) {
 
       if ( msg.text.startsWith('/') == true ){
 
