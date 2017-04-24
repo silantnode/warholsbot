@@ -535,31 +535,39 @@ bot.on('ask.url', msg => {
   
   getMode( msg.from.id, function( error, currentMode ){
 
-    if ( isUrl( msg.text ) == true ){ // Check if the url is a valid one.
+    if ( currentMode == 4 ) {
 
-      pool.getConnection(function(err, connection) {
+      if ( msg.text.startsWith('/') == true ){
 
-      // If it is valid then save it to the temporary data field of the user.
+        // It's a command but just let /back do its job.
 
-        connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [  msg.text, msg.from.id ], function( error, confirmedContent){
-            
-          connection.release();
+      } else {
 
-          if ( error ) throw error;
+        if ( isUrl( msg.text ) == true ){ // Check if the url is a valid one.
 
-          return bot.sendMessage( msg.from.id, `Now enter a 140 character description of the content.`, { ask: 'whatisit' });
+          pool.getConnection(function(err, connection) {
 
-        });
+          // If it is valid then save it to the temporary data field of the user.
 
-      });
+            connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [  msg.text, msg.from.id ], function( error, confirmedContent){
+                
+              connection.release();
 
-    } else if ( msg.text == '/*' ) {
+              if ( error ) throw error;
 
-      // Do nothing and let the /back button do its thing.
+              return bot.sendMessage( msg.from.id, `Now enter a 140 character description of the content.`, { ask: 'whatisit' });
 
-    } else {
+            });
 
-      return bot.sendMessage( msg.from.id, `You have not entered a valid web address. Please try again using the proper formatting.`, { ask: 'url' });
+          });
+
+        } else {
+
+          return bot.sendMessage( msg.from.id, `You have not entered a valid web address. Please try again using the proper formatting.`, { ask: 'url' });
+
+        }
+
+      }
 
     }
 
@@ -569,47 +577,51 @@ bot.on('ask.url', msg => {
 
 
 bot.on('ask.whatisit', msg => {
-  
-  let urlDescription = msg.text;
 
-  if ( urlDescription.length > DESCRIPTION_MAX_LENGTH ) {
+  if ( msg.text.startsWith('/') == true ) {
 
-    return bot.sendMessage( msg.from.id, `Your description is longer than 140 charcters. Please shorten it.`, { ask: 'whatisit' });
+    // It's a command but just let /back do its job.
 
-  } else if ( urlDescription.length <= DESCRIPTION_MAX_LENGTH ) {
+  } else {
 
-    pool.getConnection( function (err, connection){
-      
-      // connection.query('SELECT mode FROM accounts WHERE owner =' + userID , function( error, currentMode ){
+    let urlDescription = msg.text;
 
-      connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, urlSubmission ){
+    if ( urlDescription.length > DESCRIPTION_MAX_LENGTH ) {
 
-        if ( error ) throw error;
+      return bot.sendMessage( msg.from.id, `Your description is longer than 140 charcters. Please shorten it.`, { ask: 'whatisit' });
 
-        let content = ( [ urlSubmission[0].temp_user_data, urlDescription ] ).toString();
+    } else if ( urlDescription.length <= DESCRIPTION_MAX_LENGTH ) {
 
-        console.log(content);
+      pool.getConnection( function (err, connection){
         
-        // connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [  msg.text, msg.from.id ], function( error, confirmedContent){
+        // connection.query('SELECT mode FROM accounts WHERE owner =' + userID , function( error, currentMode ){
 
-        connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ content , msg.from.id ], function( error, confirmedContent ){
+        connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, urlSubmission ){
 
           if ( error ) throw error;
 
-          connection.release();
+          let content = ( [ urlSubmission[0].temp_user_data, urlDescription ] ).toString();
 
-          return bot.sendMessage( msg.from.id, `${ urlDescription } ${ urlSubmission[0].temp_user_data } \n Please review your submission! \n \n Is the content correct? \n
-    /yes or /no` );
+          console.log(content);
+          
+          // connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [  msg.text, msg.from.id ], function( error, confirmedContent){
 
-         }); 
+          connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ content , msg.from.id ], function( error, confirmedContent ){
+
+            if ( error ) throw error;
+
+            connection.release();
+
+            return bot.sendMessage( msg.from.id, `${ urlDescription } ${ urlSubmission[0].temp_user_data } \n Please review your submission! \n \n Is the content correct? \n
+      /yes or /no` );
+
+          }); 
+
+          });
 
         });
 
-      });
-
-    } else if ( msg.text == '/*') {
-
-      // Do nothing and let the /back button do its thing.
+      }
 
     }
 
@@ -970,10 +982,6 @@ bot.on( YES_BUTTON, msg => {
 
         });
           
-        // 
-
-        // warholMode = 0;
-
         return bot.sendMessage( msg.from.id, `Enjoy! Your account has been credited with ${ warholValue } Warhols`, { markup });
 
       } else if ( currentMode == 4 ) { // Verify that they are in spend/creative mode.
@@ -982,56 +990,56 @@ bot.on( YES_BUTTON, msg => {
           [ BACK_BUTTON ]], { resize: true }
         );
 
-      pool.getConnection(function(err, connection){
+        pool.getConnection(function(err, connection){
 
-        connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, content ){
+          connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, content ){
 
-          connection.release();
+            connection.release();
 
-          if ( error ) throw error;
+            if ( error ) throw error;
 
-          content = content[0].temp_user_data.split(",");
+            content = content[0].temp_user_data.split(",");
 
-          // Add the submitted content to the database.
-          AddCreativeContent( msg.from.id, msg.from.first_name, content );
+            // Add the submitted content to the database.
+            AddCreativeContent( msg.from.id, msg.from.first_name, content );
 
-          // Subtract Warhols from the account of the user.
-          SubtractWarhols( msg.from.id, 10 );
+            // Subtract Warhols from the account of the user.
+            SubtractWarhols( msg.from.id, 10 );
 
-          // Post to WarholsChannel New Content
-          if ( typeof msg.from.last_name != "undefined" ){ // if the user does not have a last name
+            // Post to WarholsChannel New Content
+            if ( typeof msg.from.last_name != "undefined" ){ // if the user does not have a last name
 
-            var contentName = ( msg.from.first_name+' '+ msg.from.last_name );
+              var contentName = ( msg.from.first_name+' '+ msg.from.last_name );
 
-          } else {  
+            } else {  
           
-            var contentName = ( msg.from.first_name );
+              var contentName = ( msg.from.first_name );
 
-          }
+            }
 
-          if ( typeof msg.from.username != "undefined" ){ // if the user does not have a username
+            if ( typeof msg.from.username != "undefined" ){ // if the user does not have a username
 
-            var contentUser = ( ' - @' + msg.from.username );
+              var contentUser = ( ' - @' + msg.from.username );
 
-          } else  {  
+            } else  {  
           
-            var contentUser = (' ');
+              var contentUser = (' ');
         
-          }
+            }
         
-          requestify.post('https://maker.ifttt.com/trigger/new_content/with/key/' + custom_data[5] , { // IFTTT secret key.
+            requestify.post('https://maker.ifttt.com/trigger/new_content/with/key/' + custom_data[5] , { // IFTTT secret key.
 
-            value1: ( contentName + contentUser ) , // telegram user.
-            value2: content[1] , // content title.
-            value3: content[0] // content URL.
+              value1: ( contentName + contentUser ) , // telegram user.
+              value2: content[1] , // content title.
+              value3: content[0] // content URL.
 
-          })
+            })
 
-          .then( function( response ) {
+            .then( function( response ) {
 
-          // Get the response and write to console
-          response.body;
-          // console.log('IFTTT: ' + response.body);
+            // Get the response and write to console
+            response.body;
+            // console.log('IFTTT: ' + response.body);
 
           }); // End of WarholsChannel content posting routine.
           
@@ -1054,7 +1062,7 @@ bot.on( NO_BUTTON, msg => {
 
   getMode( msg.from.id, function( error, currentMode ){
 
-    if ( currentMode == 3 ){ 
+    if ( currentMode == 8 ){ 
 
       let markup = bot.keyboard([
         [ BACK_BUTTON ],[ GET_BUTTON ]], { resize: true }
@@ -1065,9 +1073,9 @@ bot.on( NO_BUTTON, msg => {
 
       return bot.sendMessage( msg.from.id, `Perhaps there is another good deed you are willing to perform isntead? \n Use use /get to find another or go /back to the main menu.`, { markup } );
 
-    } else if ( currentMode == 5 ){
+    } else if ( currentMode == 4 ){ // Verify that they are in spend mode.
 
-      return bot.sendMessage( msg.from.id, `Enter the URL for the content.` , { ask: 'url'});
+      return bot.sendMessage( msg.from.id, `Enter the URL for the content.` , { ask: 'url'} );
 
     }
 
