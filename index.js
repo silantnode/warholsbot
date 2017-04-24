@@ -137,17 +137,11 @@ var marketClosureId = 0;
 
 bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
   
-  warholMode = 0;
-  giftSpendMode = 0;
-
   // Display commands as handy buttons in the telegram interface.
   let markup = bot.keyboard([
     [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
   );
   
-  // currentCreativeSelection = [];
-  // currentGiftSelection = [];
-
   // Check the Warhols database to see if the user already has an account.
 
   pool.getConnection( function( err, connection ) {
@@ -180,6 +174,8 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
         if( error ) throw error;
       
       });
+
+      setMode( msg.from.id, 0 );
 
       return bot.sendMessage( msg.from.id, `Welcome ${ msg.from.first_name }! You're new here, right? That's ok! we created an account for you. Use the commands below to interact with your account.`, { markup } );
 
@@ -234,6 +230,8 @@ function getMode( userID, callback ){
 
       if ( error ) throw error;
       
+      console.log(currentMode[0].mode);
+
       return callback( error, currentMode[0].mode );
 
     });
@@ -388,9 +386,21 @@ bot.on( CREATIVE_ECON, msg => {
 
       GetBalance( msg.from.id, function( error, balance ){
 
+        if ( balance < 10 ){
+
+          let markup = bot.keyboard([
+            [ BACK_BUTTON ]], { resize: true }
+          );
+
+          return bot.sendMessage( msg.from.id, `You don't have enough Warhols to publish. Try and /get more Warhols`, { markup } );
+
+        } else {
+
         return bot.sendMessage( msg.from.id, `You can /publish your content for 10 Warhols. Your current balance is ${ balance } Warhols`, { markup: 'hide' } );
 
         // Function for reading url and descriptive text from the user and sending it to the database.
+
+        }
 
       });
 
@@ -408,7 +418,7 @@ bot.on( PUBLISH_BUTTON , msg => {
   // Need a way to prevent the publish command from being invoked or set warhol mode in case people want to short cut to publish without
   // stepping through all of the other menus.
   
-  getMode( msg.from.id, function( error, currentMode){
+  getMode( msg.from.id, function( error, currentMode ){
 
     if ( currentMode == 4 ){
 
@@ -782,6 +792,8 @@ bot.on( '/*' , msg => {
     
       let taskNumber = Number( ( ( msg.text ).slice( 1, 2 ) ) );
 
+      setMode( msg.from.id, 8 );
+
       DisplayGiftContent( msg.from.id, taskNumber, markup );
         
     } else if ( currentMode == 6 ) { // Make sure we are in spend/gift/random mode.
@@ -903,7 +915,7 @@ bot.on( YES_BUTTON, msg => {
 
     getMode( msg.from.id, function( error, currentMode ){
 
-      if ( currentMode == 3 ){ // Verify that they are in gift mode.
+      if ( currentMode == 8 ){ // Verify that they are in gift mode.
 
         let markup = bot.keyboard([
           [ BACK_BUTTON ]], { resize: true }
