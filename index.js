@@ -553,7 +553,7 @@ bot.on('ask.url', msg => {
 
       });
 
-    } else if ( msg.text == '/back' ) {
+    } else if ( msg.text == '/*' ) {
 
       // Do nothing and let the /back button do its thing.
 
@@ -607,7 +607,7 @@ bot.on('ask.whatisit', msg => {
 
       });
 
-    } else if ( msg.text == '/back') {
+    } else if ( msg.text == '/*') {
 
       // Do nothing and let the /back button do its thing.
 
