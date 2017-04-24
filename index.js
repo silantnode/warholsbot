@@ -618,7 +618,7 @@ bot.on( GIFT_ECON, msg => {
 
         });
 
-      } else if ( currentMode == 2 ) { // If we are in spend mode...
+      } else if ( currentMode == 4 ) { // If we are in spend mode...
 
         let markup = bot.keyboard([
           [ GIFT_RANDOM ], [ GIFT_FOUNTAIN ] ], { resize: true }
@@ -638,21 +638,25 @@ bot.on( [ GIFT_RANDOM, GIFT_FOUNTAIN ], msg => {
 
   // Ask the user how many Warhols they want to spend.
   
-  if ( warholMode == 2 ) { // Make sure they are in spend mode.
+  getMode( msg.from.id, function( error, currentMode ){
 
-    if ( msg.text == '/random' ) {
+    if ( currentMode == 4 ) { // Make sure they are in spend mode.
 
-      giftSpendMode = 1;
+      if ( msg.text == '/random' ) {
 
-    } else if ( msg.text == '/fountain' ) {
+        setMode( msg.from.id, 6 );
 
-      giftSpendMode = 2;
+      } else if ( msg.text == '/fountain' ) {
+
+        setMode( msg.from.id, 7 );
+
+      }
+
+      return bot.sendMessage( msg.from.id, `How many Warhols do you want to spend? \n /5 \n /10 \n /20`);
 
     }
 
-    return bot.sendMessage( msg.from.id, `How many Warhols do you want to spend? \n /5 \n /10 \n /20`);
-
-  }
+  });
 
 });
 
@@ -780,7 +784,7 @@ bot.on( '/*' , msg => {
 
       DisplayGiftContent( msg.from.id, taskNumber, markup );
         
-    } else if ( currentMode == 4 ) { // Make sure we are in spend/gift mode.
+    } else if ( currentMode == 6 ) { // Make sure we are in spend/gift/random mode.
     
       // Read from the second character in the message string.
       let warholAmount = Number( ( ( msg.text ).slice( 1, 3 ) ) );
@@ -794,21 +798,33 @@ bot.on( '/*' , msg => {
 
         } else if ( userBalance >= warholAmount ){
         
-          if ( giftSpendMode == 1 ){ // They have chosen to give to a random person.
-        
-            GiveWarholsRandom( msg.from.id, warholAmount, markup );
-        
-          } else if ( giftSpendMode == 2 ) { // They have chosen to give to the fountain.
-
-            ShareTheWealth( msg.from.id, warholAmount );
-
-          }
+          GiveWarholsRandom( msg.from.id, warholAmount, markup );
 
         }
 
       });
+    
+    } else if ( currentMode == 7 ){ // Make sure they are in spend/gift/fountain.
 
-    } else if ( currentMode == 7 ){ // Make sure we are in speculation mode.
+      // Read from the second character in the message string.
+      let warholAmount = Number( ( ( msg.text ).slice( 1, 3 ) ) );
+    
+      // Check if the amount they have selected does not exceed the amount available in their account.
+      GetBalance( msg.from.id, function( error, userBalance ){
+
+        if ( userBalance < warholAmount ){
+
+          return bot.sendMessage( msg.from.id, `You do not have enough warhols. Please choose a smaller amount or /get more warhols.`);
+
+        } else if ( userBalance >= warholAmount ){
+
+          ShareTheWealth( msg.from.id, warholAmount );
+
+        }
+      
+      });
+
+    } else if ( currentMode == 8 ){ // Make sure we are in speculation mode.
 
       let betAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
 
@@ -1016,19 +1032,26 @@ bot.on( YES_BUTTON, msg => {
 
 bot.on( NO_BUTTON, msg => {
 
-  if ( warholMode == 1 ){
+  getMode( msg.from.id, function( error, currentMode ){
 
-    let markup = bot.keyboard([
-      [ BACK_BUTTON ],[ GET_BUTTON ]], { resize: true }
-    );
+    if ( currentMode == 3 ){ 
 
-    return bot.sendMessage( msg.from.id, `Perhaps there is another good deed you are willing to perform isntead? \n Use use /get to find another or go /back to the main menu.`, { markup } );
+      let markup = bot.keyboard([
+        [ BACK_BUTTON ],[ GET_BUTTON ]], { resize: true }
+      );
 
-  } else if ( warholMode == 2 ){
+      resetRemoteData( msg.from.id );
+      setMode( msg.from.id, 0 );
 
-    return bot.sendMessage( msg.from.id, `Enter the URL for the content.` , { ask: 'url'});
+      return bot.sendMessage( msg.from.id, `Perhaps there is another good deed you are willing to perform isntead? \n Use use /get to find another or go /back to the main menu.`, { markup } );
 
-  }
+    } else if ( currentMode == 5 ){
+
+      return bot.sendMessage( msg.from.id, `Enter the URL for the content.` , { ask: 'url'});
+
+    }
+
+  });  
 
 });
 
@@ -1197,8 +1220,7 @@ function GiveWarholsRandom( userID, warholAmount, markup ){
 
         });        
 
-        warholMode = 0;
-        giftSpendMode = 0;
+        setMode( userID, 0 );
 
         return bot.sendMessage( userID, `Thank you for your gift! Your Warhols have been anonymously sent to a random person.`, { markup });
 
@@ -1283,6 +1305,8 @@ function ShareTheWealth( userID, fountainContribution ){
 
             });
 
+            setMode( userID, 0 );
+
             return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive ${ distroAmount } Warhols :D`, { markup });
 
           });
@@ -1291,6 +1315,8 @@ function ShareTheWealth( userID, fountainContribution ){
         } else {
 
           console.log('Fountain received new funds');
+
+          setMode( userID, 0 );
 
           return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
 
