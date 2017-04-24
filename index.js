@@ -386,17 +386,17 @@ bot.on( CREATIVE_ECON, msg => {
 
       GetBalance( msg.from.id, function( error, balance ){
 
-        if ( balance < 10 ){
-
-          let markup = bot.keyboard([
+        let markup = bot.keyboard([
             [ BACK_BUTTON ]], { resize: true }
-          );
+        );
+
+        if ( balance < 10 ){
 
           return bot.sendMessage( msg.from.id, `You don't have enough Warhols to publish. Try and /get more Warhols`, { markup } );
 
         } else {
 
-        return bot.sendMessage( msg.from.id, `You can /publish your content for 10 Warhols. Your current balance is ${ balance } Warhols`, { markup: 'hide' } );
+        return bot.sendMessage( msg.from.id, `You can /publish your content for 10 Warhols. Your current balance is ${ balance } Warhols`, { markup } );
 
         // Function for reading url and descriptive text from the user and sending it to the database.
 
@@ -537,25 +537,29 @@ bot.on('ask.url', msg => {
 
     if ( isUrl( msg.text ) == true ){ // Check if the url is a valid one.
 
-        pool.getConnection(function(err, connection) {
+      pool.getConnection(function(err, connection) {
 
-          // connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?', [ newMode, userID ], function( error, updatedMode ){
-          
-          connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [  msg.text, msg.from.id ], function( error, confirmedContent){
+      // If it is valid then save it to the temporary data field of the user.
+
+        connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [  msg.text, msg.from.id ], function( error, confirmedContent){
             
-            connection.release();
+          connection.release();
 
-            if ( error ) throw error;
+          if ( error ) throw error;
 
-            return bot.sendMessage( msg.from.id, `Now enter a 140 character description of the content.`, { ask: 'whatisit' });
-
-          });
+          return bot.sendMessage( msg.from.id, `Now enter a 140 character description of the content.`, { ask: 'whatisit' });
 
         });
 
-      } else {
+      });
 
-        return bot.sendMessage( msg.from.id, `You have not entered a valid web address. Please try again using the proper formatting.`, { ask: 'url'});
+    } else if ( msg.text == '/back' ) {
+
+      // Do nothing and let the /back button do its thing.
+
+    } else {
+
+      return bot.sendMessage( msg.from.id, `You have not entered a valid web address. Please try again using the proper formatting.`, { ask: 'url' });
 
     }
 
@@ -602,6 +606,10 @@ bot.on('ask.whatisit', msg => {
         });
 
       });
+
+    } else if ( msg.text == '/back') {
+
+      // Do nothing and let the /back button do its thing.
 
     }
 
@@ -836,7 +844,7 @@ bot.on( '/*' , msg => {
       
       });
 
-    } else if ( currentMode == 8 ){ // Make sure we are in speculation mode.
+    } else if ( currentMode == 9 ){ // Make sure we are in speculation mode.
 
       let betAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
 
@@ -921,7 +929,7 @@ bot.on( YES_BUTTON, msg => {
           [ BACK_BUTTON ]], { resize: true }
         );
 
-        var warholValue = (Math.ceil( Math.random() * RAND_GIFT_RANGE ) -1 );          
+        var warholValue = (Math.ceil( Math.random() * RAND_GIFT_RANGE ) + 1 );          
 
         GetBalance( msg.from.id, function( error, result ){
 
