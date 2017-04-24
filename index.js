@@ -234,8 +234,6 @@ function getMode( userID, callback ){
 
       if ( error ) throw error;
       
-      console.log(userID +' has been updated to mode '+ currentMode[0].mode);
-
       return callback( error, currentMode[0].mode );
 
     });
@@ -948,8 +946,6 @@ bot.on( YES_BUTTON, msg => {
           [ BACK_BUTTON ]], { resize: true }
         );
 
-// connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, urlSubmission ){
-
       pool.getConnection(function(err, connection){
 
         connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, content ){
@@ -1004,6 +1000,7 @@ bot.on( YES_BUTTON, msg => {
           }); // End of WarholsChannel content posting routine.
           
           resetRemoteData( msg.from.id );
+          setMode( msg.from.id, 0 );
 
           return bot.sendMessage( msg.from.id, `Excellent! Your content is now available for viewing and 10 Warhols have been subtracted from your account.`, { markup });
 
