@@ -230,7 +230,7 @@ function getMode( userID, callback ){
 
       if ( error ) throw error;
       
-      console.log(currentMode[0].mode);
+      // console.log(currentMode[0].mode);
 
       return callback( error, currentMode[0].mode );
 
