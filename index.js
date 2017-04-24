@@ -247,7 +247,7 @@ function getMode( userID, callback ){
 
 // Resets the random list field in the account of a specified user
 
-function resetRandList( userID ){
+function resetRemoteData( userID ){
 
   pool.getConnection(function(err, connection) {
 
@@ -558,21 +558,44 @@ bot.on('ask.url', msg => {
 
 bot.on('ask.whatisit', msg => {
   
-  let incomingText = msg.text;
+  let urlDescription = msg.text;
 
-  if ( incomingText.length > DESCRIPTION_MAX_LENGTH ) {
+  if ( urlDescription.length > DESCRIPTION_MAX_LENGTH ) {
 
     return bot.sendMessage( msg.from.id, `Your description is longer than 140 charcters. Please shorten it.`, { ask: 'whatisit' });
 
-  } else if ( incomingText.length <= DESCRIPTION_MAX_LENGTH ) {
+  } else if ( urlDescription.length <= DESCRIPTION_MAX_LENGTH ) {
 
-    contentSubmission[1] = incomingText;
+    pool.getConnection( function (err, connection){
+      
+      // connection.query('SELECT mode FROM accounts WHERE owner =' + userID , function( error, currentMode ){
 
-    return bot.sendMessage( msg.from.id, `${ contentSubmission[1] } ${ contentSubmission[0] } \n Please review your submission! \n \n 
-    Is the content correct? \n
+      connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, urlSubmission ){
+
+        if ( error ) throw error;
+
+        let content = ( [ urlSubmission[0].temp_user_data, urlDescription ] ).toString();
+
+        console.log(content);
+        
+        // connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [  msg.text, msg.from.id ], function( error, confirmedContent){
+
+        connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ content , msg.from.id ], function( error, confirmedContent ){
+
+          if ( error ) throw error;
+
+          connection.release();
+
+          return bot.sendMessage( msg.from.id, `${ urlDescription } ${ urlSubmission[0].temp_user_data } \n Please review your submission! \n \n Is the content correct? \n
     /yes or /no` );
 
-  }
+         }); 
+
+        });
+
+      });
+
+    }
 
 });
 
@@ -857,6 +880,7 @@ bot.on( '/*' , msg => {
 });
 
 
+// currentList[0].temp_user_data.split(",");
 
 // These two are only relevant for the end routine of a user who has chosen to earn Warhols through the gift economy.
 // I could do an overall better implementation of this but for now I am just trying to get this project done. I am sure you understand how deadlines work.
@@ -901,7 +925,7 @@ bot.on( YES_BUTTON, msg => {
 
                 if ( error ) throw error;
 
-                resetRandList( msg.from.id );
+                resetRemoteData( msg.from.id );
                 setMode( msg.from.id, 0 );
 
               });
@@ -924,52 +948,68 @@ bot.on( YES_BUTTON, msg => {
           [ BACK_BUTTON ]], { resize: true }
         );
 
-        // Add the submitted content to the database.
-        AddCreativeContent( msg.from.id, msg.from.first_name, contentSubmission );
+// connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, urlSubmission ){
 
-        // Subtract Warhols from the account of the user.
-        SubtractWarhols( msg.from.id, 10 );
+      pool.getConnection(function(err, connection){
 
-        // Post to WarholsChannel New Content
-        if ( typeof msg.from.last_name != "undefined" ){ // if the user does not have a last name
+        connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, content ){
 
-          var contentName = ( msg.from.first_name+' '+ msg.from.last_name );
+          connection.release();
 
-        } else {  
+          if ( error ) throw error;
+
+          content = content[0].temp_user_data.split(",");
+
+          // Add the submitted content to the database.
+          AddCreativeContent( msg.from.id, msg.from.first_name, content );
+
+          // Subtract Warhols from the account of the user.
+          SubtractWarhols( msg.from.id, 10 );
+
+          // Post to WarholsChannel New Content
+          if ( typeof msg.from.last_name != "undefined" ){ // if the user does not have a last name
+
+            var contentName = ( msg.from.first_name+' '+ msg.from.last_name );
+
+          } else {  
           
-          var contentName = ( msg.from.first_name );
+            var contentName = ( msg.from.first_name );
 
-        }
+          }
 
-        if ( typeof msg.from.username != "undefined" ){ // if the user does not have a username
+          if ( typeof msg.from.username != "undefined" ){ // if the user does not have a username
 
             var contentUser = ( ' - @' + msg.from.username );
 
-        } else  {  
+          } else  {  
           
-          var contentUser = (' ');
+            var contentUser = (' ');
         
-        }
+          }
         
-        requestify.post('https://maker.ifttt.com/trigger/new_content/with/key/' + custom_data[5] , { // IFTTT secret key.
+          requestify.post('https://maker.ifttt.com/trigger/new_content/with/key/' + custom_data[5] , { // IFTTT secret key.
 
-          value1: ( contentName + contentUser ) , // telegram user.
-          value2: contentSubmission[1] , // content title.
-          value3: contentSubmission[0] // content URL.
+            value1: ( contentName + contentUser ) , // telegram user.
+            value2: content[1] , // content title.
+            value3: content[0] // content URL.
 
-        })
+          })
 
-        .then( function( response ) {
+          .then( function( response ) {
 
           // Get the response and write to console
           response.body;
           // console.log('IFTTT: ' + response.body);
 
-        }); // End of WarholsChannel content posting routine.
+          }); // End of WarholsChannel content posting routine.
+          
+          resetRemoteData( msg.from.id );
 
-        contentSubmission = [];
+          return bot.sendMessage( msg.from.id, `Excellent! Your content is now available for viewing and 10 Warhols have been subtracted from your account.`, { markup });
 
-        return bot.sendMessage( msg.from.id, `Excellent! Your content is now available for viewing and 10 Warhols have been subtracted from your account.`, { markup });
+        });
+
+      });
 
     }
 
@@ -1492,7 +1532,7 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
           });
 
           setMode( userID, 0 );
-          resetRandList( userID );
+          resetRemoteData( userID );
 
         });
 
@@ -1521,7 +1561,7 @@ function DisplayGiftContent( userID, giftNumber, markup ){
 
         connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + userID, function( error, currentList ){
           
-          let temp = currentList[0].temp_user_data.split(","); // 
+          let temp = currentList[0].temp_user_data.split(","); // Convert the array of numbers in strings into an array.
           
           let contentSelector = Number(temp[ ( giftNumber - 1 ) ]); // Pad the number so we can use it to retreive the selection from the array.
     
