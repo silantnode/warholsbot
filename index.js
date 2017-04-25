@@ -998,7 +998,7 @@ bot.on( '/*' , msg => {
           [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
         );
 
-        // warholMode = 0;
+        setMode( msg.from.id, 0);
 
         return bot.sendMessage( msg.from.id, `Thanks for your investment! You will get a notification when the market closes. Good luck!`, { markup } );
 
