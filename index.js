@@ -282,72 +282,37 @@ bot.on( '/help', msg => {
 
 bot.on( BALANCE_BUTTON, msg => {
   
-  // Display commands as handy buttons in the telegram interface.
-  let markup = bot.keyboard([
-    [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
-  );
+    // Display commands as handy buttons in the telegram interface.
+    let markup = bot.keyboard([
+        [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+    );
 
+    // check if the fountain has been activated and if so display message (compare last activity with last fountain date)
+    // check if market has closed (compare last activity with current date, check market closure inbetween)
+    newMarketActivity( msg.from.id, function( error, callback ){
 
-// to do: check if the fountain has been activated and if so display message (compare last activity with last fountain date)
+      // console.log( callback );
 
+    });
 
-//    console.log( callback );
+  // if market closures happened, see if any bets were won. Display message of sorry or congratulation
 
+    GetBalance( msg.from.id, function( error, result ){
 
-  GetBalance( msg.from.id, function( error, result ){  // at this point "result" loads the balance since last interaction, bets not processed yet
-
-
-  // check if there are new market closures that can lead to new balance
-
-
-      newMarketActivity( msg.from.id, function( error, newMarketNewBalance ){ // this function's result is an array with two values
-      var anyClosures = newMarketNewBalance[0];  // first value of array is 1 for new closures, 0 for none of such
-      var betsBalance = newMarketNewBalance[1];  // second result of array is new updated user balance with any new bets won
-      console.log('callback -- anyClosures: ' + anyClosures);
-      console.log('callback -- new balance after winnings: ' + betsBalance);   
-      console.log('previous balance: ' + result);
-
-      var wonWarhols = (betsBalance-result); // Warhols won, can be zero if no wins
-
-      if ( anyClosures == 1 ) {
-
-        if (betsBalance > result) {  // if new balance is higher, user won Warhols on market - YAY to speculation!
-
-          return bot.sendMessage( msg.from.id, `The market has closed and you have won ${ wonWarhols } Warhols. Your new balance is ${ betsBalance } Warhols. Use the /spend to change this situation.`, { markup });
-
-        }
-        else {
-
-          return bot.sendMessage( msg.from.id, `The market has closed and unfortunately you didn't win. You currently have ${ betsBalance } Warhols. Use the /spend to change this situation.`, { markup });
-
-        } 
-      
-      }
-
-      else { // markets have not closed, just diplay "old" balance which has not changed
-
-        // Check what the balance is... 
-        if ( result == 0 ) {
+    // Check what the balance is... 
+    if ( result == 0 ) {
         // If there are no Warhols on the account encourage them to get some Warhols.
-          return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Use the /get command to change this situation.`, { markup });
+        return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Use the /get command to change this situation.`, { markup });
         
-         } else {
-        // If they have Warhols encourage them to spend some Warhols.
-          return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Use the /spend to change this situation.`, { markup });
-       
-        }
+    } else {
+        // If they have Warhols encourage them to spend the Warhols.
+        return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Choose how to /spend your warhols. Or /get some more.`, { markup });
 
-      }
+    }
 
-      }); // end of market check routine
+  });
 
-
-
-
-
-  });  // end of getBalance function
-
-}); // end of bot.on balance button
+});
 
 
 // Get warhols.
