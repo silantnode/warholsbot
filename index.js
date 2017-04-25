@@ -952,7 +952,7 @@ bot.on( '/*' , msg => {
 
           // write to market bets database: user id, user name, flavor, amount, time bet placed
 
-          var currentDate = new Date();
+          let currentDate = new Date();
 
           if (typeof msg.from.last_name != "undefined"){ // if the user does not have a last name
 
@@ -969,6 +969,8 @@ bot.on( '/*' , msg => {
             // SELECT viewed FROM gifts WHERE task_id =' + currentGiftSelection[0] , function( error, timesViewed ){
 
             connection.query( 'SELECT temp_user_data FROM accounts WHERE owner=' + msg.from.id, function( error, flavorChoice ){
+
+              if( error ) throw error;
 
               let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: flavorChoice, amount: betAmount, credited: 0 };
 
