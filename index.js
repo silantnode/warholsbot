@@ -307,7 +307,7 @@ bot.on( BALANCE_BUTTON, msg => {
         
     } else {
         // If they have Warhols encourage them to spend the Warhols.
-        return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Use the /spend to change this situation.`, { markup });
+        return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Choose how to /spend your warhols. Or /get some more.`, { markup });
 
     }
 
@@ -393,9 +393,17 @@ bot.on( CREATIVE_ECON, msg => {
 
         if ( balance < 10 ){
 
+          let markup = bot.keyboard([
+            [ BACK_BUTTON ]], { resize: true }
+          );
+
           return bot.sendMessage( msg.from.id, `You don't have enough Warhols to publish. Try and /get more Warhols`, { markup } );
 
         } else {
+
+          let markup = bot.keyboard([
+            [ '/publish' ],[ BACK_BUTTON ]], { resize: true }
+          );
 
           setMode( msg.from.id, 9 );
 
@@ -418,6 +426,10 @@ bot.on( CREATIVE_ECON, msg => {
 
 bot.on( PUBLISH_BUTTON , msg => {
 
+  let markup = bot.keyboard([
+      [ BACK_BUTTON ]], { resize: true }
+  );
+
   // Need a way to prevent the publish command from being invoked or set warhol mode in case people want to short cut to publish without
   // stepping through all of the other menus.
   
@@ -425,7 +437,7 @@ bot.on( PUBLISH_BUTTON , msg => {
 
     if ( currentMode == 9 ){
 
-      return bot.sendMessage( msg.from.id, `Enter the URL for the content.`, { ask: 'url' });
+      return bot.sendMessage( msg.from.id, `Enter the URL for the content.`, { ask: 'url' }, { markup } );
 
     }
 
@@ -639,8 +651,7 @@ bot.on('ask.whatisit', msg => {
 
                 setMode( msg.from.id, 11 );
 
-                return bot.sendMessage( msg.from.id, `${ urlDescription } ${ urlSubmission[0].temp_user_data } \n Please review your submission! \n \n Is the content correct? \n
-        /yes or /no` );
+                return bot.sendMessage( msg.from.id, `Please review your submission! \n${ urlDescription } ${ urlSubmission[0].temp_user_data } \n  \nIs the content correct? \n/yes or /no` );
 
               }); 
 
@@ -682,7 +693,7 @@ bot.on( GIFT_ECON, msg => {
       } else if ( currentMode == 4 ) { // If we are in spend mode...
 
         let markup = bot.keyboard([
-          [ GIFT_RANDOM ], [ GIFT_FOUNTAIN ] ], { resize: true }
+          [ GIFT_FOUNTAIN ], [ GIFT_RANDOM ] ], { resize: true }
         );
 
         return bot.sendMessage( msg.from.id, `Give Warhols to everybody with the Warhols /fountain\nGive Warhols to a person at /random`, { markup });
@@ -696,6 +707,12 @@ bot.on( GIFT_ECON, msg => {
   
 
 bot.on( [ GIFT_RANDOM, GIFT_FOUNTAIN ], msg => {
+
+  let markup = bot.keyboard([
+
+  [ BACK_BUTTON ]], { resize: true }
+
+  );
 
   // Ask the user how many Warhols they want to spend.
   
@@ -713,7 +730,7 @@ bot.on( [ GIFT_RANDOM, GIFT_FOUNTAIN ], msg => {
 
       }
 
-      return bot.sendMessage( msg.from.id, `How many Warhols do you want to spend? \n /5 \n /10 \n /20`);
+      return bot.sendMessage( msg.from.id, `How many Warhols do you want to give? \n /5 \n /10 \n /20`, { markup } );
 
     }
 
@@ -735,7 +752,7 @@ bot.on( SPECULATIVE_ECON, msg => {
 
   GetBalance( msg.from.id, function( error, balance ){
     
-    return bot.sendMessage( msg.from.id, `Are you ready to take some risks and maybe get some rewards?. How would you like to invest your Warhols: \n /market exchange of flavors \n /ranking of cultural appreciation`, { markup } );
+    return bot.sendMessage( msg.from.id, `Are you ready to take some risks and maybe get some rewards?. How would you like to invest your Warhols: \n\n /market exchange of flavors \n /ranking of cultural appreciation`, { markup } );
 
   });
   
@@ -752,7 +769,7 @@ bot.on( SPEC_MARKET , msg => {
 
     let markup = bot.keyboard([
 
-      [SPEC_FLAVOR_1],[SPEC_FLAVOR_2],[SPEC_FLAVOR_3],[ BACK_BUTTON ]], { resize: true }
+      [SPEC_FLAVOR_1 , SPEC_FLAVOR_2 , SPEC_FLAVOR_3],[ BACK_BUTTON ]], { resize: true }
 
     );
 
@@ -779,7 +796,7 @@ bot.on( SPEC_MARKET , msg => {
        
         }
 
-        return bot.sendMessage( msg.from.id, `The Warhols exchange market will close in ` + timetoClosing + `. In which flavor would you like to invest? \n `+ SPEC_FLAVOR_1 +` Warhols \n `+ SPEC_FLAVOR_2 +` Warhols \n `+ SPEC_FLAVOR_3 +` Warhols`, { markup } );
+        return bot.sendMessage( msg.from.id, `The Warhols exchange market will close in ` + timetoClosing + `. In which flavor would you like to invest? \n\n `+ SPEC_FLAVOR_1 +` Warhols \n `+ SPEC_FLAVOR_2 +` Warhols \n `+ SPEC_FLAVOR_3 +` Warhols`, { markup } );
     
     });
     
@@ -793,6 +810,12 @@ bot.on( SPEC_MARKET , msg => {
 // assign marketFlavor variable according to the choice of flavor by the user
 
 bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {  
+
+  let markup = bot.keyboard([
+
+  [ BACK_BUTTON ]], { resize: true }
+
+  );
 
   if ( msg.text == SPEC_FLAVOR_1 ) {
 
@@ -814,7 +837,7 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
   warholMode = 3;
 
   var flavorName = msg.text.substr(1);
-  return bot.sendMessage( msg.from.id, `How many shares of ` + flavorName + ` Warhols you want to buy? \n /5 \n /10 \n /20 \n /50 \n /100`);
+  return bot.sendMessage( msg.from.id, `How many shares of ` + flavorName + ` Warhols you want to buy? \n /5 \n /10 \n /20 \n /50 \n /100`, { markup } );
 
 });
 
@@ -1102,7 +1125,7 @@ bot.on( NO_BUTTON, msg => {
       resetRemoteData( msg.from.id );
       setMode( msg.from.id, 0 );
 
-      return bot.sendMessage( msg.from.id, `Perhaps there is another good deed you are willing to perform isntead? \n Use use /get to find another or go /back to the main menu.`, { markup } );
+      return bot.sendMessage( msg.from.id, `Perhaps there is another good deed you are willing to perform instead? \n/get more gift suggestions or go /back to the main menu.`, { markup } );
 
     } else if ( currentMode == 11 ){ // Verify that they are in spend mode.
 
@@ -1611,7 +1634,7 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
 
             AddWarhols( userID, newBalance ); // Function talks to database but does not require a callback.
 
-            return bot.sendMessage( userID, `You now have more Warhols. Enjoy! The link for the content is ${ taskURL }`, { markup });
+            return bot.sendMessage( userID, `Here's the link to view the content you selected: \n${ taskURL }\n\nEnjoy!`, { markup });
 
           });
 
@@ -1654,7 +1677,7 @@ function DisplayGiftContent( userID, giftNumber, markup ){
           // Save the selection of the user in the temp_user_data field for the yes/no confirmation.
           connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ contentSelector, userID ], function( error, selectionPending){
 
-            return bot.sendMessage( userID, `Will you ${ giftDescription }? \n /yes or /no ?`, { markup });
+            return bot.sendMessage( userID, `Will you ${ giftDescription }? \n\n/yes, I will. \n/no, thanks.`, { markup });
 
           });
             
