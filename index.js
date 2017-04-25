@@ -223,8 +223,6 @@ function getMode( userID, callback ){
 
   pool.getConnection(function(err, connection) {
 
-    // SELECT viewed FROM gifts WHERE task_id =' + currentGiftSelection[0] , function( error, timesViewed ){
-
     connection.query('SELECT mode FROM accounts WHERE owner =' + userID , function( error, currentMode ){
 
       connection.release();
@@ -958,24 +956,30 @@ bot.on( '/*' , msg => {
 
           if (typeof msg.from.last_name != "undefined"){ // if the user does not have a last name
 
-            var betOwner = (msg.from.first_name +' '+ msg.from.last_name);
+            let betOwner = (msg.from.first_name +' '+ msg.from.last_name);
 
           } else {  
 
-            var betOwner = (msg.from.first_name);
+            let betOwner = (msg.from.first_name);
 
           }
 
-          let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
-
           pool.getConnection(function(err, connection) {
 
-            connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
-            
-              connection.release();
+            // SELECT viewed FROM gifts WHERE task_id =' + currentGiftSelection[0] , function( error, timesViewed ){
 
-              if( error ) throw error;
-      
+            connection.query( 'SELECT temp_user_data FROM accounts WHERE owner=' + msg.from.id, function( error, flavorChoice ){
+
+              let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: flavorChoice, amount: betAmount, credited: 0 };
+
+              connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
+              
+                connection.release();
+
+                if( error ) throw error;
+        
+              });
+
             });
 
           });
