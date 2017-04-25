@@ -950,7 +950,7 @@ bot.on( '/*' , msg => {
       // Check what the balance is... 
         if ( result < betAmount ) {
 
-          return bot.sendMessage( msg.from.id, `You currently have only ${ result } Warhols. Please start with a lower investment.`, { markup: 'hide' });
+          return bot.sendMessage( msg.from.id, `You currently have only ${ result } Warhols. Please start with a lower investment.`);
         
         } else {   // Continue with the investment.
         
