@@ -937,7 +937,7 @@ bot.on( '/*' , msg => {
 
       let betAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
 
-      if(isNaN(betAmount)){
+      if(isNaN(betAmount)){  // if user types a command that is not a number, this can cause a bug, so betAmount must not be NaN.
 
         betAmount = 5;
 
