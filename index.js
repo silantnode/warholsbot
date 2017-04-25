@@ -820,9 +820,9 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
             
           connection.release();
 
-<<<<<<< HEAD
+
   setMode( msg.from.id, 12);
-=======
+
           if ( error ) throw error;
 
         }); 
@@ -846,7 +846,6 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
   setMode( msg.from.id, 12 );
 
   let flavorName = msg.text.substr(1);
->>>>>>> cb48b5185717d604e6c8d19be7d05dd61478ab85
 
   return bot.sendMessage( msg.from.id, `How many shares of ` + flavorName + ` Warhols you want to buy? \n /5 \n /10 \n /20 \n /50 \n /100`, { markup } );
 
