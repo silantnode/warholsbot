@@ -223,8 +223,6 @@ function getMode( userID, callback ){
 
   pool.getConnection(function(err, connection) {
 
-    // SELECT viewed FROM gifts WHERE task_id =' + currentGiftSelection[0] , function( error, timesViewed ){
-
     connection.query('SELECT mode FROM accounts WHERE owner =' + userID , function( error, currentMode ){
 
       connection.release();
@@ -817,26 +815,51 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
   );
 
-  if ( msg.text == SPEC_FLAVOR_1 ) {
+  pool.getConnection(function(err, connection){
 
-  marketFlavor = 1; 
-  // console.log(marketFlavor);
+      if ( msg.text == SPEC_FLAVOR_1 ) {
+      
+        connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ 1, msg.from.id ], function( error, flavorChoice ){
+          
+          connection.release();
 
-  } else if ( msg.text == SPEC_FLAVOR_2 ) {
+          if ( error ) throw error;
 
-  marketFlavor = 2; 
-  // console.log(marketFlavor);
+        });
 
-  } else if ( msg.text == SPEC_FLAVOR_3 ) {
+      marketFlavor = 1; 
+      // console.log(marketFlavor);
 
-  marketFlavor = 3; 
-  // console.log(marketFlavor);
+      } else if ( msg.text == SPEC_FLAVOR_2 ) {
 
-  }
+        connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ 2, msg.from.id ], function( error, flavorChoice ){
+            
+          connection.release();
 
-  warholMode = 3;
+          if ( error ) throw error;
 
-  var flavorName = msg.text.substr(1);
+        }); 
+      // console.log(marketFlavor);
+
+      } else if ( msg.text == SPEC_FLAVOR_3 ) {
+
+        connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ 3, msg.from.id ], function( error, flavorChoice ){
+          
+          connection.release();
+
+          if ( error ) throw error;
+
+        }); 
+      // console.log(marketFlavor);
+
+      }
+
+  });
+
+  setMode( msg.from.id, 12 );
+
+  let flavorName = msg.text.substr(1);
+
   return bot.sendMessage( msg.from.id, `How many shares of ` + flavorName + ` Warhols you want to buy? \n /5 \n /10 \n /20 \n /50 \n /100`, { markup } );
 
 });
@@ -929,28 +952,36 @@ bot.on( '/*' , msg => {
 
           // write to market bets database: user id, user name, flavor, amount, time bet placed
 
-          var currentDate = new Date();
+          let currentDate = new Date();
 
           if (typeof msg.from.last_name != "undefined"){ // if the user does not have a last name
 
-            var betOwner = (msg.from.first_name +' '+ msg.from.last_name);
+            let betOwner = (msg.from.first_name +' '+ msg.from.last_name);
 
           } else {  
 
-            var betOwner = (msg.from.first_name);
+            let betOwner = (msg.from.first_name);
 
           }
 
-          let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
-
           pool.getConnection(function(err, connection) {
 
-            connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
-            
-              connection.release();
+            // SELECT viewed FROM gifts WHERE task_id =' + currentGiftSelection[0] , function( error, timesViewed ){
+
+            connection.query( 'SELECT temp_user_data FROM accounts WHERE owner=' + msg.from.id, function( error, flavorChoice ){
 
               if( error ) throw error;
-      
+
+              let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: flavorChoice, amount: betAmount, credited: 0 };
+
+              connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
+              
+                connection.release();
+
+                if( error ) throw error;
+        
+              });
+
             });
 
           });
@@ -967,7 +998,7 @@ bot.on( '/*' , msg => {
           [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
         );
 
-        // warholMode = 0;
+        setMode( msg.from.id, 0);
 
         return bot.sendMessage( msg.from.id, `Thanks for your investment! You will get a notification when the market closes. Good luck!`, { markup } );
 
