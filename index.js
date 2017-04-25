@@ -973,7 +973,7 @@ bot.on( '/*' , msg => {
               if( error ) throw error;
 
  //             let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: flavorChoice, amount: betAmount, credited: 0 };
-              let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, flavor: flavorChoice, amount: betAmount, credited: 0 };
+              let newBet = { time: betDate, event: eventName, market_id: marketClosureId, user: msg.from.id, flavor: flavorChoice, amount: betAmount, credited: 0 };
 
               connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
               
