@@ -823,6 +823,8 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
       
         connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ 1, msg.from.id ], function( error, flavorChoice ){
           
+          connection.release();
+
           if ( error ) throw error;
 
         });
@@ -834,7 +836,9 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
         connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ 2, msg.from.id ], function( error, flavorChoice ){
             
-            if ( error ) throw error;
+          connection.release();
+
+          if ( error ) throw error;
 
         }); 
       // console.log(marketFlavor);
@@ -843,6 +847,8 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
         connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ 3, msg.from.id ], function( error, flavorChoice ){
           
+          connection.release();
+
           if ( error ) throw error;
 
         }); 
@@ -854,7 +860,8 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
   setMode( msg.from.id, 12 );
 
-  var flavorName = msg.text.substr(1);
+  let flavorName = msg.text.substr(1);
+
   return bot.sendMessage( msg.from.id, `How many shares of ` + flavorName + ` Warhols you want to buy? \n /5 \n /10 \n /20 \n /50 \n /100`, { markup } );
 
 });
