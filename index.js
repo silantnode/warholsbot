@@ -834,7 +834,7 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
           connection.release();
 
 
-  setMode( msg.from.id, 12);
+  // setMode( msg.from.id, 12);
 
           if ( error ) throw error;
 
@@ -937,6 +937,12 @@ bot.on( '/*' , msg => {
 
       let betAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
 
+      if(isNaN(betAmount)){
+
+        betAmount = 5;
+
+      }else{
+
       // check if user has enough balance, if not ask to choose other value
 
       GetBalance( msg.from.id, function( error, result ){
@@ -1008,6 +1014,8 @@ bot.on( '/*' , msg => {
 
       }); // end if balance enough
     
+    }
+
     }
 
   });
