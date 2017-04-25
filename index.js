@@ -968,12 +968,16 @@ bot.on( '/*' , msg => {
 
             // SELECT viewed FROM gifts WHERE task_id =' + currentGiftSelection[0] , function( error, timesViewed ){
 
-            connection.query( 'SELECT temp_user_data FROM accounts WHERE owner=' + msg.from.id, function( error, flavorChoice ){
+            connection.query( 'SELECT temp_user_data FROM accounts WHERE owner=' + msg.from.id, function( error, result ){
 
               if( error ) throw error;
 
+              let flavorChoice = result[0].temp_user_data;
+              console.log (flavorChoice);
+
+
  //             let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: flavorChoice, amount: betAmount, credited: 0 };
-              let newBet = { time: betDate, event: eventName, market_id: marketClosureId, user: msg.from.id, flavor: flavorChoice, amount: betAmount, credited: 0 };
+              let newBet = { time: betDate, event: eventName, market_id: marketClosureId, user: msg.from.id, name: msg.from.first_name, flavor: flavorChoice, amount: betAmount, credited: 0 };
 
               connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
               
