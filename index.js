@@ -817,24 +817,42 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
   );
 
-  if ( msg.text == SPEC_FLAVOR_1 ) {
+  pool.getConnection(function(err, connection){
 
-  marketFlavor = 1; 
-  // console.log(marketFlavor);
+      if ( msg.text == SPEC_FLAVOR_1 ) {
+      
+        connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ 1, msg.from.id ], function( error, flavorChoice ){
+          
+          if ( error ) throw error;
 
-  } else if ( msg.text == SPEC_FLAVOR_2 ) {
+        });
 
-  marketFlavor = 2; 
-  // console.log(marketFlavor);
+      marketFlavor = 1; 
+      // console.log(marketFlavor);
 
-  } else if ( msg.text == SPEC_FLAVOR_3 ) {
+      } else if ( msg.text == SPEC_FLAVOR_2 ) {
 
-  marketFlavor = 3; 
-  // console.log(marketFlavor);
+        connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ 2, msg.from.id ], function( error, flavorChoice ){
+            
+            if ( error ) throw error;
 
-  }
+        }); 
+      // console.log(marketFlavor);
 
-  warholMode = 3;
+      } else if ( msg.text == SPEC_FLAVOR_3 ) {
+
+        connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ 3, msg.from.id ], function( error, flavorChoice ){
+          
+          if ( error ) throw error;
+
+        }); 
+      // console.log(marketFlavor);
+
+      }
+
+  });
+
+  setMode( msg.from.id, 12 );
 
   var flavorName = msg.text.substr(1);
   return bot.sendMessage( msg.from.id, `How many shares of ` + flavorName + ` Warhols you want to buy? \n /5 \n /10 \n /20 \n /50 \n /100`, { markup } );
