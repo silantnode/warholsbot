@@ -746,6 +746,19 @@ bot.on( SPECULATIVE_ECON , msg => {
 
     betDate = new Date(); // this will be the time of their bet if they place one
     //console.log('betDate - ', betDate);
+
+    pool.getConnection(function(err, connection) {
+
+      connection.query( 'UPDATE accounts SET pre_bet1 = ? WHERE owner = ?', [ betDate, msg.from.id ], function( error, flavorChoice ){
+            
+        connection.release();
+
+        if ( error ) throw error;
+
+      });
+
+    });
+
     // to do: check if user has enough balance, if not ask to choose other value
 
 
@@ -959,7 +972,8 @@ bot.on( '/*' , msg => {
 
               if( error ) throw error;
 
-              let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: flavorChoice, amount: betAmount, credited: 0 };
+ //             let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: flavorChoice, amount: betAmount, credited: 0 };
+              let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, flavor: flavorChoice, amount: betAmount, credited: 0 };
 
               connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
               
