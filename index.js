@@ -157,6 +157,7 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
         if( rows[i].owner == msg.from.id ){
 
           // Send them a message welcoming them back.
+          setMode( msg.from.id, 0 );
           resetRemoteData( msg.from.id );
           return bot.sendMessage( msg.from.id, `Welcome back ${ msg.from.first_name }!`, { markup } );
           
@@ -740,25 +741,8 @@ bot.on( [ GIFT_RANDOM, GIFT_FOUNTAIN ], msg => {
 
 // The speculative economy, where everyone loses their shirt except for the socipaths.
 
-bot.on( SPECULATIVE_ECON, msg => {
 
-  let markup = bot.keyboard([
-
-    [ SPEC_MARKET ],[ SPEC_RANKING ],[ BACK_BUTTON ]], { resize: true }
-
-  );
-
-  GetBalance( msg.from.id, function( error, balance ){
-    
-    return bot.sendMessage( msg.from.id, `Are you ready to take some risks and maybe get some rewards?. How would you like to invest your Warhols: \n\n /market exchange of flavors \n /ranking of cultural appreciation`, { markup } );
-
-  });
-  
-});
-
-// If the user chooses the Market of flavors
-
-bot.on( SPEC_MARKET , msg => {
+bot.on( SPECULATIVE_ECON , msg => {
 
     betDate = new Date(); // this will be the time of their bet if they place one
     //console.log('betDate - ', betDate);
@@ -835,6 +819,9 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
         connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ 2, msg.from.id ], function( error, flavorChoice ){
             
           connection.release();
+
+
+  setMode( msg.from.id, 12);
 
           if ( error ) throw error;
 
