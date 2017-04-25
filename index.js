@@ -156,7 +156,8 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
         if( rows[i].owner == msg.from.id ){
 
-          // Send them a message welcoming them back. 
+          // Send them a message welcoming them back.
+          resetRemoteData( msg.from.id );
           return bot.sendMessage( msg.from.id, `Welcome back ${ msg.from.first_name }!`, { markup } );
           
         }
@@ -175,7 +176,7 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
       
       });
 
-      setMode( msg.from.id, 0 );
+      setMode( msg.from.id, 0 ); 
 
       return bot.sendMessage( msg.from.id, `Welcome ${ msg.from.first_name }! You're new here, right? That's ok! we created an account for you. Use the commands below to interact with your account.`, { markup } );
 
@@ -539,10 +540,18 @@ bot.on('ask.url', msg => {
 
     if ( currentMode == 9 ) {
 
-      if ( msg.text.startsWith('/') == true ){
+     if ( msg.text.startsWith('/') == true ) {
 
-        // It's a command but just let /back do its job.
+        if ( msg.text == '/back') {
 
+          // It's a command but just let /back do its job.
+
+        } else {
+
+          return bot.sendMessage( msg.from.id, `That was a command. Please enter a url.`, { ask: 'url' });
+
+        }
+        
       } else {
 
         if ( isUrl( msg.text ) == true ){ // Check if the url is a valid one.
@@ -556,6 +565,8 @@ bot.on('ask.url', msg => {
               connection.release();
 
               if ( error ) throw error;
+
+              setMode( msg.from.id, 10 ); 
 
               return bot.sendMessage( msg.from.id, `Now enter a 140 character description of the content.`, { ask: 'whatisit' });
 
@@ -580,52 +591,70 @@ bot.on('ask.url', msg => {
 
 bot.on('ask.whatisit', msg => {
 
-  if ( msg.text.startsWith('/') == true ) {
+  getMode( msg.from.id, function( error, currentMode ){
 
-    // It's a command but just let /back do its job.
+    if ( currentMode == 10 ){
 
-  } else {
+      if ( msg.text.startsWith('/') == true ) {
 
-    let urlDescription = msg.text;
+        if ( msg.text == '/back') {
 
-    if ( urlDescription.length > DESCRIPTION_MAX_LENGTH ) {
+          // It's a command but just let /back do its job.
 
-      return bot.sendMessage( msg.from.id, `Your description is longer than 140 charcters. Please shorten it.`, { ask: 'whatisit' });
+        } else {
 
-    } else if ( urlDescription.length <= DESCRIPTION_MAX_LENGTH ) {
+          return bot.sendMessage( msg.from.id, `That was a command. Please enter a description.`, { ask: 'whatisit' });
 
-      pool.getConnection( function (err, connection){
+        }
         
-        // connection.query('SELECT mode FROM accounts WHERE owner =' + userID , function( error, currentMode ){
+      } else {
 
-        connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, urlSubmission ){
+        let urlDescription = msg.text;
 
-          if ( error ) throw error;
+        if ( urlDescription.length > DESCRIPTION_MAX_LENGTH ) {
 
-          let content = ( [ urlSubmission[0].temp_user_data, urlDescription ] ).toString();
+          return bot.sendMessage( msg.from.id, `Your description is longer than 140 charcters. Please shorten it.`, { ask: 'whatisit' });
 
-          console.log(content);
+        } else if ( urlDescription.length <= DESCRIPTION_MAX_LENGTH ) {
+
+          pool.getConnection( function (err, connection){
           
-          // connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [  msg.text, msg.from.id ], function( error, confirmedContent){
+            // connection.query('SELECT mode FROM accounts WHERE owner =' + userID , function( error, currentMode ){
 
-          connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ content , msg.from.id ], function( error, confirmedContent ){
+            connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, urlSubmission ){
 
-            if ( error ) throw error;
+              if ( error ) throw error;
 
-            connection.release();
+              let content = ( [ urlSubmission[0].temp_user_data, urlDescription ] ).toString();
 
-            return bot.sendMessage( msg.from.id, `${ urlDescription } ${ urlSubmission[0].temp_user_data } \n Please review your submission! \n \n Is the content correct? \n
-      /yes or /no` );
+              console.log(content);
+            
+              // connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [  msg.text, msg.from.id ], function( error, confirmedContent){
 
-          }); 
+              connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ content , msg.from.id ], function( error, confirmedContent ){
+
+                if ( error ) throw error;
+
+                connection.release();
+
+                setMode( msg.from.id, 11 );
+
+                return bot.sendMessage( msg.from.id, `${ urlDescription } ${ urlSubmission[0].temp_user_data } \n Please review your submission! \n \n Is the content correct? \n
+        /yes or /no` );
+
+              }); 
+
+            });
 
           });
 
-        });
+        }
 
       }
+    
+    } 
 
-    }
+  });
 
 });
 
@@ -858,7 +887,7 @@ bot.on( '/*' , msg => {
       
       });
 
-    } else if ( currentMode == 9 ){ // Make sure we are in speculation mode.
+    } else if ( currentMode == 12 ){ // Make sure we are in speculation mode.
 
       let betAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
 
@@ -986,7 +1015,7 @@ bot.on( YES_BUTTON, msg => {
           
         return bot.sendMessage( msg.from.id, `Enjoy! Your account has been credited with ${ warholValue } Warhols`, { markup });
 
-      } else if ( currentMode == 4 ) { // Verify that they are in spend/creative mode.
+      } else if ( currentMode == 11 ) { // Verify that they are in spend/creative mode.
         
         let markup = bot.keyboard([
           [ BACK_BUTTON ]], { resize: true }
@@ -1075,8 +1104,10 @@ bot.on( NO_BUTTON, msg => {
 
       return bot.sendMessage( msg.from.id, `Perhaps there is another good deed you are willing to perform isntead? \n Use use /get to find another or go /back to the main menu.`, { markup } );
 
-    } else if ( currentMode == 4 ){ // Verify that they are in spend mode.
+    } else if ( currentMode == 11 ){ // Verify that they are in spend mode.
 
+      resetRemoteData( msg.from.id );
+      setMode( msg.from.id, 9);
       return bot.sendMessage( msg.from.id, `Enter the URL for the content.` , { ask: 'url'} );
 
     }
