@@ -10,7 +10,11 @@ var requestify = require('requestify');
 // Create the connection to the database.
 const mysql = require('mysql');
 
-const connection = mysql.createConnection({
+const pool = mysql.createPool({
+
+  connectionLimit : 100,
+  waitForConnections: true,
+  queueLimit: 100,
   host     : custom_data[1], // Host address of the database server.
   user     : custom_data[2], // Username for the coinspiration account.
   password : custom_data[3], // Password for the coinspiration account.
@@ -18,7 +22,7 @@ const connection = mysql.createConnection({
 
 });
 
-connection.connect( function (error){
+pool.getConnection( function (error){
   
   if( error ) throw error;
 
@@ -32,6 +36,7 @@ connection.connect( function (error){
   console.log('Connection established');
 
 });
+
 
 // Initialize telebot
 
@@ -87,14 +92,7 @@ const DESCRIPTION_MAX_LENGTH = 140; // How long a description of content is allo
 
 // Identify the event for which the Warhols will be used - this will provide a subset of market closing dates to work with
 
- var eventName = 'test';
-
-// Holds the random selection of five items to be selected from by the user. The list is changed every time the user selects the 'creative' option when selecting 'get'
-// It also serves to filter out any numbered commands (i.e. /4, /21, etc.)
-
-var currentCreativeSelection = []; 
-var currentGiftSelection = [];
-
+var eventName = 'test';
 
 // Holds two items submitted by a user in spend/creative mode: 
 // - url for the content.
@@ -134,49 +132,56 @@ var betDate = 0;
 
 var marketClosureId = 0;
 
+
 // The user starts the bot with the /start command.
 
 bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
   
-  warholMode = 0;
-  giftSpendMode = 0;
-
   // Display commands as handy buttons in the telegram interface.
   let markup = bot.keyboard([
     [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
   );
   
-  currentCreativeSelection = [];
-  currentGiftSelection = [];
-
   // Check the Warhols database to see if the user already has an account.
-  connection.query( 'SELECT * FROM accounts', function( error, rows ){
 
-    if( error ) throw error;
+  pool.getConnection( function( err, connection ) {
 
-    for( let i = 0; i < rows.length; i++ ){
+    connection.query( 'SELECT * FROM accounts', function( error, rows ){
 
-      if( rows[i].owner == msg.from.id ){
- 
-        // Send them a message welcoming them back. 
-        return bot.sendMessage( msg.from.id, `Welcome back ${ msg.from.first_name }!`, { markup } );
-        
-      }
-    
-    }
+      connection.release();
 
-    // If we get this far then it means the user does not have an account yet. So we create one for them.
-
-    let newOwner = { owner: msg.from.id, owner_name: msg.from.first_name, balance: 0 };
-    
-    connection.query('INSERT INTO accounts SET ?', newOwner, function( error, result ){
-    
       if( error ) throw error;
-    
+
+      for( let i = 0; i < rows.length; i++ ){
+
+        if( rows[i].owner == msg.from.id ){
+
+          // Send them a message welcoming them back.
+          resetRemoteData( msg.from.id );
+          return bot.sendMessage( msg.from.id, `Welcome back ${ msg.from.first_name }!`, { markup } );
+          
+        }
+      
+      }
+
+      // If we get this far then it means the user does not have an account yet. So we create one for them.
+
+      let newOwner = { owner: msg.from.id, owner_name: msg.from.first_name, balance: 0 };
+      
+      connection.query('INSERT INTO accounts SET ?', newOwner, function( error, result ){
+        
+        connection.release();
+
+        if( error ) throw error;
+      
+      });
+
+      setMode( msg.from.id, 0 ); 
+
+      return bot.sendMessage( msg.from.id, `Welcome ${ msg.from.first_name }! You're new here, right? That's ok! we created an account for you. Use the commands below to interact with your account.`, { markup } );
+
     });
-
-    return bot.sendMessage( msg.from.id, `Welcome ${ msg.from.first_name }! You're new here, right? That's ok! we created an account for you. Use the commands below to interact with your account.`, { markup } );
-
+  
   });
 
 });
@@ -187,7 +192,77 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
 bot.on( '/test', msg => {
 
+
 });
+
+
+// Sets the mode of the user
+
+function setMode( userID, newMode ){ 
+  
+  pool.getConnection(function(err, connection) {
+
+    connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?', [ newMode, userID ], function( error, updatedMode ){
+      
+      console.log( userID +' updated to mode ' + newMode );
+
+      connection.release();
+
+      if ( error ) throw error;
+
+    });
+
+  });
+
+}
+
+
+// Gets the mode of the user
+
+function getMode( userID, callback ){
+
+  pool.getConnection(function(err, connection) {
+
+    // SELECT viewed FROM gifts WHERE task_id =' + currentGiftSelection[0] , function( error, timesViewed ){
+
+    connection.query('SELECT mode FROM accounts WHERE owner =' + userID , function( error, currentMode ){
+
+      connection.release();
+
+      if ( error ) throw error;
+      
+      // console.log(currentMode[0].mode);
+
+      return callback( error, currentMode[0].mode );
+
+    });
+
+  });
+
+}
+
+
+// Resets the random list field in the account of a specified user
+
+function resetRemoteData( userID ){
+
+  pool.getConnection(function(err, connection) {
+
+    let resetList = "";
+    
+    connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ resetList, userID ], function( error, resetList ){
+
+      connection.release();
+
+      if ( error ) throw error;
+
+      console.log('The random list selection for ' + userID + ' has been reset');
+
+    });
+
+  });
+
+}
 
 
 
@@ -217,11 +292,11 @@ bot.on( BALANCE_BUTTON, msg => {
     // check if market has closed (compare last activity with current date, check market closure inbetween)
     newMarketActivity( msg.from.id, function( error, callback ){
 
-        // console.log( callback );
+      // console.log( callback );
 
     });
 
-// if market closures happened, see if any bets were won. Display message of sorry or congratulation
+  // if market closures happened, see if any bets were won. Display message of sorry or congratulation
 
     GetBalance( msg.from.id, function( error, result ){
 
@@ -249,7 +324,7 @@ bot.on( GET_BUTTON, msg => {
       [ GIFT_ECON ],[ CREATIVE_ECON ],[ SPECULATIVE_ECON ]], { resize: true }
     );
 
-    warholMode = 1; // Entering get mode.
+    setMode( msg.from.id, 1 ); // Entering get mode.
 
     return bot.sendMessage( msg.from.id, `How do you want to get Warhols?`, { markup });
 
@@ -270,13 +345,13 @@ bot.on( SPEND_BUTTON, msg => {
 
           return bot.sendMessage( msg.from.id, `You don’t have enough Warhols in your account. You need at least 5 Warhols and your balance is ${ balance }. You should /get some Warhols first.`);
 
-      } else {
+      } else { // If they have enough warhols they are provided with options for spending them.
 
         let markup = bot.keyboard([
           [ GIFT_ECON ],[ CREATIVE_ECON ],[ SPECULATIVE_ECON ]], { resize: true }
         ); 
 
-        warholMode = 2; // Entering spend mode.
+        setMode( msg.from.id, 4 ); // Entering spend mode.
 
         return bot.sendMessage( msg.from.id, `How do you want to spend Warhols?`, { markup });
 
@@ -291,30 +366,50 @@ bot.on( SPEND_BUTTON, msg => {
 
 bot.on( CREATIVE_ECON, msg => {
 
-  if ( warholMode == 1 ){
+  getMode( msg.from.id, function(error, currentMode){
 
-    let markup = bot.keyboard([
-      [ BACK_BUTTON ]], { resize: true }
-    );
+    if ( currentMode == 1 ){ // We are in get mode...
 
-    GetCreativeContent( function( error, content ){
-    
-    // Display the tasks as text.
-    return bot.sendMessage( msg.from.id, `${ content }`, { markup } );
-    
-    });
+      let markup = bot.keyboard([
+        [ BACK_BUTTON ]], { resize: true }
+      );
 
-  } else if ( warholMode == 2 ){
+      GetCreativeContent( msg.from.id, function( error, content ){
+      
+        setMode( msg.from.id, 2 ); // Change mode to get/creative
 
-    GetBalance( msg.from.id, function( error, balance ){
+        // Display the tasks as text.
+        return bot.sendMessage( msg.from.id, `${ content }`, { markup } );
+      
+      });
 
-      return bot.sendMessage( msg.from.id, `You can /publish your content for 10 Warhols. Your current balance is ${ balance } Warhols`, { markup: 'hide' } );
+    } else if ( currentMode == 4 ){ // We are in spend mode...
 
-      // Function for reading url and descriptive text from the user and sending it to the database.
+      GetBalance( msg.from.id, function( error, balance ){
 
-    });
+        let markup = bot.keyboard([
+            [ BACK_BUTTON ]], { resize: true }
+        );
 
-  }
+        if ( balance < 10 ){
+
+          return bot.sendMessage( msg.from.id, `You don't have enough Warhols to publish. Try and /get more Warhols`, { markup } );
+
+        } else {
+
+          setMode( msg.from.id, 9 );
+
+          return bot.sendMessage( msg.from.id, `You can /publish your content for 10 Warhols. Your current balance is ${ balance } Warhols`, { markup } );
+
+        // Function for reading url and descriptive text from the user and sending it to the database.
+
+        }
+
+      });
+
+    }
+
+  });
 
 });
 
@@ -325,8 +420,16 @@ bot.on( PUBLISH_BUTTON , msg => {
 
   // Need a way to prevent the publish command from being invoked or set warhol mode in case people want to short cut to publish without
   // stepping through all of the other menus.
+  
+  getMode( msg.from.id, function( error, currentMode ){
 
-  return bot.sendMessage( msg.from.id, `Enter the URL for the content.`, { ask: 'url' });
+    if ( currentMode == 9 ){
+
+      return bot.sendMessage( msg.from.id, `Enter the URL for the content.`, { ask: 'url' });
+
+    }
+
+  });
 
 });
 
@@ -343,81 +446,87 @@ bot.on('ask.coupon', msg => {
 
   let couponCode = msg.text;
 
-  connection.query( 'SELECT * FROM coupons', function( error, uniqueCode ){
+  pool.getConnection(function(err, connection) {
 
-    if( error ) throw error;
+    connection.query( 'SELECT * FROM coupons', function( error, uniqueCode ){
 
-      for( let i = 0; i < uniqueCode.length; i++ ){
-        
-        // Check if the user has previously submitted a code.
-        if ( uniqueCode[i].owner == msg.from.id ){
+      if( error ) throw error;
 
-            let markup = bot.keyboard([
-              [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
-            );
-
-            return bot.sendMessage( msg.from.id, `You have already used a coupon code. Maybe /get some warhols?`, { markup });
-
-        } else {
-
-          // Check if the submitted code matches a code in the database.
-          if ( couponCode == uniqueCode[i].unique ){
-
-          // Verify if the code has been used already.
-            if ( uniqueCode[i].used == 1 ){
-
-              return bot.sendMessage( msg.from.id, `This coupon has already been used. Please enter a different code if you have one.`, { ask: 'coupon' });
-
-            } else {
-
-              // If the code is unused mark it as used.
-              connection.query( 'UPDATE coupons SET used = ? WHERE id = ?', [ 1, uniqueCode[i].id ], function( error, selectedCoupon ){
-
-                if( error ) throw error;
-
-              });
-
-              // Record the Telegram user id of the person who used the code.
-              connection.query( 'UPDATE coupons SET owner = ? WHERE id = ?', [ msg.from.id , uniqueCode[i].id ], function( error, claiment ){
-
-                if( error ) throw error;
-
-              });
-                
-              // Record the time and date the coupon was claimed.
-
-              let currentDate = new Date();
-
-              connection.query( 'UPDATE coupons SET tds = ? WHERE id = ?', [ currentDate , uniqueCode[i].id ], function( error, dateConfirmation ){
-
-                if( error ) throw error;
-
-              });
-                
-              // Give the user their warhols.
-              GetBalance( msg.from.id, function( error, currentBalance ){
-
-                let newBalance = ( MAX_COUPON + currentBalance );
-
-                AddWarhols( msg.from.id, newBalance );
-
-              });
+        for( let i = 0; i < uniqueCode.length; i++ ){
+          
+          // Check if the user has previously submitted a code.
+          if ( uniqueCode[i].owner == msg.from.id ){
 
               let markup = bot.keyboard([
                 [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
               );
 
-              return bot.sendMessage( msg.from.id, `Congradulations! You now have 10 Warhols on your account.`, { markup });
+              return bot.sendMessage( msg.from.id, `You have already used a coupon code. Maybe /get some warhols?`, { markup });
+
+          } else {
+
+            // Check if the submitted code matches a code in the database.
+            if ( couponCode == uniqueCode[i].unique ){
+
+            // Verify if the code has been used already.
+              if ( uniqueCode[i].used == 1 ){
+
+                return bot.sendMessage( msg.from.id, `This coupon has already been used. Please enter a different code if you have one.`, { ask: 'coupon' });
+
+              } else {
+
+                // If the code is unused mark it as used.
+                connection.query( 'UPDATE coupons SET used = ? WHERE id = ?', [ 1, uniqueCode[i].id ], function( error, selectedCoupon ){
+
+                  if( error ) throw error;
+
+                });
+
+                // Record the Telegram user id of the person who used the code.
+                connection.query( 'UPDATE coupons SET owner = ? WHERE id = ?', [ msg.from.id , uniqueCode[i].id ], function( error, claiment ){
+
+                  if( error ) throw error;
+
+                });
+                  
+                // Record the time and date the coupon was claimed.
+
+                let currentDate = new Date();
+
+                connection.query( 'UPDATE coupons SET tds = ? WHERE id = ?', [ currentDate , uniqueCode[i].id ], function( error, dateConfirmation ){
+
+                  connection.release();
+
+                  if( error ) throw error;
+
+                });
+                  
+                // Give the user their warhols.
+                GetBalance( msg.from.id, function( error, currentBalance ){
+
+                  let newBalance = ( MAX_COUPON + currentBalance );
+
+                  AddWarhols( msg.from.id, newBalance );
+
+                });
+
+                let markup = bot.keyboard([
+                  [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+                );
+
+                return bot.sendMessage( msg.from.id, `Congradulations! You now have 10 Warhols on your account.`, { markup });
+
+              }
 
             }
 
           }
-
+    
         }
-  
-      }
 
-    return bot.sendMessage( msg.from.id, `Perhaps you entered the code incorrectly? Please try again.`, { ask: 'coupon' });
+      return bot.sendMessage( msg.from.id, `Perhaps you entered the code incorrectly? Please try again.`, { ask: 'coupon' });
+
+    });
 
   });
 
@@ -427,40 +536,125 @@ bot.on('ask.coupon', msg => {
 
 bot.on('ask.url', msg => {
   
-  let content = msg.text;
+  getMode( msg.from.id, function( error, currentMode ){
 
-  if ( isUrl( content ) == true ){ // Check if the url is a valid one.
+    if ( currentMode == 9 ) {
 
-        contentSubmission[0] = content; // save the url for review by the user.
-        return bot.sendMessage( msg.from.id, `Now enter a 140 character description of the content.`, { ask: 'whatisit' });
+     if ( msg.text.startsWith('/') == true ) {
 
-    } else {
+        if ( msg.text == '/back') {
 
-        return bot.sendMessage( msg.from.id, `You have not entered a valid web address. Please try again using the proper formatting.`, { ask: 'url'});
+          // It's a command but just let /back do its job.
+
+        } else {
+
+          return bot.sendMessage( msg.from.id, `That was a command. Please enter a url.`, { ask: 'url' });
+
+        }
+        
+      } else {
+
+        if ( isUrl( msg.text ) == true ){ // Check if the url is a valid one.
+
+          pool.getConnection(function(err, connection) {
+
+          // If it is valid then save it to the temporary data field of the user.
+
+            connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [  msg.text, msg.from.id ], function( error, confirmedContent){
+                
+              connection.release();
+
+              if ( error ) throw error;
+
+              setMode( msg.from.id, 10 ); 
+
+              return bot.sendMessage( msg.from.id, `Now enter a 140 character description of the content.`, { ask: 'whatisit' });
+
+            });
+
+          });
+
+        } else {
+
+          return bot.sendMessage( msg.from.id, `You have not entered a valid web address. Please try again using the proper formatting.`, { ask: 'url' });
+
+        }
+
+      }
 
     }
+
+  });
 
 });
 
 
-
 bot.on('ask.whatisit', msg => {
-  
-  let incomingText = msg.text;
 
-  if ( incomingText.length > DESCRIPTION_MAX_LENGTH ) {
+  getMode( msg.from.id, function( error, currentMode ){
 
-    return bot.sendMessage( msg.from.id, `Your description is longer than 140 charcters. Please shorten it.`, { ask: 'whatisit' });
+    if ( currentMode == 10 ){
 
-  } else if ( incomingText.length <= DESCRIPTION_MAX_LENGTH ) {
+      if ( msg.text.startsWith('/') == true ) {
 
-    contentSubmission[1] = incomingText;
+        if ( msg.text == '/back') {
 
-    return bot.sendMessage( msg.from.id, `${ contentSubmission[1] } ${ contentSubmission[0] } \n Please review your submission! \n \n 
-    Is the content correct? \n
-    /yes or /no` );
+          // It's a command but just let /back do its job.
 
-  }
+        } else {
+
+          return bot.sendMessage( msg.from.id, `That was a command. Please enter a description.`, { ask: 'whatisit' });
+
+        }
+        
+      } else {
+
+        let urlDescription = msg.text;
+
+        if ( urlDescription.length > DESCRIPTION_MAX_LENGTH ) {
+
+          return bot.sendMessage( msg.from.id, `Your description is longer than 140 charcters. Please shorten it.`, { ask: 'whatisit' });
+
+        } else if ( urlDescription.length <= DESCRIPTION_MAX_LENGTH ) {
+
+          pool.getConnection( function (err, connection){
+          
+            // connection.query('SELECT mode FROM accounts WHERE owner =' + userID , function( error, currentMode ){
+
+            connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, urlSubmission ){
+
+              if ( error ) throw error;
+
+              let content = ( [ urlSubmission[0].temp_user_data, urlDescription ] ).toString();
+
+              console.log(content);
+            
+              // connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [  msg.text, msg.from.id ], function( error, confirmedContent){
+
+              connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ content , msg.from.id ], function( error, confirmedContent ){
+
+                if ( error ) throw error;
+
+                connection.release();
+
+                setMode( msg.from.id, 11 );
+
+                return bot.sendMessage( msg.from.id, `${ urlDescription } ${ urlSubmission[0].temp_user_data } \n Please review your submission! \n \n Is the content correct? \n
+        /yes or /no` );
+
+              }); 
+
+            });
+
+          });
+
+        }
+
+      }
+    
+    } 
+
+  });
 
 });
 
@@ -469,27 +663,33 @@ bot.on('ask.whatisit', msg => {
 
 bot.on( GIFT_ECON, msg => {
 
-    if ( warholMode == 1 ){ // If we are in get mode...
+    getMode( msg.from.id, function( error, currentMode ){
+    
+      if ( currentMode == 1 ){ // If we are in get mode...
 
-      let markup = bot.keyboard([
-        [ BACK_BUTTON ]], { resize: true }
-      );
+        let markup = bot.keyboard([
+          [ BACK_BUTTON ]], { resize: true }
+        );
 
-      GetGiftsContent( function( error, content ){
+        setMode( msg.from.id, 3 ); // Set to get/gift
 
-        return bot.sendMessage( msg.from.id, `${ content }`, { markup } );
+        GetGiftsContent( msg.from.id, function( error, content ){
 
-      });
+          return bot.sendMessage( msg.from.id, `${ content }`, { markup } );
 
-    } else if ( warholMode == 2 ) { // If we are in spend mode...
+        });
 
-      let markup = bot.keyboard([
-        [ GIFT_RANDOM ], [ GIFT_FOUNTAIN ] ], { resize: true }
-      );
+      } else if ( currentMode == 4 ) { // If we are in spend mode...
 
-      return bot.sendMessage( msg.from.id, `Give Warhols to everybody with the Warhols /fountain\nGive Warhols to a person at /random`, { markup });
+        let markup = bot.keyboard([
+          [ GIFT_RANDOM ], [ GIFT_FOUNTAIN ] ], { resize: true }
+        );
 
-    }
+        return bot.sendMessage( msg.from.id, `Give Warhols to everybody with the Warhols /fountain\nGive Warhols to a person at /random`, { markup });
+
+      }
+
+    });
 
 });
 
@@ -499,21 +699,25 @@ bot.on( [ GIFT_RANDOM, GIFT_FOUNTAIN ], msg => {
 
   // Ask the user how many Warhols they want to spend.
   
-  if ( warholMode == 2 ) { // Make sure they are in spend mode.
+  getMode( msg.from.id, function( error, currentMode ){
 
-    if ( msg.text == '/random' ) {
+    if ( currentMode == 4 ) { // Make sure they are in spend mode.
 
-      giftSpendMode = 1;
+      if ( msg.text == '/random' ) {
 
-    } else if ( msg.text == '/fountain' ) {
+        setMode( msg.from.id, 6 );
 
-      giftSpendMode = 2;
+      } else if ( msg.text == '/fountain' ) {
+
+        setMode( msg.from.id, 7 );
+
+      }
+
+      return bot.sendMessage( msg.from.id, `How many Warhols do you want to spend? \n /5 \n /10 \n /20`);
 
     }
 
-    return bot.sendMessage( msg.from.id, `How many Warhols do you want to spend? \n /5 \n /10 \n /20`);
-
-  }
+  });
 
 });
 
@@ -552,34 +756,38 @@ bot.on( SPEC_MARKET , msg => {
 
     );
 
+    pool.getConnection(function(err, connection) {
       // new connection to retrieve next market closure dates
       connection.query('SELECT close_time, id FROM market WHERE event = ?', [eventName], function (error, results, fields) {
 
         if (error) throw error;
 
-      var currentDate = new Date();
+        var currentDate = new Date();
 
-      var i = 0;
+        var i = 0;
 
-      for (i = 0; i < results.length; i++) {
+        for (i = 0; i < results.length; i++) {
 
           marketClosureId = results[i].id;
 
           // console.log('marketClosureId - ', marketClosureId);
 
-        var dateDifference = (results[i].close_time-currentDate);
-        var timetoClosing = timeConversion(dateDifference);
+          var dateDifference = (results[i].close_time-currentDate);
+          var timetoClosing = timeConversion(dateDifference);
 
-             if (dateDifference > 600000) { break; } // choose the first date at least 10 minutes in the future
+          if (dateDifference > 600000) { break; } // choose the first date at least 10 minutes in the future
        
-      }
+        }
 
-          return bot.sendMessage( msg.from.id, `The Warhols exchange market will close in ` + timetoClosing + `. In which flavor would you like to invest? \n `+ SPEC_FLAVOR_1 +` Warhols \n `+ SPEC_FLAVOR_2 +` Warhols \n `+ SPEC_FLAVOR_3 +` Warhols`, { markup } );
-        });
+        return bot.sendMessage( msg.from.id, `The Warhols exchange market will close in ` + timetoClosing + `. In which flavor would you like to invest? \n `+ SPEC_FLAVOR_1 +` Warhols \n `+ SPEC_FLAVOR_2 +` Warhols \n `+ SPEC_FLAVOR_3 +` Warhols`, { markup } );
     
-      // end retrieving market closure dates
+    });
+    
+    // end retrieving market closure dates
 
- });
+  });
+
+});
 
 
 // assign marketFlavor variable according to the choice of flavor by the user
@@ -611,169 +819,120 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 });
 
 
-
-// Market investment 
-
-bot.on( '/five', msg => {  // amount chosen to invest
-
-  var betAmount = 5;
-  // check if user has enough balance, if not ask to choose other value
-
-  GetBalance( msg.from.id, function( error, result ){
-
-  // Check what the balance is... 
-    if ( result < betAmount ) {
-
-        return bot.sendMessage( msg.from.id, `You currently have only ${ result } Warhols. Please start with a lower investment.`, { markup: 'hide' });
-        
-    } else {   // Continue with the investment.
-        
-    // console.log('they have enough Warhols - ', result);
-
-    // write to market bets database: user id, user name, flavor, amount, time bet placed
-
-    var currentDate = new Date();
-
-      if (typeof msg.from.last_name != "undefined"){ // if the user does not have a last name
-
-        var betOwner = (msg.from.first_name +' '+ msg.from.last_name);
-
-      } else {  
-
-        var betOwner = (msg.from.first_name);
-
-      }
-
-
-    let newBet = { time: betDate, event: eventName, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
-
-      connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
-    
-        if( error ) throw error;
-    
-      });
-
-      // deduct warhols from users account
-
-      SubtractWarhols( msg.from.id, betAmount );
-      setLastDate( msg.from.id ); // set last interaction date
-
-      // send message with thanks, display home menu
-
-      let markup = bot.keyboard([
-        [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
-      );
-
-      return bot.sendMessage( msg.from.id, `Thanks for your investment! You will get a notification when the market closes. Good luck!`, { markup } );
-
-    } // end if balance enough
-
-  });
-
-});
-
-
 // '/*' listens for any activity entered by the user and then filters out the resulting strings. Checks the mode that
 // the user is in to determine how to react to the numbers we are listening for.
 
 bot.on( '/*' , msg => {
   
-    let markup = bot.keyboard([
-        [ BACK_BUTTON ]], { resize: true }
-    );
+  let markup = bot.keyboard([
+    [ BACK_BUTTON ]], { resize: true }
+  );
 
-  // They selected creative economy.
   
-  if ( warholMode == 1 ) { // Maks sure they are in get mode.
+  getMode( msg.from.id, function( error, currentMode ){ // Entering get mode.
 
-    if ( currentCreativeSelection.length == 5 ) {
+    if ( currentMode == 2 ) { // In get/creative mode.
 
-        // Extract the number value from the user input
-        // Make sure that what the text is only a number.
-        let taskNumber = Number( ( (msg.text).slice( 1, 2 ) ) );
+      // Extract the number value from the user input
+      // Make sure that what the text is only a number.
+      let taskNumber = Number( ( (msg.text).slice( 1, 2 ) ) );
 
-        DisplayCreativeContent( msg.from.id, taskNumber, markup );
+      DisplayCreativeContent( msg.from.id, taskNumber, markup );
 
-    }
+    } else if ( currentMode == 3 ){ // In get/gift mode. 
     
-    // They selected 'gift' economy.
-    
-    if ( currentGiftSelection.length == 5 ) {
+      let taskNumber = Number( ( ( msg.text ).slice( 1, 2 ) ) );
 
-        let taskNumber = Number( ( ( msg.text ).slice( 1, 2 ) ) );
+      setMode( msg.from.id, 8 );
 
-        DisplayGiftContent( msg.from.id, taskNumber, markup );
+      DisplayGiftContent( msg.from.id, taskNumber, markup );
         
-    }
-
-  } else if ( warholMode == 2 ) { // Make sure we are in spend mode.
+    } else if ( currentMode == 6 ) { // Make sure we are in spend/gift/random mode.
     
-    // Read from the second character in the message string.
-  
-    let warholAmount = Number( ( ( msg.text ).slice( 1, 3 ) ) );
+      // Read from the second character in the message string.
+      let warholAmount = Number( ( ( msg.text ).slice( 1, 3 ) ) );
     
-    // Check if the amount they have selected does not exceed the amount available in their account.
-    GetBalance( msg.from.id, function( error, userBalance ){
+      // Check if the amount they have selected does not exceed the amount available in their account.
+      GetBalance( msg.from.id, function( error, userBalance ){
 
-      if ( userBalance < warholAmount ){
+        if ( userBalance < warholAmount ){
 
-        return bot.sendMessage( msg.from.id, `You do not have enough warhols. Please choose a smaller amount or /get more warhols.`);
+          return bot.sendMessage( msg.from.id, `You do not have enough warhols. Please choose a smaller amount or /get more warhols.`);
 
-      } else if ( userBalance >= warholAmount ){
-        
-        if ( giftSpendMode == 1 ){ // They have chosen to give to a random person.
+        } else if ( userBalance >= warholAmount ){
         
           GiveWarholsRandom( msg.from.id, warholAmount, markup );
-        
-        } else if ( giftSpendMode == 2 ) { // They have chosen to give to the fountain.
+
+        }
+
+      });
+    
+    } else if ( currentMode == 7 ){ // Make sure they are in spend/gift/fountain.
+
+      // Read from the second character in the message string.
+      let warholAmount = Number( ( ( msg.text ).slice( 1, 3 ) ) );
+    
+      // Check if the amount they have selected does not exceed the amount available in their account.
+      GetBalance( msg.from.id, function( error, userBalance ){
+
+        if ( userBalance < warholAmount ){
+
+          return bot.sendMessage( msg.from.id, `You do not have enough warhols. Please choose a smaller amount or /get more warhols.`);
+
+        } else if ( userBalance >= warholAmount ){
 
           ShareTheWealth( msg.from.id, warholAmount );
 
         }
+      
+      });
 
-      }
+    } else if ( currentMode == 12 ){ // Make sure we are in speculation mode.
 
-    });
+      let betAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
 
-  } else if ( warholMode == 3 ){ // Make sure we are in speculation mode.
+      // check if user has enough balance, if not ask to choose other value
 
-    let betAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
-
-    // check if user has enough balance, if not ask to choose other value
-
-    GetBalance( msg.from.id, function( error, result ){
+      GetBalance( msg.from.id, function( error, result ){
 
       // Check what the balance is... 
-      if ( result < betAmount ) {
+        if ( result < betAmount ) {
 
-        return bot.sendMessage( msg.from.id, `You currently have only ${ result } Warhols. Please start with a lower investment.`, { markup: 'hide' });
+          return bot.sendMessage( msg.from.id, `You currently have only ${ result } Warhols. Please start with a lower investment.`, { markup: 'hide' });
         
-      } else {   // Continue with the investment.
+        } else {   // Continue with the investment.
         
-      // console.log('they have enough Warhols - ', result);
+          // console.log('they have enough Warhols - ', result);
 
-      // write to market bets database: user id, user name, flavor, amount, time bet placed
+          // write to market bets database: user id, user name, flavor, amount, time bet placed
 
-        var currentDate = new Date();
+          var currentDate = new Date();
 
-        if (typeof msg.from.last_name != "undefined"){ // if the user does not have a last name
+          if (typeof msg.from.last_name != "undefined"){ // if the user does not have a last name
 
-          var betOwner = (msg.from.first_name +' '+ msg.from.last_name);
+            var betOwner = (msg.from.first_name +' '+ msg.from.last_name);
 
-        } else {  
+          } else {  
 
-          var betOwner = (msg.from.first_name);
+            var betOwner = (msg.from.first_name);
+
+          }
+
+          let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
+
+          pool.getConnection(function(err, connection) {
+
+            connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
+            
+              connection.release();
+
+              if( error ) throw error;
+      
+            });
+
+          });
 
         }
-
-        let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: marketFlavor, amount: betAmount, credited: 0 };
-
-        connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
-    
-          if( error ) throw error;
-    
-        });
-
         // deduct warhols from users account
 
         SubtractWarhols( msg.from.id, betAmount );
@@ -785,140 +944,175 @@ bot.on( '/*' , msg => {
           [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
         );
 
-        warholMode = 0;
+        // warholMode = 0;
 
         return bot.sendMessage( msg.from.id, `Thanks for your investment! You will get a notification when the market closes. Good luck!`, { markup } );
 
-      } // end if balance enough
+      }); // end if balance enough
+    
+    }
 
-    });
-
-  }
-
+  });
+  
 });
 
 
+// currentList[0].temp_user_data.split(",");
 
 // These two are only relevant for the end routine of a user who has chosen to earn Warhols through the gift economy.
 // I could do an overall better implementation of this but for now I am just trying to get this project done. I am sure you understand how deadlines work.
 
 bot.on( YES_BUTTON, msg => {
 
-    if ( warholMode == 1 ){ // Verify that they are in gift mode.
+    getMode( msg.from.id, function( error, currentMode ){
 
-      let markup = bot.keyboard([
-        [ BACK_BUTTON ]], { resize: true }
-      );
+      if ( currentMode == 8 ){ // Verify that they are in gift mode.
 
-      var warholValue = (Math.ceil( Math.random() * RAND_GIFT_RANGE ) -1 );          
+        let markup = bot.keyboard([
+          [ BACK_BUTTON ]], { resize: true }
+        );
 
-      GetBalance( msg.from.id, function( error, result ){
+        var warholValue = (Math.ceil( Math.random() * RAND_GIFT_RANGE ) + 1 );          
 
-        let newBalance;
+        GetBalance( msg.from.id, function( error, result ){
 
-        newBalance = ( warholValue + result );
-          
-        AddWarhols( msg.from.id, newBalance );
+          let newBalance;
+
+          newBalance = ( warholValue + result );
             
-      });
+          AddWarhols( msg.from.id, newBalance );
+              
+        });
 
-      
-      connection.query('SELECT viewed FROM gifts WHERE task_id =' + currentGiftSelection[0] , function( error, timesViewed ){
+        pool.getConnection(function(err, connection) {
 
-        if ( error ) throw error;
+          connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, selectedGift ){
 
-        let viewedIncrement = ( ( timesViewed[0].viewed ) + 1 );
+            // let temp = Number( selectedGift[0].temp_user_data );
+
+            connection.query( 'SELECT viewed FROM gifts WHERE task_id =' + selectedGift[0].temp_user_data, function( error, timesViewed ){
+
+              if ( error ) throw error;
+
+              let viewedIncrement = ( ( timesViewed[0].viewed ) + 1 );
+              
+              connection.query( 'UPDATE gifts SET viewed = ? WHERE task_id = ?', [ viewedIncrement, selectedGift[0].temp_user_data ], function( error, viewResult ){
+
+                connection.release();
+
+                if ( error ) throw error;
+
+                resetRemoteData( msg.from.id );
+                setMode( msg.from.id, 0 );
+
+              });
+            
+            });
+
+          });
+
+        });
+          
+        return bot.sendMessage( msg.from.id, `Enjoy! Your account has been credited with ${ warholValue } Warhols`, { markup });
+
+      } else if ( currentMode == 11 ) { // Verify that they are in spend/creative mode.
         
-        connection.query('UPDATE gifts SET viewed = ? WHERE task_id = ?', [ viewedIncrement, currentGiftSelection[0] ], function( error, viewResult ){
+        let markup = bot.keyboard([
+          [ BACK_BUTTON ]], { resize: true }
+        );
 
-          if ( error ) throw error;
+        pool.getConnection(function(err, connection){
 
-          currentGiftSelection = [];
+          connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, content ){
+
+            connection.release();
+
+            if ( error ) throw error;
+
+            content = content[0].temp_user_data.split(",");
+
+            // Add the submitted content to the database.
+            AddCreativeContent( msg.from.id, msg.from.first_name, content );
+
+            // Subtract Warhols from the account of the user.
+            SubtractWarhols( msg.from.id, 10 );
+
+            // Post to WarholsChannel New Content
+            if ( typeof msg.from.last_name != "undefined" ){ // if the user does not have a last name
+
+              var contentName = ( msg.from.first_name+' '+ msg.from.last_name );
+
+            } else {  
+          
+              var contentName = ( msg.from.first_name );
+
+            }
+
+            if ( typeof msg.from.username != "undefined" ){ // if the user does not have a username
+
+              var contentUser = ( ' - @' + msg.from.username );
+
+            } else  {  
+          
+              var contentUser = (' ');
+        
+            }
+        
+            requestify.post('https://maker.ifttt.com/trigger/new_content/with/key/' + custom_data[5] , { // IFTTT secret key.
+
+              value1: ( contentName + contentUser ) , // telegram user.
+              value2: content[1] , // content title.
+              value3: content[0] // content URL.
+
+            })
+
+            .then( function( response ) {
+
+            // Get the response and write to console
+            response.body;
+            // console.log('IFTTT: ' + response.body);
+
+          }); // End of WarholsChannel content posting routine.
+          
+          resetRemoteData( msg.from.id );
+          setMode( msg.from.id, 0 );
+
+          return bot.sendMessage( msg.from.id, `Excellent! Your content is now available for viewing and 10 Warhols have been subtracted from your account.`, { markup });
 
         });
 
       });
-        
-      // 
 
-      warholMode = 0;
+    }
 
-      return bot.sendMessage( msg.from.id, `Enjoy! Your account has been credited with ${ warholValue } Warhols`, { markup });
-
-    } else if ( warholMode == 2 ) { // Verify that they are in spend mode.
-      
-      let markup = bot.keyboard([
-        [ BACK_BUTTON ]], { resize: true }
-      );
-
-      warholMode = 0;
-
-      // Add the submitted content to the database.
-      AddCreativeContent( msg.from.id, msg.from.first_name, contentSubmission );
-
-      // Subtract Warhols from the account of the user.
-      SubtractWarhols( msg.from.id, 10 );
-
-      // Post to WarholsChannel New Content
-      if ( typeof msg.from.last_name != "undefined" ){ // if the user does not have a last name
-
-        var contentName = ( msg.from.first_name+' '+ msg.from.last_name );
-
-      } else {  
-        
-        var contentName = ( msg.from.first_name );
-
-      }
-
-      if ( typeof msg.from.username != "undefined" ){ // if the user does not have a username
-
-           var contentUser = ( ' - @' + msg.from.username );
-
-      } else  {  
-        
-        var contentUser = (' ');
-      
-      }
-      
-      requestify.post('https://maker.ifttt.com/trigger/new_content/with/key/' + custom_data[5] , { // IFTTT secret key.
-
-        value1: ( contentName + contentUser ) , // telegram user.
-        value2: contentSubmission[1] , // content title.
-        value3: contentSubmission[0] // content URL.
-
-      })
-
-      .then( function( response ) {
-
-        // Get the response and write to console
-        response.body;
-        console.log('IFTTT: ' + response.body);
-
-      }); // End of WarholsChannel content posting routine.
-
-      contentSubmission = [];
-
-      return bot.sendMessage( msg.from.id, `Excellent! Your content is now available for viewing and 10 Warhols have been subtracted from your account.`, { markup });
-
-  } 
+  });
 
 });
 
 bot.on( NO_BUTTON, msg => {
 
-  if ( warholMode == 1 ){
+  getMode( msg.from.id, function( error, currentMode ){
 
-    let markup = bot.keyboard([
-      [ BACK_BUTTON ],[ GET_BUTTON ]], { resize: true }
-    );
+    if ( currentMode == 8 ){ 
 
-    return bot.sendMessage( msg.from.id, `Perhaps there is another good deed you are willing to perform isntead? \n Use use /get to find another or go /back to the main menu.`, { markup } );
+      let markup = bot.keyboard([
+        [ BACK_BUTTON ],[ GET_BUTTON ]], { resize: true }
+      );
 
-  } else if ( warholMode == 2 ){
+      resetRemoteData( msg.from.id );
+      setMode( msg.from.id, 0 );
 
-    return bot.sendMessage( msg.from.id, `Enter the URL for the content.` , { ask: 'url'});
+      return bot.sendMessage( msg.from.id, `Perhaps there is another good deed you are willing to perform isntead? \n Use use /get to find another or go /back to the main menu.`, { markup } );
 
-  }
+    } else if ( currentMode == 11 ){ // Verify that they are in spend mode.
+
+      resetRemoteData( msg.from.id );
+      setMode( msg.from.id, 9);
+      return bot.sendMessage( msg.from.id, `Enter the URL for the content.` , { ask: 'url'} );
+
+    }
+
+  });  
 
 });
 
@@ -926,7 +1120,7 @@ bot.on( NO_BUTTON, msg => {
 
 bot.on('/last', msg => {
   // Update database date_last column with current date timestamp.
-      setLastDate( msg.from.id );
+  setLastDate( msg.from.id );
 });
 
 // Date comparison test command
@@ -946,9 +1140,15 @@ bot.on('/date', msg => {
 
 function AddWarhols( userID, addedBalance ){
     
+  pool.getConnection(function(err, connection) {
+
     connection.query( 'UPDATE accounts SET balance = ? WHERE owner = ?', [ addedBalance, userID ], function( error, current ){
-                
-    if ( error ) throw error;
+
+      connection.release();
+
+      if ( error ) throw error;
+
+    });
 
   });
 
@@ -964,12 +1164,18 @@ function SubtractWarhols( userID, subtractionAmount ){
 
       let newBalance = ( result - subtractionAmount );
 
-      connection.query( 'UPDATE accounts SET balance = ? WHERE owner =?', [ newBalance, userID ], function( error, current ){
+      pool.getConnection(function(err, connection) {
 
-      if ( error ) throw error;
+        connection.query( 'UPDATE accounts SET balance = ? WHERE owner =?', [ newBalance, userID ], function( error, current ){
 
-      // console.log('Changed ' + current.changedRows + ' rows');
+          connection.release();
+        
+          if ( error ) throw error;
 
+          // console.log('Changed ' + current.changedRows + ' rows');
+
+      });
+    
     });
 
   });
@@ -982,26 +1188,38 @@ function SubtractWarhols( userID, subtractionAmount ){
 
 function GetBalance( msgID, callback ){
 
+  pool.getConnection(function(err, connection) {
+
     connection.query('SELECT balance FROM accounts WHERE owner =' + msgID , function( error, result ){
       
+        connection.release();
+        
         if ( error ) return error;
 
         return callback( error, result[0].balance );
         
     });
 
+  });
+
 }
 
 
 function GetFountainBalance( callback ){
 
-  connection.query('SELECT reservoir FROM fountain WHERE id =' + 1, function( error, result ){
+  pool.getConnection(function(err, connection) {
 
-        if ( error ) return error;
+    connection.query('SELECT reservoir FROM fountain WHERE id =' + 1, function( error, result ){
+      
+      connection.release();
 
-        return callback( error, result[0].reservoir );
+      if ( error ) return error;
+
+      return callback( error, result[0].reservoir );
         
     });
+
+  });
 
 }
 
@@ -1009,10 +1227,16 @@ function GetFountainBalance( callback ){
 
 function AddToFountain( contribution ){
 
-  connection.query('UPDATE fountain SET reservoir = ? WHERE id =?', [ contribution, 1 ], function( error, current ){
+  pool.getConnection(function(err, connection) {
 
-    if ( error ) throw error;
+    connection.query('UPDATE fountain SET reservoir = ? WHERE id =?', [ contribution, 1 ], function( error, current ){
 
+      connection.release();
+
+      if ( error ) throw error;
+
+    });
+  
   });
 
 }
@@ -1020,43 +1244,48 @@ function AddToFountain( contribution ){
 
 function GiveWarholsRandom( userID, warholAmount, markup ){
 
-  connection.query( 'SELECT * FROM accounts', function( error, users ){
+    pool.getConnection(function(err, connection) {
 
-    if( error ) throw error;
+      connection.query( 'SELECT * FROM accounts', function( error, users ){
 
-    // Choose one user at random.
+        connection.release();
 
-    // But first we have to make sure that the current user is not
-    // accidentally giving themselves Warhols.
+        if( error ) throw error;
 
-    let theOthers = [];
+        // Choose one user at random.
 
-    for( let i = 0; i < users.length; i++ ){
+        // But first we have to make sure that the current user is not
+        // accidentally giving themselves Warhols.
 
-      if ( users[i].owner != userID ){
+        let theOthers = [];
 
-        theOthers.push(users[i].owner);
+        for( let i = 0; i < users.length; i++ ){
 
-      }
+          if ( users[i].owner != userID ){
 
-    }
+            theOthers.push(users[i].owner);
 
-    var randomUser = ( Math.ceil( Math.random() * theOthers.length ) - 1 );
+          }
 
-    GetBalance( users[ randomUser ].owner, function( error, theirBalance ){
+        }
 
-      let theirNewBalance = ( theirBalance + warholAmount );
+        var randomUser = ( Math.ceil( Math.random() * theOthers.length ) - 1 );
 
-      AddWarhols( users[ randomUser ].owner, theirNewBalance );
+        GetBalance( users[ randomUser ].owner, function( error, theirBalance ){
 
-      SubtractWarhols( userID, warholAmount );
+          let theirNewBalance = ( theirBalance + warholAmount );
 
-    });        
+          AddWarhols( users[ randomUser ].owner, theirNewBalance );
 
-    warholMode = 0;
-    giftSpendMode = 0;
+          SubtractWarhols( userID, warholAmount );
 
-    return bot.sendMessage( userID, `Thank you for your gift! Your Warhols have been anonymously sent to a random person.`, { markup });
+        });        
+
+        setMode( userID, 0 );
+
+        return bot.sendMessage( userID, `Thank you for your gift! Your Warhols have been anonymously sent to a random person.`, { markup });
+
+    });
 
   });
 
@@ -1065,7 +1294,6 @@ function GiveWarholsRandom( userID, warholAmount, markup ){
 
 function ShareTheWealth( userID, fountainContribution ){
 
-  
   let markup = bot.keyboard([
     [ BACK_BUTTON ]], { resize: true }
   );
@@ -1081,71 +1309,81 @@ function ShareTheWealth( userID, fountainContribution ){
     // Subtract the contribution of the warhols from the user account.
     SubtractWarhols( userID, fountainContribution );
 
+    pool.getConnection(function(err, connection) {
+
     // Find out how many warhols users there are.
-    connection.query( 'SELECT * FROM accounts', function( error, howmanyusers ){
+      connection.query( 'SELECT * FROM accounts', function( error, howmanyusers ){
 
-      if( error ) throw error;
+        if( error ) throw error;
 
-      // Check if the reservoir is full enough for a distrobution of warhols to all the users.
-      if ( newReservoirBalance >= ( ( MIN_DISTRO * howmanyusers.length ) ) ){
+        // Check if the reservoir is full enough for a distrobution of warhols to all the users.
+        if ( newReservoirBalance >= ( ( MIN_DISTRO * howmanyusers.length ) ) ){
 
-        connection.query( 'SELECT * FROM accounts', function( error, members ){
+          connection.query( 'SELECT * FROM accounts', function( error, members ){
 
-          if( error ) throw error;
+            connection.release();
 
-          // Round down the number resulting from dividing the new reservoir balance with the number of warhols users.
-          let distroAmount =  Math.floor( ( newReservoirBalance / members.length ) ); 
+            if( error ) throw error;
 
-          // Distribute the awarded warhols to all the users.
-          for (let i = 0; i < members.length; i++ ){
+              // Round down the number resulting from dividing the new reservoir balance with the number of warhols users.
+              let distroAmount =  Math.floor( ( newReservoirBalance / members.length ) ); 
 
-            GetBalance( members[i].owner, function( error, currentBalance ){
+              // Distribute the awarded warhols to all the users.
+              for (let i = 0; i < members.length; i++ ){
 
-              let newBalance = ( distroAmount + currentBalance );
+                GetBalance( members[i].owner, function( error, currentBalance ){
 
-              AddWarhols( members[i].owner, newBalance );
+                  let newBalance = ( distroAmount + currentBalance );
 
-              newBalance = 0;
+                  AddWarhols( members[i].owner, newBalance );
+
+                  newBalance = 0;
+
+                });
+
+              }
+
+              SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
+
+              warholMode = 0;
+              giftSpendMode = 0;
+
+              console.log('Fountain activated');
+            
+              // Requestify code here
+            
+              requestify.post('https://maker.ifttt.com/trigger/new_fountain/with/key/' + custom_data[5] , { // IFTTT secret key.
+
+              value1: distroAmount
+
+              })
+
+              .then( function( response ) {
+
+              // Get the response and write to console
+              response.body;
+              // console.log('IFTTT: ' + response.body);
 
             });
 
-          }
+            setMode( userID, 0 );
 
-          SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
-
-          warholMode = 0;
-          giftSpendMode = 0;
-
-          console.log('Fountain activated');
-          
-          // Requestify code here
-          
-          requestify.post('https://maker.ifttt.com/trigger/new_fountain/with/key/' + custom_data[5] , { // IFTTT secret key.
-
-            value1: distroAmount
-
-          })
-
-          .then( function( response ) {
-
-            // Get the response and write to console
-            response.body;
-            // console.log('IFTTT: ' + response.body);
+            return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive ${ distroAmount } Warhols :D`, { markup });
 
           });
+          
+          
+        } else {
 
-          return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive ${ distroAmount } Warhols :D`, { markup });
+          console.log('Fountain received new funds');
 
-        });
-        
-        
-      } else {
+          setMode( userID, 0 );
 
-        console.log('Fountain received new funds');
+          return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
 
-        return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
+        }
 
-      }
+      });
 
     });
 
@@ -1165,9 +1403,16 @@ function SubtractFromFountain( amount, members, currentBalance ){
   resetBalance = ( currentBalance - resetBalance );
 
   // Update the reservoir.
-  connection.query('UPDATE fountain SET reservoir = ? WHERE id =?', [ resetBalance, 1 ], function( error, current ){
 
-    if ( error ) throw error;
+  pool.getConnection(function(err, connection) {
+
+    connection.query('UPDATE fountain SET reservoir = ? WHERE id =?', [ resetBalance, 1 ], function( error, current ){
+
+      connection.release();
+
+      if ( error ) throw error;
+
+    });
 
   });
 
@@ -1176,41 +1421,60 @@ function SubtractFromFountain( amount, members, currentBalance ){
 
 // Selects five random entries from the creative content for the user to choose from.
 
-function GetCreativeContent( callback ){
+function GetCreativeContent( userID, callback ){
 
-  connection.query('SELECT * FROM tasks', function( error, rows ){
+  pool.getConnection( function( err, connection ){
 
-    if ( error ) throw error;
+    connection.query('SELECT * FROM tasks', function( error, rows ){
 
-    let taskListDisplay = 'Here is some awesome content created by the Warhols users. Choose one to view to get a reward of 2 Warhols: \n \n';
-    let contentSelector;
-    let actualTaskID;
+      if ( error ) throw error;
 
-    // Randomly select 5 items from the table.
-    while( currentCreativeSelection.length < MAX_LIST_DISPLAY ){
+      let randomCreativeSelection = [];
+      let taskListDisplay = 'Here is some awesome content created by the Warhols users. Choose one to view to get a reward of 2 Warhols: \n \n';
+      let contentSelector;
+      let actualTaskID;
+
+      // Randomly select 5 items from the table.
+      while( randomCreativeSelection.length < MAX_LIST_DISPLAY ){
         // Set up the numbers usig minus 1 so that the numbers will read the list properly.
         let randNum = (Math.ceil( Math.random() * rows.length ) -1 );
 
-        if( currentCreativeSelection.indexOf( randNum ) > -1 ) continue;
+        if( randomCreativeSelection.indexOf( randNum ) > -1 ) continue;
 
-        currentCreativeSelection[ currentCreativeSelection.length ] = randNum;
+        randomCreativeSelection[ randomCreativeSelection.length ] = randNum;
 
-    }
+      }
 
-    // Prepare all of the tasks for display.
-    // Keep track of which items were selected inside currentCreativeSelection as an array.
+      // 'UPDATE accounts SET mode = ? WHERE owner =?', [ newMode, userID ], function( error, updatedMode ){
+      
+      console.log(randomCreativeSelection);
 
-    for ( let i = 0; i < ( currentCreativeSelection.length ) ; i++) {
-        
-        taskListDisplay += '/' + ( i + 1 ) + ' ';
-        contentSelector = currentCreativeSelection[i];
-        actualTaskID = rows[ contentSelector ].task_id;
-        taskListDisplay += rows[ contentSelector ].description;
-        taskListDisplay += '\n \n';
-        
-    } 
+      let temp = randomCreativeSelection.toString(); // Convert the temporary array into a string so we can save it on the database.
 
-    return callback( error, taskListDisplay );
+      connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner =?', [ temp, userID ], function( error, listCurrent ){
+
+        connection.release();
+
+        if ( error ) throw error;
+
+        // Prepare all of the tasks for display.
+        // Keep track of which items were selected inside currentCreativeSelection as an array.
+
+      });
+
+      for ( let i = 0; i < ( randomCreativeSelection.length ) ; i++) {
+          
+          taskListDisplay += '/' + ( i + 1 ) + ' ';
+          contentSelector = randomCreativeSelection[i];
+          actualTaskID = rows[ contentSelector ].task_id;
+          taskListDisplay += rows[ contentSelector ].description;
+          taskListDisplay += '\n \n';
+          
+      } 
+
+      return callback( error, taskListDisplay );
+
+      });
 
   });
 
@@ -1218,45 +1482,63 @@ function GetCreativeContent( callback ){
 
 
 // Selects five random items from the gifts for users to choose from.
-// Function is called when the user selects '/gift' in '/get' mode.
+// Function is called when the user selects '/gift' in '/get' mode (3).
 
-function GetGiftsContent( callback ){
+function GetGiftsContent( userID, callback ){
 
-  // Retrieve the list of gifts available from the gifts table.
-  connection.query('SELECT * FROM gifts', function( error, rows ){
+  pool.getConnection(function(err, connection) {
+
+    // Retrieve the list of gifts available from the gifts table.
+    connection.query('SELECT * FROM gifts', function( error, gifts ){
 
       if ( error ) throw error;
 
+      let randomGiftSelection = [];
       let giftListDisplay = 'Perform an act of kindness to pay forward for your Warhols. You will get rewarded a random amount by the gods of gratitude. \n \n';
-      let giftSelector;
-      let actualGiftID;
-
+      
       // Randomly select 5 items from the gifts table.
-      while( currentGiftSelection.length < MAX_LIST_DISPLAY ){
-        // Set up the numbers using minus 1 so that the numbers will read the list properly.
-        let randNum = ( Math.ceil( Math.random() * rows.length ) ); // Temporarily removed -1
+      while( randomGiftSelection.length < MAX_LIST_DISPLAY ){
+        
+        let randNum = ( Math.ceil( Math.random() * gifts.length ) );
 
-        if( currentGiftSelection.indexOf( randNum ) > -1 ) continue;
+        if( randomGiftSelection.indexOf( randNum ) > -1 ) continue; // Makes sure that the random number selected does not already exist in the list.
 
-        currentGiftSelection[ currentGiftSelection.length ] = randNum;
+        randomGiftSelection[ randomGiftSelection.length ] = randNum;
 
       }
 
-    // Prepare all of the tasks for display.
-    // Keep track of which items were selected inside currentCreativeSelection as an array.
+      // Prepare all of the tasks for display.
+      // Keep track of which items were selected inside currentCreativeSelection as an array.
 
-    for ( let i = 0; i < ( currentGiftSelection.length ) ; i++ ) {
-        
+      console.log( randomGiftSelection );
+
+      let temp = randomGiftSelection.toString(); // Convert the temporary array into a string so we can save it on the database.
+
+      connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner =?', [ temp, userID ], function( error, listCurrent ){
+
+        connection.release();
+
+        if ( error ) throw error;
+
+        // Prepare all of the tasks for display.
+        // Keep track of which items were selected inside currentCreativeSelection as an array.
+
+      });
+
+      for ( let i = 0; i < ( randomGiftSelection.length ) ; i++ ) {
+          
         giftListDisplay += '/' + ( i + 1 ) + ' '; // The number the user will select
 
-        giftListDisplay += rows[ ( currentGiftSelection[i] - 1 ) ].description; // The description of the gift
+        giftListDisplay += gifts[ ( randomGiftSelection[i] - 1 ) ].description; // The description of the gift
 
         giftListDisplay += '\n \n'; // Spaces for the string for the next line
-        
-    }
+          
+      }
 
-    return callback ( error, giftListDisplay );
+      return callback ( error, giftListDisplay );
 
+    });
+  
   });
 
 }
@@ -1269,9 +1551,15 @@ function AddCreativeContent( userID, userName, newContent ){
 
   let loadContent = { owner: userID, owner_name: userName, description: newContent[1] , url: newContent[0], price: 2, date_created: currentTDS };
 
-  connection.query('INSERT into tasks SET ?', loadContent, function( error, result ){
+  pool.getConnection(function(err, connection) {
 
-    if( error ) throw error;
+    connection.query('INSERT into tasks SET ?', loadContent, function( error, result ){
+
+      connection.release();
+
+      if( error ) throw error;
+
+    });
 
   });
 
@@ -1281,76 +1569,102 @@ function AddCreativeContent( userID, userName, newContent ){
 function DisplayCreativeContent( userID, taskNumber, markup ){
 
   // Read the creative table so we can extract the content associated with
-    // the content description chosen by the user.
-    connection.query('SELECT * FROM tasks', function( error, rows ){
+  // the content description chosen by the user.
 
-      if ( error ) throw error;
-        
+  pool.getConnection( function( err, connection ) {
+
+    connection.query( 'SELECT * FROM tasks', function( error, creativeContent ){
+
+      if ( error ) throw error;    
+
       // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
       if ( taskNumber >= 1 && taskNumber <= 5 ) {
-        
+          
         // Retrieve the corresponding item number from the random selection made when the user selected the /creative option.
         // We use minus 1 to offset the reading of the array.
-        let contentSelector = currentCreativeSelection[ ( taskNumber - 1 ) ];
-
-        let taskID = rows[ contentSelector ].task_id;
-        let taskURL = rows[ contentSelector ].url; // Content address.
-        let warholValue = rows[ contentSelector ].price; // Content price, as in how many Warhols are earned by watching this media.
-        
-        let viewedIncrement = ( ( rows[ contentSelector ].viewed ) + 1 ); // Update how many times the chosen content has been viewed.
-
-        connection.query('UPDATE tasks SET viewed = ? WHERE task_id = ?', [ viewedIncrement , taskID ] , function( error, viewResult ){
-
-          if (error) throw error;
-        
-        });
-
-        // Reset the random list to nothing so that if someone decides to use a command with a number nothing will happen.
-        currentCreativeSelection = [];
-
-        GetBalance( userID, function(error, result){ // Function talks to database and requires a callback.
+        connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + userID, function( error, currentList ){
           
-          let newBalance = ( warholValue + result );
+          // let temp = currentList[0].temp_user_data;
+          // let temp = [];
+          let temp = currentList[0].temp_user_data.split(","); // 
+          console.log( Number( temp[0] ) );
+          
+          let contentSelector = Number(temp[ ( taskNumber - 1 ) ]);
 
-          AddWarhols( userID, newBalance ); // Function talks to database but does not require a callback.
+          let taskID = creativeContent[ contentSelector ].task_id; // The id of the content in the database table.
+          let taskURL = creativeContent[ contentSelector ].url; // Content address.
+          let warholValue = creativeContent[ contentSelector ].price; // Content price, as in how many Warhols are earned by watching this media.
+          
+          let viewedIncrement = ( ( creativeContent[ contentSelector ].viewed ) + 1 ); // Update how many times the chosen content has been viewed.
 
-          return bot.sendMessage( userID, `You now have more Warhols. Enjoy! The link for the content is ${ taskURL }`, { markup });
+          connection.query('UPDATE tasks SET viewed = ? WHERE task_id = ?', [ viewedIncrement , taskID ] , function( error, viewResult ){
+
+            connection.release();
+
+            if (error) throw error;
+            
+          });
+
+          GetBalance( userID, function(error, result){ // Function talks to database and requires a callback.
+
+            let newBalance = ( warholValue + result );
+
+            AddWarhols( userID, newBalance ); // Function talks to database but does not require a callback.
+
+            return bot.sendMessage( userID, `You now have more Warhols. Enjoy! The link for the content is ${ taskURL }`, { markup });
+
+          });
+
+          setMode( userID, 0 );
+          resetRemoteData( userID );
 
         });
 
       }
 
     });
+
+    // Reset the random list to nothing so that if someone decides to use a command with a number nothing will happen.
+    // currentCreativeSelection = []
+
+  });
 
 }
 
 
 function DisplayGiftContent( userID, giftNumber, markup ){
 
-  connection.query('SELECT * FROM gifts', function( error, rows ){
+  pool.getConnection(function(err, connection) {
 
-    if ( error ) throw error;
+    connection.query('SELECT * FROM gifts', function( error, giftContent ){
 
-    // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
-    if ( giftNumber >= 1 && giftNumber <= 5 ) {
+      if ( error ) throw error;
 
-        // Retrieve the corresponding item number from the random selection made when the user selected the /gift option.
-        // We use minus 1 to offset the reading of the array.
-        let contentSelector = currentGiftSelection[ ( giftNumber - 1 ) ];
-        
-        let giftDescription = rows[ ( contentSelector - 1 ) ].description;
-        
-        currentGiftSelection = []; // Reset the gift selection.
+      // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
+      if ( giftNumber >= 1 && giftNumber <= 5 ) {
 
-        currentGiftSelection[0] = contentSelector; // Remember the selection of the user.
-        
-        // Need to add an extra step to prompt the user with a 'yes' or 'no' answer if they will commit to the gift.
-
-        return bot.sendMessage( userID, `Will you ${ giftDescription }? \n /yes or /no ?`, { markup });
+        connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + userID, function( error, currentList ){
           
+          let temp = currentList[0].temp_user_data.split(","); // Convert the array of numbers in strings into an array.
+          
+          let contentSelector = Number(temp[ ( giftNumber - 1 ) ]); // Pad the number so we can use it to retreive the selection from the array.
+    
+          let giftDescription = giftContent[ ( contentSelector - 1 ) ].description; // Get the description of the gift.
+          
+          // Save the selection of the user in the temp_user_data field for the yes/no confirmation.
+          connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ contentSelector, userID ], function( error, selectionPending){
+
+            return bot.sendMessage( userID, `Will you ${ giftDescription }? \n /yes or /no ?`, { markup });
+
+          });
+            
+        });
+
       }
 
     });
+
+  });
 
 }
 
@@ -1359,13 +1673,19 @@ function DisplayGiftContent( userID, giftNumber, markup ){
 
 function setLastDate( userID ){
     
-    var currentDate = new Date();
+  var currentDate = new Date();
+
+  pool.getConnection(function(err, connection) {
 
     connection.query( 'UPDATE accounts SET date_last = ? WHERE owner = ?', [ currentDate, userID ], function( error, current ){
-                
-     if ( error ) throw error;
 
-   });
+    connection.release();
+
+    if ( error ) throw error;
+
+    });
+
+  });
 
 }
 
@@ -1374,17 +1694,23 @@ function setLastDate( userID ){
 
 function DateCompare( userID ){
 
-      var currentDate = new Date();
+    var currentDate = new Date();
+
+    pool.getConnection(function(err, connection) {
 
     connection.query('SELECT date_last FROM accounts WHERE owner =' + userID , function( error, result ){
       
-        if ( error ) return error;
+      connection.release();
 
-          var previousDate = result[0].date_last; // magical command to get one result into a variable
+      if ( error ) return error;
 
-          var sincelastDate = Math.abs(currentDate-previousDate);  // difference in milliseconds
+      var previousDate = result[0].date_last; // magical command to get one result into a variable
+
+      var sincelastDate = Math.abs(currentDate-previousDate);  // difference in milliseconds
 
     });
+
+  });
 
 }
 
@@ -1394,13 +1720,19 @@ function DateCompare( userID ){
 
 function LastInteraction( userID, callback ){
 
-    connection.query('SELECT date_last FROM accounts WHERE owner =' + userID , function( error, result ){
-      
-        if ( error ) return error;
+  pool.getConnection(function(err, connection) {
 
-          return callback( error, result[0].date_last );
+    connection.query('SELECT date_last FROM accounts WHERE owner =' + userID , function( error, result ){
+
+      connection.release();
+
+      if ( error ) return error;
+
+      return callback( error, result[0].date_last );
 
     });
+
+  });
 
 }
 
@@ -1451,13 +1783,19 @@ function timeConversion( millisec ) {
 
 function newMarketActivity( userID, callback ){
 
+  pool.getConnection(function(err, connection) {
+
     connection.query('SELECT * FROM market_bets WHERE user =' + userID , function( error, result ){
       
-        if ( error ) return error;
+    connection.release();
 
-          return callback( error, result );
+    if ( error ) return error;
+
+    return callback( error, result );
 
     });
+
+  });
 
 }
 
@@ -1470,23 +1808,20 @@ function makeFountainHistory( individual, grand ){
 
   let loadContent = { amount_distro: individual, amount_total: grand, tds: currentTDS };
 
-  connection.query('INSERT into fountain_history SET ?', loadContent, function( error, result ){
+  pool.getConnection(function(err, connection) {
 
-    if( error ) throw error;
+    connection.query('INSERT into fountain_history SET ?', loadContent, function( error, result ){
 
-  });  
+      connection.release();
+
+      if( error ) throw error;
+
+    });  
+
+  });
 
 }
 
-      // TO DO:
-
-      // Compare current date with last interaction date.
-
-      // Check for fountain overflows in that period and how much they were.   
-
-      // Add overflown Warhols to users account.
-       
-      // If appropriate send them a message notifying of fountain or market and new balance.
     
 // Last line of code, all functions should be above here
 bot.connect();
