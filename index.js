@@ -742,25 +742,8 @@ bot.on( [ GIFT_RANDOM, GIFT_FOUNTAIN ], msg => {
 
 // The speculative economy, where everyone loses their shirt except for the socipaths.
 
-bot.on( SPECULATIVE_ECON, msg => {
 
-  let markup = bot.keyboard([
-
-    [ SPEC_MARKET ],[ SPEC_RANKING ],[ BACK_BUTTON ]], { resize: true }
-
-  );
-
-  GetBalance( msg.from.id, function( error, balance ){
-    
-    return bot.sendMessage( msg.from.id, `Are you ready to take some risks and maybe get some rewards?. How would you like to invest your Warhols: \n\n /market exchange of flavors \n /ranking of cultural appreciation`, { markup } );
-
-  });
-  
-});
-
-// If the user chooses the Market of flavors
-
-bot.on( SPEC_MARKET , msg => {
+bot.on( SPECULATIVE_ECON , msg => {
 
     betDate = new Date(); // this will be the time of their bet if they place one
     //console.log('betDate - ', betDate);
