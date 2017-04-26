@@ -103,6 +103,29 @@ var betDate = 0;
 
 var marketClosureId = 0;
 
+// Here we are putting temporarily some variables just to test the market winning function
+// Afterwards they should all be converted into local variables or stored on the database to avoid conflicts
+
+// Date of last market closure
+
+var lastMarketClosing = 0;
+
+// array for storing market winners
+
+var marketWinners = [];
+
+// id and flavor for a specific bet by a user
+
+var betInfo = 0;
+
+// cumulative credit of all bets won by a user in period checked
+
+var betCreditTotal = 0;
+
+// variable to hold updated balance after added market winnings
+
+var balancePlusBet = 0; 
+
 
 // The user starts the bot with the /start command.
 
