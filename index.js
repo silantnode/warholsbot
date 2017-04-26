@@ -1880,7 +1880,135 @@ function makeFountainHistory( individual, grand ){
 
 }
 
-    
+// Checks for new Market closures since bets placed
+
+function newMarketActivity( userID, callback ){
+
+      let marketActivityDisplay = 0;
+
+      // Retrieve last market closure date
+      connection.query('SELECT close_time, id, winner FROM market WHERE event = ?', [eventName], function (error, result, fields) {
+
+        if (error) throw error;
+
+        var currentDate = new Date();
+        var i = 0;
+
+        for (i = 0; i < result.length; i++) {  // retrieve all market closures for this event
+
+          if (currentDate > result[i].close_time) {   // check if any of dates are in the past
+
+                lastMarketClosing = result[i].close_time;
+                marketClosureId = result[i].id;
+                var dateDifference = (currentDate-lastMarketClosing);
+                marketWinners[i] = (result[i].winner + '' + result[i].id); // store pair of numbers (id + winning flavor) in array
+
+                //  console.log(marketWinners[i]);
+                console.log('closure ' + (i+1) + ': id ' + marketClosureId + ' - ' + timeConversion(dateDifference) + ' ago. Winner: ' + result[i].winner);
+        }
+
+        else { break; }
+
+        }
+      
+      });
+
+    // check if any bets by user
+    connection.query('SELECT * FROM market_bets WHERE event = ? AND user = ?',[eventName, userID], function( error, result ){
+      
+        if ( error ) return error;
+
+          var i = 0; // will count all bets by user
+          var ii = 0; // will count bets not credited
+          var iii = 0; // will count winning bets
+
+          betCreditTotal = 0; // reset previous value of winnings
+          var newMarketClosure = 0 ; // reset previous value of market closure
+
+          for (i = 0; i < result.length; i++) {
+
+              betInfo = (result[i].flavor + '' + result[i].market_id); // put together on a string closure id and flavor of bet
+              
+              if (result[i].credited == 0) { // check for any bets still not processed
+
+                var credText = 'not credited yet' ;
+                newMarketClosure = 1 ;
+                ii++;
+
+                if (marketWinners.indexOf(betInfo) === -1) {  // bet did not win - *sigh*
+                    console.log(betInfo + ' is NOT a winner');
+
+                             // connection query to update credited field to 1 - bet processed!
+                             connection.query( 'UPDATE market_bets SET credited = 1 WHERE user = ? AND market_id = ? AND flavor = ?', [ userID, betInfo.substring(1) , betInfo.substring(0, 1) ], function( error, current ){
+                
+                             if ( error ) throw error;
+                             
+                             });
+
+                }
+                else {  // bet is a winner - YAY!
+                    console.log(betInfo + ' is a winner');
+
+                    var betCredit = (result[i].amount * SPEC_MULTIPLIER) // multiply bet
+                    betCreditTotal = (betCreditTotal+betCredit); // add value won on this bet with other winnings
+                    iii++;
+                    console.log('betCredit: ' + betCredit);
+                    console.log('betCreditTotal: ' + betCreditTotal);
+                    console.log(betInfo.substring(0, 1)); // get back closure id from string
+                    console.log(betInfo.substring(1));  // get back bet flavor from string
+
+                             // connection query to update credited field to 1 - bet processed!
+                             connection.query( 'UPDATE market_bets SET credited = 1 WHERE user = ? AND market_id = ? AND flavor = ?', [ userID, betInfo.substring(1) , betInfo.substring(0, 1) ], function( error, current ){
+                
+                             if ( error ) throw error;
+                             
+                             });
+
+                }
+
+              } else {
+
+                var credText = 'already credited' ;
+                
+              }
+
+          console.log(result[i].name + ' bet ' + result[i].amount + ' Warhols on flavor ' + result[i].flavor + ' at market id ' + result[i].market_id + ' during event ' + result[i].event+ ' - ' + credText);
+                        
+          }
+
+          console.log ('number of uncredited bets: ' + ii);
+          console.log ('winning bets: ' + iii);
+          console.log ('total winnings: ' + betCreditTotal);
+          console.log ('has market closed: ' + newMarketClosure);
+          
+
+        connection.query('SELECT balance FROM accounts WHERE owner =' + userID , function( error, result ){
+      
+          if ( error ) return error;
+
+             var balance = result[0].balance;
+             console.log('current balance: ' + balance);
+
+             var balancePlusBet = (balance + betCreditTotal);
+             console.log('new balance: ' + balancePlusBet);
+
+             AddWarhols( userID, balancePlusBet ); // update users balance
+
+            // return callback( error, result[0].balance );
+
+             marketActivityDisplay = (' new balance after winnings: ' + balancePlusBet);
+             console.log('marketActivityDisplay1: ' + marketActivityDisplay);
+
+             var newMarketNewBalance = [newMarketClosure, balancePlusBet];
+             
+             return callback( error, newMarketNewBalance );
+        
+        });
+
+    });
+
+}
+
 // Last line of code, all functions should be above here
 bot.connect();
 // Do not add any code after this line
