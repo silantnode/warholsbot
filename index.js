@@ -571,13 +571,15 @@ bot.on('ask.coupon', msg => {
 
                       }
 
+                    } else {
+
+                      return bot.sendMessage( msg.from.id, `Perhaps you entered the code incorrectly? Please try again.`, { ask: 'coupon' });
+
                     }
 
                   }
             
                 }
-
-              return bot.sendMessage( msg.from.id, `Perhaps you entered the code incorrectly? Please try again.`, { ask: 'coupon' });
 
             });
 
