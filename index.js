@@ -1938,6 +1938,13 @@ function newMarketActivity( userID, callback ){
           for (i = 0; i < result.length; i++) {
 
               betInfo = (result[i].flavor + '' + result[i].market_id); // put together on a string closure id and flavor of bet
+
+              // if bet has not closed yet do not process!
+              // if (betDate > lastMarketClosing) 
+              console.log(result[i].time + ' is bet date');
+              console.log(lastMarketClosing + ' is last closing date');
+
+              if (result[i].time < lastMarketClosing) {
               
               if (result[i].credited == 0) { // check for any bets still not processed
 
@@ -1980,6 +1987,12 @@ function newMarketActivity( userID, callback ){
 
                 var credText = 'already credited' ;
                 
+              }  // end check for any bets still not processed
+
+            } else {
+              
+              var credText = 'not closed yet - do not process' ;
+
               }
 
           console.log(result[i].name + ' bet ' + result[i].amount + ' Warhols on flavor ' + result[i].flavor + ' at market id ' + result[i].market_id + ' during event ' + result[i].event+ ' - ' + credText);
