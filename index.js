@@ -833,7 +833,7 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 // if mode is speculation
 getMode( msg.from.id, function( error, currentMode ){
 
-  if ( currentMode == 13 ) {
+  if ( currentMode == 13 | currentMode == 12 ) {
 
   let markup = bot.keyboard([
 
