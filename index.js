@@ -94,35 +94,6 @@ const DESCRIPTION_MAX_LENGTH = 140; // How long a description of content is allo
 
 var eventName = 'test';
 
-// Holds two items submitted by a user in spend/creative mode: 
-// - url for the content.
-// - description of the content.
-// Is reset after every use. 
-
-var contentSubmission = [];
-
-
-// Set by /get, /spend. 
-// 1 is get.
-// 2 is spend.
-// 3 is speculation that is both part of get and spend.
-// This allows me to use the same command set of '/gift', '/creative' and '/speculative' twice by simply checking the mode whenever these commands are called. Especially critical for control of flow when the user inputs commands with numbers! Probably not the best approach but it was the first solution I came up with so I decided to run with it and deal with the consequences later.
-
-var warholMode = 0;
-
-
-// Is set by /random, /fountain or /user
-// 1 is random
-// 2 is fountain
-// 3 is user
-// Will be verified in the huge block that checks for all commands followed by a number ( i.e. /* ). I guess I could have used warholMode by specifying additional values, but it seemed too risky. Rather keep my sanity if there is a problem as we careen towards the deadline for this project.
-
-var giftSpendMode = 0;
-
-// Set by /market selection of Warhols flavor 
-// 1, 2, 3 etc correspond to the flavor color chosen
-
-var marketFlavor = 0;
 
 // Holds time of market bets
 
@@ -822,10 +793,9 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
           if ( error ) throw error;
 
-        });
+          console.log(msg.text);
 
-      marketFlavor = 1; 
-      // console.log(marketFlavor);
+        });
 
       } else if ( msg.text == SPEC_FLAVOR_2 ) {
 
@@ -833,13 +803,11 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
             
           connection.release();
 
-
-  // setMode( msg.from.id, 12);
+          console.log(msg.text);
 
           if ( error ) throw error;
 
         }); 
-      // console.log(marketFlavor);
 
       } else if ( msg.text == SPEC_FLAVOR_3 ) {
 
@@ -849,9 +817,10 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
           if ( error ) throw error;
 
-        }); 
-      // console.log(marketFlavor);
+          console.log(msg.text);
 
+        }); 
+      
       }
 
   });
