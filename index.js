@@ -983,7 +983,7 @@ bot.on( '/*' , msg => {
       // Read from the second character in the message string.
       let warholAmount = Number( ( ( msg.text ).slice( 1, 3 ) ) );
       
-      if ( isNaN( taskNumber ) ){
+      if ( isNaN( warholAmount ) ){
 
         // Do nothing.
 
@@ -1011,7 +1011,7 @@ bot.on( '/*' , msg => {
       // Read from the second character in the message string.
       let warholAmount = Number( ( ( msg.text ).slice( 1, 3 ) ) );
     
-      if ( isNaN( taskNumber ) ){
+      if ( isNaN( warholAmount ) ){
 
         // Do nothing.
 
@@ -1038,7 +1038,7 @@ bot.on( '/*' , msg => {
 
       let betAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
 
-      if( isNaN(betAmount) ){  // if user types a command that is not a number, this can cause a bug, so betAmount must not be NaN.
+      if( isNaN( betAmount ) ){  // if user types a command that is not a number, this can cause a bug, so betAmount must not be NaN.
 
         betAmount = 5;
 
