@@ -283,7 +283,7 @@ bot.on( BALANCE_BUTTON, msg => {
     [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
   );
 
-// to do: check if the fountain has been activated and if so display message (compare last activity with last fountain date)
+  // to do: check if the fountain has been activated and if so display message (compare last activity with last fountain date)
 
   GetBalance( msg.from.id, function( error, result ){  // at this point "result" loads the balance since last interaction, bets not processed yet
 
