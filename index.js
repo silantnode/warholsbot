@@ -290,7 +290,7 @@ bot.on( BALANCE_BUTTON, msg => {
       newMarketActivity( msg.from.id, function( error, newMarketNewBalance ){ // this function's result is an array with two values
       var anyClosures = newMarketNewBalance[0];  // first value of array is 1 for new closures, 0 for none of such
       var betsBalance = newMarketNewBalance[1];  // second result of array is new updated user balance with any new bets won
-      
+
       console.log('callback -- anyClosures: ' + anyClosures);
       console.log('callback -- new balance after winnings: ' + betsBalance);   
       console.log('previous balance: ' + result);
@@ -1863,25 +1863,7 @@ function timeConversion( millisec ) {
 
 
 
-// Checks for new Market closures since bets placed
 
-function newMarketActivity( userID, callback ){
-
-  pool.getConnection(function(err, connection) {
-
-    connection.query('SELECT * FROM market_bets WHERE user =' + userID , function( error, result ){
-      
-    connection.release();
-
-    if ( error ) return error;
-
-    return callback( error, result );
-
-    });
-
-  });
-
-}
 
 
 // Records overflow of fountain, how much each user received, the total amount taken from the fountain and the date.
