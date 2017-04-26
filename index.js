@@ -303,11 +303,11 @@ bot.on( BALANCE_BUTTON, msg => {
 
         if (betsBalance > result) {  // if new balance is higher, user won Warhols on market - YAY to speculation!
 
-          return bot.sendMessage( msg.from.id, `The market has closed and you have won ${ wonWarhols } Warhols. Your new balance is ${ betsBalance } Warhols. Choose how to /spend your warhols. Or /get some more.`, { markup });
+          return bot.sendMessage( msg.from.id, `The market has closed and you have won ${ wonWarhols } Warhols. Your new balance is ${ betsBalance } Warhols. \nChoose how to /spend your warhols. Or /get some more.`, { markup });
 
         } else {
 
-          return bot.sendMessage( msg.from.id, `The market has closed and unfortunately you didn't win. You currently have ${ betsBalance } Warhols. Choose how to /spend your warhols. Or /get some more.`, { markup });
+          return bot.sendMessage( msg.from.id, `The market has closed and unfortunately you didn't win. You currently have ${ betsBalance } Warhols. \nChoose how to /spend your warhols. Or /get some more.`, { markup });
 
         } 
       
