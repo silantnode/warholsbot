@@ -978,8 +978,6 @@ bot.on( '/*' , msg => {
 
           } else {
 
-            setMode( msg.from.id, 8 );
-
             DisplayGiftContent( msg.from.id, taskNumber, markup );
 
           }
@@ -1825,6 +1823,8 @@ function DisplayGiftContent( userID, giftNumber, markup ){
           
           // Save the selection of the user in the temp_user_data field for the yes/no confirmation.
           connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ contentSelector, userID ], function( error, selectionPending){
+
+            setMode( msg.from.id, 8 );
 
             return bot.sendMessage( userID, `Will you ${ giftDescription }? \n\n/yes, I will. \n/no, thanks.`, { markup });
 
