@@ -1758,8 +1758,6 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
         // We use minus 1 to offset the reading of the array.
         connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + userID, function( error, currentList ){
           
-          // let temp = currentList[0].temp_user_data;
-          // let temp = [];
           let temp = currentList[0].temp_user_data.split(","); // 
           console.log( Number( temp[0] ) );
           
