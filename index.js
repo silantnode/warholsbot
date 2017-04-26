@@ -493,13 +493,15 @@ bot.on('ask.coupon', msg => {
 
           // It's a command but just let /back do its job.
 
+        } else {
+
+          let markup = bot.keyboard([
+            [ BACK_BUTTON ]], { resize: true }
+          );
+
+          return bot.sendMessage( msg.from.id, `That is a command. Please enter a coupon code.` ,{ ask: 'coupon' }, {  })
+
         }
-
-        let markup = bot.keyboard([
-          [ BACK_BUTTON ]], { resize: true }
-        );
-
-        return bot.sendMessage( msg.from.id, `That is a command. Please enter a coupon code.` ,{ ask: 'coupon' }, {  })
 
       } else {
 
