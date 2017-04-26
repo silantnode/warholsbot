@@ -1030,7 +1030,7 @@ bot.on( '/*' , msg => {
 
         setMode( msg.from.id, 0);
 
-        return bot.sendMessage( msg.from.id, `Thanks for your investment! You will get a notification when the market closes. Good luck!`, { markup } );
+        return bot.sendMessage( msg.from.id, `Thanks for your investment! Check you balance again after the market closes. Good luck!`, { markup } );
 
       }); // end if balance enough
     
