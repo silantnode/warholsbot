@@ -746,6 +746,19 @@ bot.on( SPECULATIVE_ECON , msg => {
 
     betDate = new Date(); // this will be the time of their bet if they place one
     //console.log('betDate - ', betDate);
+
+    pool.getConnection(function(err, connection) {
+
+      connection.query( 'UPDATE accounts SET pre_bet1 = ? WHERE owner = ?', [ betDate, msg.from.id ], function( error, flavorChoice ){
+            
+        connection.release();
+
+        if ( error ) throw error;
+
+      });
+
+    });
+
     // to do: check if user has enough balance, if not ask to choose other value
 
 
@@ -821,7 +834,7 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
           connection.release();
 
 
-  setMode( msg.from.id, 12);
+  // setMode( msg.from.id, 12);
 
           if ( error ) throw error;
 
@@ -924,6 +937,12 @@ bot.on( '/*' , msg => {
 
       let betAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
 
+      if(isNaN(betAmount)){  // if user types a command that is not a number, this can cause a bug, so betAmount must not be NaN.
+
+        betAmount = 5;
+
+      }else{
+
       // check if user has enough balance, if not ask to choose other value
 
       GetBalance( msg.from.id, function( error, result ){
@@ -931,7 +950,7 @@ bot.on( '/*' , msg => {
       // Check what the balance is... 
         if ( result < betAmount ) {
 
-          return bot.sendMessage( msg.from.id, `You currently have only ${ result } Warhols. Please start with a lower investment.`, { markup: 'hide' });
+          return bot.sendMessage( msg.from.id, `You currently have only ${ result } Warhols. Please start with a lower investment.`);
         
         } else {   // Continue with the investment.
         
@@ -955,11 +974,15 @@ bot.on( '/*' , msg => {
 
             // SELECT viewed FROM gifts WHERE task_id =' + currentGiftSelection[0] , function( error, timesViewed ){
 
-            connection.query( 'SELECT temp_user_data FROM accounts WHERE owner=' + msg.from.id, function( error, flavorChoice ){
+            connection.query( 'SELECT temp_user_data FROM accounts WHERE owner=' + msg.from.id, function( error, result ){
 
               if( error ) throw error;
 
-              let newBet = { time: betDate, market_id: marketClosureId, user: msg.from.id, name: betOwner, flavor: flavorChoice, amount: betAmount, credited: 0 };
+              let flavorChoice = result[0].temp_user_data;
+
+              console.log (flavorChoice);
+
+              let newBet = { time: betDate, event: eventName, market_id: marketClosureId, user: msg.from.id, name: msg.from.first_name, flavor: flavorChoice, amount: betAmount, credited: 0 };
 
               connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
               
@@ -991,6 +1014,8 @@ bot.on( '/*' , msg => {
 
       }); // end if balance enough
     
+    }
+
     }
 
   });
