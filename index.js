@@ -1512,9 +1512,6 @@ function ShareTheWealth( userID, fountainContribution ){
 
               SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
 
-              warholMode = 0;
-              giftSpendMode = 0;
-
               console.log('Fountain activated');
             
               // Requestify code here
