@@ -766,6 +766,8 @@ bot.on( [ GIFT_RANDOM, GIFT_FOUNTAIN ], msg => {
 
 bot.on( SPECULATIVE_ECON , msg => {
 
+  setMode( msg.from.id, 13 ); // Entering speculation mode.
+
     betDate = new Date(); // this will be the time of their bet if they place one
     //console.log('betDate - ', betDate);
 
@@ -828,6 +830,11 @@ bot.on( SPECULATIVE_ECON , msg => {
 
 bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {  
 
+// if mode is speculation
+getMode( msg.from.id, function( error, currentMode ){
+
+  if ( currentMode == 13 ) {
+
   let markup = bot.keyboard([
 
   [ BACK_BUTTON ]], { resize: true }
@@ -881,6 +888,9 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
   let flavorName = msg.text.substr(1);
 
   return bot.sendMessage( msg.from.id, `How many shares of ` + flavorName + ` Warhols you want to buy? \n\n /5 \n /10 \n /20 \n /50 \n /100`, { markup } );
+
+  }
+});
 
 });
 
