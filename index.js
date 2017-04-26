@@ -78,6 +78,8 @@ const SPEC_FLAVOR_2 = "/green";
 const SPEC_FLAVOR_3 = "/orange";
 const SPEC_FLAVOR_4 = "/purple";
 
+const SPEC_MULTIPLIER = 2; // How many times to multiply the bet if user wins in the market
+
 const MIN_DISTRO = 2; // The minimum amount of warhols required per amount of users for an even distrobution of warhols from the fountain.
 const GIFT_MULTIPLYER = 2; // The maximum bonus amount of warhols included in the distrobution from the fountain.
 
@@ -1862,10 +1864,6 @@ function timeConversion( millisec ) {
     }
 
 
-
-
-
-
 // Records overflow of fountain, how much each user received, the total amount taken from the fountain and the date.
 
 function makeFountainHistory( individual, grand ){
@@ -1894,8 +1892,12 @@ function newMarketActivity( userID, callback ){
 
       let marketActivityDisplay = 0;
 
+      pool.getConnection(function(err, connection) {
+
       // Retrieve last market closure date
       connection.query('SELECT close_time, id, winner FROM market WHERE event = ?', [eventName], function (error, result, fields) {
+
+        connection.release();
 
         if (error) throw error;
 
@@ -2014,6 +2016,8 @@ function newMarketActivity( userID, callback ){
         });
 
     });
+
+  });
 
 }
 
