@@ -283,11 +283,11 @@ bot.on( BALANCE_BUTTON, msg => {
     [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
   );
 
-// to do: check if the fountain has been activated and if so display message (compare last activity with last fountain date)
+  // to do: check if the fountain has been activated and if so display message (compare last activity with last fountain date)
 
   GetBalance( msg.from.id, function( error, result ){  // at this point "result" loads the balance since last interaction, bets not processed yet
 
-  // check if there are new market closures that can lead to new balance
+    // check if there are new market closures that can lead to new balance
 
       newMarketActivity( msg.from.id, function( error, newMarketNewBalance ){ // this function's result is an array with two values
       var anyClosures = newMarketNewBalance[0];  // first value of array is 1 for new closures, 0 for none of such
@@ -868,18 +868,18 @@ bot.on( SPECULATIVE_ECON , msg => {
 
 bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {  
 
-// if mode is speculation
-getMode( msg.from.id, function( error, currentMode ){
+  // if mode is speculation
+  getMode( msg.from.id, function( error, currentMode ){
 
   if ( currentMode == 13 | currentMode == 12 ) {
 
-  let markup = bot.keyboard([
+    let markup = bot.keyboard([
 
-  [ BACK_BUTTON ]], { resize: true }
+    [ BACK_BUTTON ]], { resize: true }
 
   );
 
-  pool.getConnection(function(err, connection){
+    pool.getConnection(function(err, connection){
 
       if ( msg.text == SPEC_FLAVOR_1 ) {
       
@@ -909,26 +909,27 @@ getMode( msg.from.id, function( error, currentMode ){
 
         connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ 3, msg.from.id ], function( error, flavorChoice ){
           
-          connection.release();
+        connection.release();
 
-          if ( error ) throw error;
+        if ( error ) throw error;
 
-          // console.log(msg.text);
+        // console.log(msg.text);
 
-        }); 
+      }); 
       
-      }
+    }
 
   });
 
-  setMode( msg.from.id, 12 );
+    setMode( msg.from.id, 12 );
 
-  let flavorName = msg.text.substr(1);
+      let flavorName = msg.text.substr(1);
 
-  return bot.sendMessage( msg.from.id, `How many shares of ` + flavorName + ` Warhols you want to buy? \n\n /5 \n /10 \n /20 \n /50 \n /100`, { markup } );
+      return bot.sendMessage( msg.from.id, `How many shares of ` + flavorName + ` Warhols you want to buy? \n\n /5 \n /10 \n /20 \n /50 \n /100`, { markup });
 
-  }
-});
+    }
+
+  });
 
 });
 
