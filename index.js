@@ -498,7 +498,7 @@ bot.on('/coupon', msg => {
 });
 
 
-
+/*
 
 bot.on('ask.coupon', msg => {
 
@@ -612,10 +612,9 @@ bot.on('ask.coupon', msg => {
 
   });// Close getMode
 
-
-
 }); // Close bot.on
 
+*/
 
 
 bot.on('ask.url', msg => {
