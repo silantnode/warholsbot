@@ -472,7 +472,7 @@ bot.on('/coupon', msg => {
       [ BACK_BUTTON ]], { resize: true }
   );
 
-  pool.getConnection(function(err,connection) {
+  pool.getConnection(function(err,connection){
     
     connection.query( 'SELECT used_coupon FROM accounts WHERE owner =' + msg.from.id, function( error, couponUsed ){
 
@@ -493,12 +493,16 @@ bot.on('/coupon', msg => {
         return bot.sendMessage( msg.from.id, `Please enter code exactly as it appears on the coupon.`, { ask: 'coupon' }, { markup });
       }
 
+    });
+
   });
 
 });
 
 
-/*
+
+
+
 
 bot.on('ask.coupon', msg => {
 
@@ -614,7 +618,7 @@ bot.on('ask.coupon', msg => {
 
 }); // Close bot.on
 
-*/
+
 
 
 bot.on('ask.url', msg => {
