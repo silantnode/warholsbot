@@ -190,6 +190,7 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 bot.on( '/test', msg => {
 
 
+
 });
 
 
@@ -466,8 +467,9 @@ bot.on( PUBLISH_BUTTON , msg => {
 
 
 
-bot.on('/coupon', msg => {
+bot.on( '/coupon' , msg => {
 
+  
   let markup = bot.keyboard([
       [ BACK_BUTTON ]], { resize: true }
   );
@@ -478,7 +480,7 @@ bot.on('/coupon', msg => {
 
       if( error ) throw error;
 
-      if ( couponUsed == 1 ) { // They have already used a coupon
+      if ( couponUsed[0].used_coupon == 1 ) { // They have already used a coupon
 
         let markup = bot.keyboard([
           [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
@@ -486,7 +488,7 @@ bot.on('/coupon', msg => {
         
         return bot.sendMessage( msg.from.id, `You have already used a coupon code. Maybe /get some warhols?`, { markup });
 
-      } else if ( couponUsed == 0 ) { // They have not used a coupon
+      } else if ( couponUsed[0].used_coupon == 0 ) { // They have not used a coupon
         
         setMode( msg.from.id, 14 ); // Set to coupon mode.
 
@@ -501,9 +503,6 @@ bot.on('/coupon', msg => {
 
 
 
-
-
-
 bot.on('ask.coupon', msg => {
 
   getMode( msg.from.id, function( error, currentMode ){
@@ -515,108 +514,149 @@ bot.on('ask.coupon', msg => {
         if ( msg.text == '/back'){
 
           // It's a command but just let /back do its job.
-        }
-
-      } else {
+        } else {
 
           let markup = bot.keyboard([
             [ BACK_BUTTON ]], { resize: true }
           );
 
-          return bot.sendMessage( msg.from.id, `That is a command. Please enter a coupon code.` ,{ ask: 'coupon' }, {  })
+          return bot.sendMessage( msg.from.id, `That is a command. Please enter a coupon code.` ,{ ask: 'coupon' }, { markup });
 
-      }
+        }
 
-    } else { // The message is not a command or any other gobley gook...
+      } else { // The message is not a command or any other gobley gook...
 
-      let couponCode = msg.text;
+        let couponCode = msg.text;
 
-      pool.getConnection(function(err, connection) {
+        let codeFound = false;
 
-        connection.query( 'SELECT * FROM coupons', function( error, uniqueCode ){
+        let codeUsed = false;
 
-          if( error ) throw error;
+        let matchingCode;
 
-          for( let i = 0; i < uniqueCode.length; i++ ){
-                
-            // Check if the submitted code matches a code in the database.
-            if ( couponCode == uniqueCode[i].unique ){
+        pool.getConnection(function(err, connection) {
 
-              // Verify if the code has been used already.
-              if ( uniqueCode[i].used == 1 ){
+          connection.query( 'SELECT * FROM coupons', function( error, allCodes ){
 
-                return bot.sendMessage( msg.from.id, `This coupon has already been used. Please enter a different code if you have one.`, { ask: 'coupon' });
+            // connection.release();
 
-              } else { // The code has never been used so the user can now redeem the warhols.
+            if( error ) throw error;
+
+            for( let i = 0; i < allCodes.length; i++ ){
               
-                // Mark the code as used.
-                connection.query( 'UPDATE coupons SET used = ? WHERE id = ?', [ 1, uniqueCode[i].id ], function( error, selectedCoupon ){
+              if ( couponCode == allCodes[i].unique){ // If the code entered has been found...
 
-                  if( error ) throw error;
+                console.log('Found!');
 
-                });
+                if ( allCodes[i].used == 0 ){
 
-                // Record the Telegram user id of the person who used the code.
-                connection.query( 'UPDATE coupons SET owner = ? WHERE id = ?', [ msg.from.id , uniqueCode[i].id ], function( error, claiment ){
+                  console.log('And it can be used!');
+                  matchingCode = (allCodes[i].id - 1 ); // Minus 1 to pad for the 0 of the array.
+                  console.log(matchingCode);
+                  codeFound = true;
+                  break;
 
-                  if( error ) throw error;
+                } else {
 
-                });
+                  codeUsed = true;
+                  break;
 
-                // Flag on the account of the user that they have used a coupon.
-                connection.query( 'UPDATE accounts SET used_code = ? WHERE id = ?', [ msg.from.id, 1 ], function( error, usedCoupon ){
+                }
+              
+              }
 
-                  if( error ) throw error;
+            }
 
-                });
-                        
-                // Record the time and date the coupon was claimed.
-                let currentDate = new Date();
+            if ( codeUsed == true ){
 
-                connection.query( 'UPDATE coupons SET tds = ? WHERE id = ?', [ currentDate , uniqueCode[i].id ], function( error, dateConfirmation ){
+              return bot.sendMessage( msg.from.id, `This code has already been used. Please enter another if you have one`, { ask: 'coupon' });              
 
-                  connection.release();
+            }
 
-                  if( error ) throw error;
-
-                });
-                        
-                // Give the user their warhols.
-                GetBalance( msg.from.id, function( error, currentBalance ){
-
-                  let newBalance = ( MAX_COUPON + currentBalance );
-
-                  AddWarhols( msg.from.id, newBalance );
-
-                });
-
-                let markup = bot.keyboard([
-                  [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
-                );
-
-                setMode( msg.from.id, 0 );
-
-                return bot.sendMessage( msg.from.id, `Congradulations! You now have 10 Warhols on your account.`, { markup });
-
-              } // Close verification if code was already used
-
-            } else {
+            if ( codeFound == false ){
 
               return bot.sendMessage( msg.from.id, `Perhaps you entered the code incorrectly? Please try again.`, { ask: 'coupon' });
 
-            } // Close to check if coupon exists
+            } else if ( codeFound == true ) {
 
-          } // Close of for loop
+              console.log('Do the thing.');
+
+              
+              // Mark the code as used.
+              connection.query( 'UPDATE coupons SET used = ? WHERE id = ?', [ 1, allCodes[ matchingCode ].id ], function( error, selectedCoupon ){
+
+                if( error ) throw error;
+
+              });
+              
+              // Record the Telegram user id of the person who used the code.
+              connection.query( 'UPDATE coupons SET owner = ? WHERE id = ?', [ msg.from.id , allCodes[ matchingCode ].id ], function( error, claiment ){
+
+                if( error ) throw error;
+
+              });
+              
+              // Flag on the account of the user that they have used a coupon.
+              connection.query( 'UPDATE accounts SET used_coupon = ? WHERE owner = ?', [ 1, msg.from.id ], function( error, usedCoupon ){
+
+                if( error ) throw error;
+
+              });
+                  
+              // Record the time and date the coupon was claimed.
+              let currentDate = new Date();
+
+              connection.query( 'UPDATE coupons SET tds = ? WHERE id = ?', [ currentDate , allCodes[ matchingCode ].id ], function( error, dateConfirmation ){
+
+                connection.release();
+
+                  if( error ) throw error;
+
+              });
+                          
+              // Give the user their warhols.
+              GetBalance( msg.from.id, function( error, currentBalance ){
+
+                let newBalance = ( MAX_COUPON + currentBalance );
+
+                AddWarhols( msg.from.id, newBalance );
+
+              });
+
+              let markup = bot.keyboard([
+                [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+              );
+
+              setMode( msg.from.id, 0 );
+
+              return bot.sendMessage( msg.from.id, `Congradulations! You now have 10 Warhols on your account.`, { markup });
+
+            }
           
-        }); // Close coupon query
+          });
+        
+        });
 
-      }); // Close pool
+      }
+    
+    }
 
-    } // Close if ( currentMode )
+  });
 
-  });// Close getMode
+});
 
-}); // Close bot.on
+    
+      
+
+          
+            
+          
+
+          
+            
+          
+
+      
 
 
 
