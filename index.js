@@ -492,7 +492,7 @@ bot.on( '/coupon' , msg => {
         
         setMode( msg.from.id, 14 ); // Set to coupon mode.
 
-        return bot.sendMessage( msg.from.id, `Please enter code exactly as it appears on the coupon.`, { ask: 'coupon' }, { markup });
+        return bot.sendMessage( msg.from.id, `It seems you have a coupon for free Warhols. Please enter the coupon code:`, { ask: 'coupon' }, { markup });
       }
 
     });
@@ -569,13 +569,13 @@ bot.on('ask.coupon', msg => {
 
             if ( codeUsed == true ){
 
-              return bot.sendMessage( msg.from.id, `This code has already been used. Please enter another if you have one`, { ask: 'coupon' });              
+              return bot.sendMessage( msg.from.id, `Sorry, this code has been used already. Try another.`, { ask: 'coupon' });              
 
             }
 
             if ( codeFound == false ){
 
-              return bot.sendMessage( msg.from.id, `Perhaps you entered the code incorrectly? Please try again.`, { ask: 'coupon' });
+              return bot.sendMessage( msg.from.id, `This code is invalid. Maybe you mistyped? Try again.`, { ask: 'coupon' });
 
             } else if ( codeFound == true ) {
 
@@ -629,7 +629,7 @@ bot.on('ask.coupon', msg => {
 
               setMode( msg.from.id, 0 );
 
-              return bot.sendMessage( msg.from.id, `Congradulations! You now have 10 Warhols on your account.`, { markup });
+              return bot.sendMessage( msg.from.id, `Yay! Your account was credited with 10 Warhols. \nYou can now /spend them, or /get even more!`, { markup });
 
             }
           
