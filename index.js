@@ -557,7 +557,7 @@ bot.on( '/coupon' , msg => {
       [ BACK_BUTTON ]], { resize: true }
   );
 
-  doesUserExist( userID, function(error, doThey){
+  doesUserExist( msg.from.id, function(error, doThey){
     
     if ( doThey == true ){
 
@@ -588,8 +588,11 @@ bot.on( '/coupon' , msg => {
 
     } else {
 
-      createUserAccount( msg.from.id, msg. msg.from.first_name );
-      return bot.sendMessage( msg.from.id, `Welcome ${ msg.from.first_name }! You're new here, right? That's ok! we created an account for you. Use the commands below to interact with your account. Now you can enter the coupon code.`, { ask: 'coupon' }, { markup } );
+      createUserAccount( msg.from.id, msg.from.first_name );
+
+      setMode (msg.from.id, 14);
+      
+      return bot.sendMessage( msg.from.id, `Welcome ${ msg.from.first_name }! You're new here, right? We created an account for you. Now you can enter the coupon code.`, { ask: 'coupon' }, { markup } );
 
     }
 
