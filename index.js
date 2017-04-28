@@ -164,7 +164,7 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
         }
       
-      }
+      }  // end of for loop
 
       // Send them a message welcoming them back.
 
@@ -203,27 +203,35 @@ bot.on( '/test', msg => {
 
 function doesUserExist( userID, callback ){ // true if they do exist, false if they don't.
 
-  pool.getConnection(function(err, connection) {
+  // Check the Warhols database to see if the user already has an account.
 
-    connection.query('SELECT * FROM accounts', function( error, allUsers ){
+  pool.getConnection( function( err, connection ) {
+
+    connection.query( 'SELECT * FROM accounts', function( error, rows ){
 
       connection.release();
 
-      if ( error ) throw error;
-        
-      let doThey = false;
+      if( error ) throw error;
 
-      for( let i = 0; i < allUsers.length; i++ ){
+      let doesUserExist = false;
 
-        if( allUsers[i].owner == userID ){
+      for( let i = 0; i < rows.length; i++ ){
 
-          doThey == true;
+        if( rows[i].owner == userID ){ // Check if the user exists.
+
+          // They are an existing user.    
+          doesUserExist = true;      
+          
+        } else {
+
+          // They are a new user.
+          doesUserExist = false;
 
         }
+      
+      }  // end of for loop
 
-      }
-
-      if ( doThey == false ){
+ /*     if ( doThey == false ){
 
         return callback( error, doThey );
 
@@ -231,6 +239,8 @@ function doesUserExist( userID, callback ){ // true if they do exist, false if t
 
         return callback( error, doThey );
       }
+*/
+return callback( error, doesUserExist );
 
     });
 
@@ -260,8 +270,12 @@ function createUserAccount( userID, userFirstName ){
 // Sets the mode of the user
 
 function setMode( userID, newMode ){ 
+
+  console.log('entered setmode function ' + userID);
   
   doesUserExist( userID, function(error, doThey){
+
+    console.log('dothey = ' + doThey);
 
     if ( doThey == true ){
 
