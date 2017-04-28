@@ -176,7 +176,7 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
       } else if ( doesUserExist == false ) {
 
-      // If we get this far then it means the user does not have an account yet. So we create one for them.
+        // If we get this far then it means the user does not have an account yet. So we create one for them.
 
         createUserAccount( msg.from.id, msg.from.first_name );
 
@@ -229,18 +229,9 @@ function doesUserExist( userID, callback ){ // true if they do exist, false if t
 
         }
       
-      }  // end of for loop
-
- /*     if ( doThey == false ){
-
-        return callback( error, doThey );
-
-      } else if ( doThey == true ) {
-
-        return callback( error, doThey );
       }
-*/
-return callback( error, doesUserExist );
+
+      return callback( error, doesUserExist );
 
     });
 
@@ -562,33 +553,45 @@ bot.on( PUBLISH_BUTTON , msg => {
 
 bot.on( '/coupon' , msg => {
 
-  
   let markup = bot.keyboard([
       [ BACK_BUTTON ]], { resize: true }
   );
 
-  pool.getConnection(function(err,connection){
+  doesUserExist( userID, function(error, doThey){
     
-    connection.query( 'SELECT used_coupon FROM accounts WHERE owner =' + msg.from.id, function( error, couponUsed ){
+    if ( doThey == true ){
 
-      if( error ) throw error;
-
-      if ( couponUsed[0].used_coupon == 1 ) { // They have already used a coupon
-
-        let markup = bot.keyboard([
-          [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
-        );
+      pool.getConnection(function(err,connection){
         
-        return bot.sendMessage( msg.from.id, `You have already used a coupon code. Maybe /get some warhols?`, { markup });
+        connection.query( 'SELECT used_coupon FROM accounts WHERE owner =' + msg.from.id, function( error, couponUsed ){
 
-      } else if ( couponUsed[0].used_coupon == 0 ) { // They have not used a coupon
-        
-        setMode( msg.from.id, 14 ); // Set to coupon mode.
+          if( error ) throw error;
 
-        return bot.sendMessage( msg.from.id, `It seems you have a coupon for free Warhols. Please enter the coupon code:`, { ask: 'coupon' }, { markup });
-      }
+          if ( couponUsed[0].used_coupon == 1 ) { // They have already used a coupon
 
-    });
+            let markup = bot.keyboard([
+              [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+            );
+            
+            return bot.sendMessage( msg.from.id, `You have already used a coupon code. Maybe /get some warhols?`, { markup });
+
+          } else if ( couponUsed[0].used_coupon == 0 ) { // They have not used a coupon
+            
+            setMode( msg.from.id, 14 ); // Set to coupon mode.
+
+            return bot.sendMessage( msg.from.id, `It seems you have a coupon for free Warhols. Please enter the coupon code:`, { ask: 'coupon' }, { markup });
+          }
+
+        });
+
+      });
+
+    } else {
+
+      createUserAccount( msg.from.id, msg. msg.from.first_name );
+      return bot.sendMessage( msg.from.id, `Welcome ${ msg.from.first_name }! You're new here, right? That's ok! we created an account for you. Use the commands below to interact with your account. Now you can enter the coupon code.`, { ask: 'coupon' }, { markup } );
+
+    }
 
   });
 
