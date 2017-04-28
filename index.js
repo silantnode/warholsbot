@@ -254,7 +254,6 @@ function doesUserExist( userID, callback ){ // true if they do exist, false if t
 
 }
 
-// 
 
 function createUserAccount( userID, userFirstName ){
 
