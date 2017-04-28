@@ -131,7 +131,7 @@ var balancePlusBet = 0;
 
 // The user starts the bot with the /start command.
 
-bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
+bot.on([ START_BUTTON ], msg => {
   
   // Display commands as handy buttons in the telegram interface.
   let markup = bot.keyboard([
@@ -190,6 +190,21 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
 });
 
+// BACK command
+
+bot.on( BACK_BUTTON, msg => {
+
+  // Display commands as handy buttons in the telegram interface.
+  let markup = bot.keyboard([
+    [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+  );
+
+        setMode( msg.from.id, 0 );
+        resetRemoteData( msg.from.id );
+        return bot.sendMessage( msg.from.id, `Welcome back ${ msg.from.first_name }!`, { markup } );
+
+
+});
 
 // Command for testing functions.
 
@@ -591,7 +606,7 @@ bot.on( '/coupon' , msg => {
       createUserAccount( msg.from.id, msg.from.first_name );
 
       setMode (msg.from.id, 14);
-      
+
       return bot.sendMessage( msg.from.id, `Welcome ${ msg.from.first_name }! You're new here, right? We created an account for you. Now you can enter the coupon code.`, { ask: 'coupon' }, { markup } );
 
     }
