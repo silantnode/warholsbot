@@ -94,7 +94,7 @@ const DESCRIPTION_MAX_LENGTH = 140; // How long a description of content is allo
 
 // Identify the event for which the Warhols will be used - this will provide a subset of market closing dates to work with
 
-var eventName = 'test';
+var eventName = 'eind2017';
 
 
 // Holds time of market bets
@@ -148,35 +148,42 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 
       if( error ) throw error;
 
+      let doesUserExist = false;
+
       for( let i = 0; i < rows.length; i++ ){
 
-        if( rows[i].owner == msg.from.id ){
+        if( rows[i].owner == msg.from.id ){ // Check if the user exists.
 
-          // Send them a message welcoming them back.
-          setMode( msg.from.id, 0 );
-          resetRemoteData( msg.from.id );
-          return bot.sendMessage( msg.from.id, `Welcome back ${ msg.from.first_name }!`, { markup } );
+          // They are an existing user.    
+          doesUserExist = true;      
           
+        } else {
+
+          // They are a new user.
+          doesUserExist = false;
+
         }
       
       }
 
+      // Send them a message welcoming them back.
+
+      if ( doesUserExist == true ){
+
+        setMode( msg.from.id, 0 );
+        resetRemoteData( msg.from.id );
+        return bot.sendMessage( msg.from.id, `Welcome back ${ msg.from.first_name }!`, { markup } );
+
+      } else if ( doesUserExist == false ) {
+
       // If we get this far then it means the user does not have an account yet. So we create one for them.
 
-      let newOwner = { owner: msg.from.id, owner_name: msg.from.first_name, balance: 0 };
+        createUserAccount( msg.from.id, msg.from.first_name );
+
+        return bot.sendMessage( msg.from.id, `Welcome ${ msg.from.first_name }! You're new here, right? That's ok! we created an account for you. Use the commands below to interact with your account.`, { markup } );
       
-      connection.query('INSERT INTO accounts SET ?', newOwner, function( error, result ){
-        
-        connection.release();
-
-        if( error ) throw error;
+      }         
       
-      });
-
-      setMode( msg.from.id, 0 ); 
-
-      return bot.sendMessage( msg.from.id, `Welcome ${ msg.from.first_name }! You're new here, right? That's ok! we created an account for you. Use the commands below to interact with your account.`, { markup } );
-
     });
   
   });
@@ -194,21 +201,85 @@ bot.on( '/test', msg => {
 });
 
 
-// Sets the mode of the user
+function doesUserExist( userID, callback ){ // true if they do exist, false if they don't.
 
-function setMode( userID, newMode ){ 
-  
   pool.getConnection(function(err, connection) {
 
-    connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?', [ newMode, userID ], function( error, updatedMode ){
-      
-      console.log( userID +' updated to mode ' + newMode );
+    connection.query('SELECT * FROM accounts', function( error, allUsers ){
 
       connection.release();
 
       if ( error ) throw error;
+        
+      let doThey = false;
+
+      for( let i = 0; i < allUsers.length; i++ ){
+
+        if( allUsers[i].owner == userID ){
+
+          doThey == true;
+
+        }
+
+      }
+
+      if ( doThey == false ){
+
+        return callback( error, doThey );
+
+      } else if ( doThey == true ) {
+
+        return callback( error, doThey );
+      }
 
     });
+
+  });
+
+}
+
+
+function createUserAccount( userID, userFirstName ){
+
+  pool.getConnection(function(err, connection){
+
+    let newOwner = { owner: userID, owner_name: userFirstName, balance: 0, mode: 0 };
+        
+      connection.query('INSERT INTO accounts SET ?', newOwner, function( error, result ){
+          
+        connection.release();
+
+        if( error ) throw error;
+        
+      });
+
+  });
+
+}
+
+// Sets the mode of the user
+
+function setMode( userID, newMode ){ 
+  
+  doesUserExist( userID, function(error, doThey){
+
+    if ( doThey == true ){
+
+      pool.getConnection(function(err, connection) {
+
+        connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?', [ newMode, userID ], function( error, updatedMode ){
+          
+          console.log( userID +' updated to mode ' + newMode );
+
+          connection.release();
+
+          if ( error ) throw error;
+
+        });
+
+      });
+
+    }
 
   });
 
@@ -219,19 +290,27 @@ function setMode( userID, newMode ){
 
 function getMode( userID, callback ){
 
-  pool.getConnection(function(err, connection) {
+  doesUserExist( userID, function( error, doThey ){
 
-    connection.query('SELECT mode FROM accounts WHERE owner =' + userID , function( error, currentMode ){
+    if ( doThey == true ){
 
-      connection.release();
+      pool.getConnection(function(err, connection) {
 
-      if ( error ) throw error;
-      
-      // console.log(currentMode[0].mode);
+        connection.query('SELECT mode FROM accounts WHERE owner =' + userID , function( error, currentMode ){
 
-      return callback( error, currentMode[0].mode );
+          connection.release();
 
-    });
+          if ( error ) throw error;
+          
+          console.log(currentMode[0].mode);
+          
+          return callback( error, currentMode[0].mode );
+
+        });
+
+      });
+     
+    }
 
   });
 
@@ -645,21 +724,7 @@ bot.on('ask.coupon', msg => {
 
 });
 
-    
-      
-
-          
-            
-          
-
-          
-            
-          
-
-      
-
-
-
+  
 
 bot.on('ask.url', msg => {
   
