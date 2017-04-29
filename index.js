@@ -194,11 +194,7 @@ bot.on([ START_BUTTON, BACK_BUTTON ], msg => {
 // Command for testing functions.
 
 
-bot.on( '/test', msg => {
 
-
-
-});
 
 
 function doesUserExist( userID, callback ){ // true if they do exist, false if they don't.
