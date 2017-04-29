@@ -195,6 +195,14 @@ bot.on([ START_BUTTON ], msg => {
 
 bot.on( BACK_BUTTON, msg => {
 
+  //first check if user exists
+
+  doesUserExist( msg.from.id, function(error, doThey){
+
+  console.log('dothey = ' + doThey);
+
+  if ( doThey == true ){
+
   // Display commands as handy buttons in the telegram interface.
   let markup = bot.keyboard([
     [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
@@ -204,6 +212,8 @@ bot.on( BACK_BUTTON, msg => {
         resetRemoteData( msg.from.id );
         return bot.sendMessage( msg.from.id, `Welcome back ${ msg.from.first_name }!`, { markup } );
 
+}
+});
 
 });
 
@@ -387,6 +397,12 @@ bot.on( BALANCE_BUTTON, msg => {
 
   // to do: check if the fountain has been activated and if so display message (compare last activity with last fountain date)
 
+doesUserExist( msg.from.id, function(error, doThey){
+
+    console.log('dothey = ' + doThey);
+
+    if ( doThey == true ){
+
   GetBalance( msg.from.id, function( error, result ){  // at this point "result" loads the balance since last interaction, bets not processed yet
 
     // check if there are new market closures that can lead to new balance
@@ -434,12 +450,23 @@ bot.on( BALANCE_BUTTON, msg => {
 
   });  // end of getBalance function
 
+}
+}); // end of checking if user exists
+
 }); // end of bot.on balance button
 
 
 // Get warhols.
 
 bot.on( GET_BUTTON, msg => {
+
+  // first check if user exists
+
+  doesUserExist( msg.from.id, function(error, doThey){
+
+  console.log('dothey = ' + doThey);
+
+  if ( doThey == true ){
 
     let markup = bot.keyboard([
       [ GIFT_ECON ],[ CREATIVE_ECON ],[ SPECULATIVE_ECON ]], { resize: true }
@@ -449,10 +476,22 @@ bot.on( GET_BUTTON, msg => {
 
     return bot.sendMessage( msg.from.id, `How do you want to get Warhols?`, { markup });
 
+  }
+  });
+
 });
 
 
 bot.on( SPEND_BUTTON, msg => {
+
+
+   // first check if they have an account
+   doesUserExist( msg.from.id, function(error, doThey){
+
+   console.log('dothey = ' + doThey);
+
+   if ( doThey == true ){
+
 
      // Check their account to see if it has any Warhols.
 
@@ -479,6 +518,10 @@ bot.on( SPEND_BUTTON, msg => {
       }
 
     });
+
+  }
+
+  });
     
 });
 
@@ -962,6 +1005,13 @@ bot.on( [ GIFT_RANDOM, GIFT_FOUNTAIN ], msg => {
 
 bot.on( SPECULATIVE_ECON , msg => {
 
+// first check if user exists
+doesUserExist( msg.from.id, function(error, doThey){
+
+console.log('dothey = ' + doThey);
+
+if ( doThey == true ){  
+
   setMode( msg.from.id, 13 ); // Entering speculation mode.
 
     betDate = new Date(); // this will be the time of their bet if they place one
@@ -1019,7 +1069,11 @@ bot.on( SPECULATIVE_ECON , msg => {
 
   });
 
-});
+}
+
+}); // end of check if user exists
+
+}); // end of speculation econ
 
 
 // assign marketFlavor variable according to the choice of flavor by the user
@@ -1102,6 +1156,27 @@ bot.on( '/*' , msg => {
   );
 
   if ( msg.text.startsWith('/') == true ) {
+
+    // first test for coupon or start command since it's ok to activate even without user having an account
+
+    if ( msg.text == '/coupon' | msg.text == '/start') {
+
+      // just let /coupon do its job.
+
+    } else {
+
+    doesUserExist( msg.from.id, function(error, doThey){
+
+    console.log('dothey = ' + doThey);
+
+    if ( doThey == false ){
+
+      return bot.sendMessage( msg.from.id, `You don't have an account yet. /start to create one.`);
+
+    }
+
+    else {
+
 
     if ( msg.text == '/back') {
 
@@ -1286,7 +1361,12 @@ bot.on( '/*' , msg => {
 
     }
 
-  }
+   }
+   });  // end of checking if user exists
+
+  }  // end of checking for /coupon or /start
+  
+  }  // end of checking for / commands
   
 });
 
@@ -1451,7 +1531,7 @@ bot.on( NO_BUTTON, msg => {
 });
 
 // Last Interaction test command
-
+/*
 bot.on('/last', msg => {
   // Update database date_last column with current date timestamp.
   setLastDate( msg.from.id );
@@ -1464,7 +1544,7 @@ bot.on('/date', msg => {
   DateCompare ( msg.from.id );
 
 });
-
+*/
 
 
 
