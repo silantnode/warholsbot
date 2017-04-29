@@ -156,6 +156,7 @@ bot.on([ START_BUTTON ], msg => {
 
           // They are an existing user.    
           doesUserExist = true;      
+          break;
           
         } else {
 
@@ -236,6 +237,7 @@ function doesUserExist( userID, callback ){ // true if they do exist, false if t
 
           // They are an existing user.    
           doesUserExist = true;      
+          break;
           
         } else {
 
