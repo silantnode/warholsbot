@@ -298,7 +298,9 @@ function createUserAccount( userID, userFirstName ){
       balance: 0,
       mode: 0 };
 
-      connection.query('INSERT INTO accounts SET ?', newOwner, function( error, result ){
+      connection.query('INSERT INTO accounts SET ?',
+        newOwner,
+        function( error, result ){
 
         connection.release();
 
