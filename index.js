@@ -1935,7 +1935,7 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
         connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + userID, function( error, currentList ){
 
           let temp = currentList[0].temp_user_data.split(","); //
-    
+
           let contentSelector = Number(temp[ ( taskNumber - 1 ) ]);
 
           let taskID = creativeContent[ contentSelector ].task_id; // The id of the content in the database table.
@@ -2176,11 +2176,11 @@ function newMarketActivity( userID, callback ){
                 var dateDifference = (currentDate-lastMarketClosing);
                 marketWinners[i] = (result[i].winner + '' + result[i].id); // store pair of numbers (id + winning flavor) in array
 
-                // console.log(marketWinners[i]);
-                // console.log('closure ' + (i+1) + ': id ' + marketClosureId + ' - ' + timeConversion(dateDifference) + ' ago. Winner: ' + result[i].winner);
-        }
+          } else {
 
-        else { break; }
+            break;
+
+          }
 
         }
 
