@@ -1433,7 +1433,7 @@ bot.on( YES_BUTTON, msg => {
 
             // Get the response and write to console
             response.body;
-            // console.log('IFTTT: ' + response.body);
+            
 
           }); // End of WarholsChannel content posting routine.
 
