@@ -1070,8 +1070,6 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
           connection.release();
 
-          // console.log(msg.text);
-
           if ( error ) throw error;
 
         });
