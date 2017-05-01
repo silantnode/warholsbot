@@ -1121,9 +1121,7 @@ bot.on( '/*' , msg => {
     } else {
 
     doesUserExist( msg.from.id, function(error, doThey){
-
-    console.log('dothey = ' + doThey);
-
+      
     if ( doThey == false ){
 
       return bot.sendMessage( msg.from.id, `You don't have an account yet. /start to create one.`);
