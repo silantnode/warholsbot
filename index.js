@@ -82,7 +82,9 @@ const SPEC_MULTIPLIER = 2;
 // The minimum amount of warhols required per amount of users
 // for an even distrobution of warhols from the fountain.
 const MIN_DISTRO = 2;
-const GIFT_MULTIPLYER = 2; // The maximum bonus amount of warhols included in the distrobution from the fountain.
+// The maximum bonus amount of warhols included
+// in the distrobution from the fountain.
+const GIFT_MULTIPLYER = 2;
 
 const YES_BUTTON = "/yes";
 const NO_BUTTON = "/no";
