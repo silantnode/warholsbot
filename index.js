@@ -145,7 +145,7 @@ var balancePlusBet = 0;
 
 
 bot.on([ START_BUTTON ], msg => {
-  
+
   // Display commands as handy buttons in the telegram interface.
   let markup = bot.keyboard(
     [[ GET_BUTTON ],
@@ -170,14 +170,14 @@ bot.on([ START_BUTTON ], msg => {
 
         if( rows[i].owner == msg.from.id ){ // Check if the user exists.
 
-
           // They are an existing user.
           doesUserExist = true;
 
           // They are an existing user.    
           doesUserExist = true;      
+
           break;
-          
+
         } else {
 
           // They are a new user.
@@ -235,8 +235,6 @@ bot.on( BACK_BUTTON, msg => {
 
   doesUserExist( msg.from.id, function(error, doThey){
 
-  console.log('dothey = ' + doThey);
-
   if ( doThey == true ){
 
   // Display commands as handy buttons in the telegram interface.
@@ -281,10 +279,10 @@ function doesUserExist( userID, callback ){
 
         if( rows[i].owner == userID ){ // Check if the user exists.
 
-          // They are an existing user.    
-          doesUserExist = true;      
+          // They are an existing user.
+          doesUserExist = true;
           break;
-          
+
         } else {
 
           // They are a new user.
@@ -307,12 +305,14 @@ function createUserAccount( userID, userFirstName ){
 
   pool.getConnection(function(err, connection){
 
+
     let newOwner = {
       owner: userID,
       owner_name: userFirstName,
       balance: 0,
       mode: 0
     };
+
 
       connection.query('INSERT INTO accounts SET ?', newOwner, function( error, result ){
 
@@ -330,20 +330,18 @@ function createUserAccount( userID, userFirstName ){
 
 function setMode( userID, newMode ){
 
-  console.log('entered setmode function ' + userID);
-
   doesUserExist( userID, function(error, doThey){
-
-    console.log('dothey = ' + doThey);
 
     if ( doThey == true ){
 
       pool.getConnection(function(err, connection) {
 
+
         connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?',
         [ newMode, userID ], function( error, updatedMode ){
 
           console.log( userID +' updated to mode ' + newMode );
+
 
           connection.release();
 
@@ -377,8 +375,6 @@ function getMode( userID, callback ){
 
           if ( error ) throw error;
 
-          console.log(currentMode[0].mode);
-
           return callback( error, currentMode[0].mode );
 
         });
@@ -400,14 +396,13 @@ function resetRemoteData( userID ){
 
     let resetList = "";
 
+
     connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?',
     [ resetList, userID ], function( error, resetList ){
 
       connection.release();
 
       if ( error ) throw error;
-
-      console.log('The random list selection for ' + userID + ' has been reset');
 
     });
 
@@ -419,8 +414,10 @@ function resetRemoteData( userID ){
 
 bot.on( '/help', msg => {
 
+
   return bot.sendMessage( msg.from.id, `A list of common commands available to
   use for interacting with warhols bot.\n
+
   /start - Starts the warholsbot.\n
   /back - Returns you to the start menu from anywhere.\n
   /spend - Starts the process of spending warhols and can be used anywhere.\n
@@ -446,9 +443,6 @@ bot.on( BALANCE_BUTTON, msg => {
   // to do: check if the fountain has been activated and if so display message
   // (compare last activity with last fountain date)
 
-
-doesUserExist( msg.from.id, function(error, doThey){
-
     if ( doThey == true ){
 
     GetBalance( msg.from.id, function( error, result ){  // at this point "result" loads the balance since last interaction, bets not processed yet
@@ -462,10 +456,6 @@ doesUserExist( msg.from.id, function(error, doThey){
       var anyClosures = newMarketNewBalance[0];
       // second result of array is new updated user balance with any new bets won
       var betsBalance = newMarketNewBalance[1];
-
-      // console.log('callback -- anyClosures: ' + anyClosures);
-      // console.log('callback -- new balance after winnings: ' + betsBalance);
-      // console.log('previous balance: ' + result);
 
       var wonWarhols = (betsBalance-result); // Warhols won, can be zero if no wins
 
@@ -494,6 +484,7 @@ doesUserExist( msg.from.id, function(error, doThey){
       // Check what the balance is...
         if ( result == 0 ) {
           // If there are no Warhols on the account encourage them to get some Warhols.
+
           return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols.
           Use the /get command to change this situation.`, { markup });
 
@@ -524,8 +515,6 @@ bot.on( GET_BUTTON, msg => {
 
   doesUserExist( msg.from.id, function(error, doThey){
 
-  console.log('dothey = ' + doThey);
-
   if ( doThey == true ){
 
     let markup = bot.keyboard([
@@ -547,8 +536,6 @@ bot.on( SPEND_BUTTON, msg => {
 
    // first check if they have an account
    doesUserExist( msg.from.id, function(error, doThey){
-
-   console.log('dothey = ' + doThey);
 
    if ( doThey == true ){
 
@@ -586,7 +573,7 @@ bot.on( SPEND_BUTTON, msg => {
   }
 
   });
-  
+
 });
 
 
@@ -778,17 +765,18 @@ bot.on('ask.coupon', msg => {
             if( error ) throw error;
 
             for( let i = 0; i < allCodes.length; i++ ){
+
               // If the code entered has been found...
               if ( couponCode == allCodes[i].unique){
 
-                console.log('Found!');
-
                 if ( allCodes[i].used == 0 ){
 
-                  console.log('And it can be used!');
+
+                  matchingCode = (allCodes[i].id - 1 ); // Minus 1 to pad for the 0 of the array.
+
                   // Minus 1 to pad for the 0 of the array.
                   matchingCode = (allCodes[i].id - 1 );
-                  console.log(matchingCode);
+
                   codeFound = true;
                   break;
 
@@ -816,9 +804,6 @@ bot.on('ask.coupon', msg => {
               Maybe you mistyped? Try again.`, { ask: 'coupon' });
 
             } else if ( codeFound == true ) {
-
-              console.log('Do the thing.');
-
 
               // Mark the code as used.
               connection.query( 'UPDATE coupons SET used = ? WHERE id = ?',
@@ -1096,33 +1081,29 @@ bot.on( [ GIFT_RANDOM, GIFT_FOUNTAIN ], msg => {
 
 bot.on( SPECULATIVE_ECON , msg => {
 
-// first check if user exists
-doesUserExist( msg.from.id, function(error, doThey){
+  // first check if user exists
+  doesUserExist( msg.from.id, function(error, doThey){
 
-console.log('dothey = ' + doThey);
+    if ( doThey == true ){
 
-if ( doThey == true ){  
+      setMode( msg.from.id, 13 ); // Entering speculation mode.
 
-  setMode( msg.from.id, 13 ); // Entering speculation mode.
+      betDate = new Date(); // this will be the time of their bet if they place one
 
-    betDate = new Date(); // this will be the time of their bet if they place one
-    //console.log('betDate - ', betDate);
+      pool.getConnection(function(err, connection) {
 
-    pool.getConnection(function(err, connection) {
+        connection.query( 'UPDATE accounts SET pre_bet1 = ? WHERE owner = ?',
+        [ betDate, msg.from.id ], function( error, flavorChoice ){
 
-      connection.query( 'UPDATE accounts SET pre_bet1 = ? WHERE owner = ?',
-      [ betDate, msg.from.id ], function( error, flavorChoice ){
+          connection.release();
 
-        connection.release();
-
-        if ( error ) throw error;
+          if ( error ) throw error;
 
       });
 
     });
 
     // to do: check if user has enough balance, if not ask to choose other value
-
 
     let markup = bot.keyboard([
 
@@ -1145,19 +1126,15 @@ if ( doThey == true ){
 
           marketClosureId = results[i].id;
 
-          // console.log('marketClosureId - ', marketClosureId);
-
           var dateDifference = (results[i].close_time-currentDate);
           var timetoClosing = timeConversion(dateDifference);
           // choose the first date at least 10 minutes in the future
           if (dateDifference > 600000) { break; }
 
-        }
-
-        return bot.sendMessage( msg.from.id, `The Warhols exchange market will
-        close in ` + timetoClosing + `. In which flavor would you like to invest?
-        \n\n `+ SPEC_FLAVOR_1 +` Warhols \n `+ SPEC_FLAVOR_2 +` Warhols \n
-        `+ SPEC_FLAVOR_3 +` Warhols`, { markup } );
+            return bot.sendMessage( msg.from.id, `The Warhols exchange market will
+            close in ` + timetoClosing + `. In which flavor would you like to invest?
+            \n\n `+ SPEC_FLAVOR_1 +` Warhols \n `+ SPEC_FLAVOR_2 +` Warhols \n
+            `+ SPEC_FLAVOR_3 +` Warhols`, { markup } );
 
     });
 
@@ -1198,18 +1175,15 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
           if ( error ) throw error;
 
-          // console.log(msg.text);
-
         });
 
       } else if ( msg.text == SPEC_FLAVOR_2 ) {
+
 
         connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?',
         [ 2, msg.from.id ], function( error, flavorChoice ){
 
           connection.release();
-
-          // console.log(msg.text);
 
           if ( error ) throw error;
 
@@ -1223,8 +1197,6 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
         connection.release();
 
         if ( error ) throw error;
-
-        // console.log(msg.text);
 
       });
 
@@ -1267,8 +1239,6 @@ bot.on( '/*' , msg => {
     } else {
 
     doesUserExist( msg.from.id, function(error, doThey){
-
-    console.log('dothey = ' + doThey);
 
     if ( doThey == false ){
 
@@ -1426,7 +1396,7 @@ bot.on( '/*' , msg => {
                   if( error ) throw error;
 
                   let flavorChoice = result[0].temp_user_data;
-
+                  
                   let newBet = {
                     time: betDate,
                     event: eventName,
@@ -1482,9 +1452,9 @@ bot.on( '/*' , msg => {
    });  // end of checking if user exists
 
   }  // end of checking for /coupon or /start
-  
+
   }  // end of checking for / commands
-  
+
 });
 
 
@@ -1610,7 +1580,7 @@ bot.on( YES_BUTTON, msg => {
 
             // Get the response and write to console
             response.body;
-            // console.log('IFTTT: ' + response.body);
+
 
           }); // End of WarholsChannel content posting routine.
 
@@ -1720,8 +1690,6 @@ function SubtractWarhols( userID, subtractionAmount ){
 
           if ( error ) throw error;
 
-          // console.log('Changed ' + current.changedRows + ' rows');
-
       });
 
     });
@@ -1737,6 +1705,7 @@ function SubtractWarhols( userID, subtractionAmount ){
 function GetBalance( msgID, callback ){
 
   pool.getConnection(function(err, connection) {
+
 
     connection.query('SELECT balance FROM accounts WHERE owner ='
     + msgID , function( error, result ){
@@ -1757,6 +1726,7 @@ function GetBalance( msgID, callback ){
 function GetFountainBalance( callback ){
 
   pool.getConnection(function(err, connection) {
+
 
     connection.query('SELECT reservoir FROM fountain WHERE id ='
     + 1, function( error, result ){
@@ -1896,9 +1866,7 @@ function ShareTheWealth( userID, fountainContribution ){
               }
 
               SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
-
-              console.log('Fountain activated');
-
+           
               // Requestify code here
 
               requestify.post('https://maker.ifttt.com/trigger/new_fountain/with/key/' + custom_data[5] , { // IFTTT secret key.
@@ -1923,10 +1891,7 @@ function ShareTheWealth( userID, fountainContribution ){
 
           });
 
-
         } else {
-
-          console.log('Fountain received new funds');
 
           setMode( userID, 0 );
 
@@ -1998,7 +1963,6 @@ function GetCreativeContent( userID, callback ){
         randomCreativeSelection[ randomCreativeSelection.length ] = randNum;
 
       }
-
 
       // Convert the temporary array into a string so we can save it on the database.
       let temp = randomCreativeSelection.toString();
@@ -2080,6 +2044,7 @@ function GetGiftsContent( userID, callback ){
 
       for ( let i = 0; i < ( randomGiftSelection.length ) ; i++ ) {
 
+
         // The number the user will select
         giftListDisplay += '/' + ( i + 1 ) + ' ';
 
@@ -2088,7 +2053,7 @@ function GetGiftsContent( userID, callback ){
 
         // Spaces for the string for the next line
         giftListDisplay += '\n \n';
-
+        
       }
 
       return callback ( error, giftListDisplay );
@@ -2150,7 +2115,6 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
         + userID, function( error, currentList ){
 
           let temp = currentList[0].temp_user_data.split(","); //
-          console.log( Number( temp[0] ) );
 
           let contentSelector = Number(temp[ ( taskNumber - 1 ) ]);
           // The id of the content in the database table.
@@ -2210,6 +2174,7 @@ function DisplayGiftContent( userID, giftNumber, markup ){
       // Make sure that the number they have entered is either 1 or 5.
       // If not, just act dumb and don't do anything.
       if ( giftNumber >= 1 && giftNumber <= 5 ) {
+
 
         connection.query( 'SELECT temp_user_data FROM accounts WHERE owner ='
         + userID, function( error, currentList ){
@@ -2274,18 +2239,18 @@ function DateCompare( userID ){
 
     pool.getConnection(function(err, connection) {
 
-    connection.query('SELECT date_last FROM accounts WHERE owner ='
-    + userID , function( error, result ){
+      connection.query('SELECT date_last FROM accounts WHERE owner ='
+      + userID , function( error, result ){
 
-      connection.release();
+        connection.release();
 
-      if ( error ) return error;
+        if ( error ) return error;
 
-      // magical command to get one result into a variable.
-      var previousDate = result[0].date_last;
+        // magical command to get one result into a variable.
+        var previousDate = result[0].date_last;
 
-      // difference in milliseconds.
-      var sincelastDate = Math.abs(currentDate-previousDate);
+        // difference in milliseconds.
+        var sincelastDate = Math.abs(currentDate-previousDate);
 
     });
 
@@ -2417,15 +2382,18 @@ function newMarketActivity( userID, callback ){
                 // store pair of numbers (id + winning flavor) in array
                 marketWinners[i] = (result[i].winner + '' + result[i].id);
 
-        }
+          } else {
 
-        else { break; }
+            break;
+
+          }
 
         }
 
       });
 
     // check if any bets by user
+
     connection.query('SELECT * FROM market_bets WHERE event = ? AND user = ?',
     [eventName, userID], function( error, result ){
 
@@ -2444,8 +2412,6 @@ function newMarketActivity( userID, callback ){
 
               // if bet has not closed yet do not process!
 
-              // console.log(result[i].time + ' is bet date');
-              // console.log(lastMarketClosing + ' is last closing date');
 
               if (result[i].time < lastMarketClosing) {
 
@@ -2455,6 +2421,7 @@ function newMarketActivity( userID, callback ){
                   var credText = 'not credited yet' ;
                   newMarketClosure = 1 ;
                   ii++;
+
 
                   // bet did not win - *sigh*
                   if (marketWinners.indexOf(betInfo) === -1) {
@@ -2473,11 +2440,13 @@ function newMarketActivity( userID, callback ){
                     betCreditTotal = (betCreditTotal+betCredit);
                     iii++;
 
+
                     connection.query( 'UPDATE market_bets SET credited = 1 WHERE user = ? AND market_id = ? AND flavor = ?', [ userID, betInfo.substring(1) , betInfo.substring(0, 1) ], function( error, current ){
 
                       if ( error ) throw error;
 
                       });
+
 
                 }
 
