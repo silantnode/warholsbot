@@ -1731,8 +1731,6 @@ function ShareTheWealth( userID, fountainContribution ){
 
         } else {
 
-          console.log('Fountain received new funds');
-
           setMode( userID, 0 );
 
           return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
