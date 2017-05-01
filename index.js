@@ -217,21 +217,23 @@ bot.on( BACK_BUTTON, msg => {
 
   doesUserExist( msg.from.id, function(error, doThey){
 
-  
-
   if ( doThey == true ){
 
-  // Display commands as handy buttons in the telegram interface.
-  let markup = bot.keyboard([
-    [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
-  );
+    // Display commands as handy buttons in the telegram interface.
+    let markup = bot.keyboard([
+      [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+    );
 
-        setMode( msg.from.id, 0 );
-        resetRemoteData( msg.from.id );
-        return bot.sendMessage( msg.from.id, `Welcome back ${ msg.from.first_name }!`, { markup } );
+    setMode( msg.from.id, 0 );
+    resetRemoteData( msg.from.id );
+    return bot.sendMessage(
+      msg.from.id,
+      `Welcome back ${ msg.from.first_name }!`,
+      { markup } );
 
-}
-});
+    }
+    
+  });
 
 });
 
