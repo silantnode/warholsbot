@@ -1935,8 +1935,7 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
         connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + userID, function( error, currentList ){
 
           let temp = currentList[0].temp_user_data.split(","); //
-          console.log( Number( temp[0] ) );
-
+    
           let contentSelector = Number(temp[ ( taskNumber - 1 ) ]);
 
           let taskID = creativeContent[ contentSelector ].task_id; // The id of the content in the database table.
