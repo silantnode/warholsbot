@@ -975,8 +975,6 @@ bot.on( SPECULATIVE_ECON , msg => {
 // first check if user exists
 doesUserExist( msg.from.id, function(error, doThey){
 
-console.log('dothey = ' + doThey);
-
 if ( doThey == true ){
 
   setMode( msg.from.id, 13 ); // Entering speculation mode.
