@@ -2071,11 +2071,12 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
 
           });
 
-          GetBalance( userID, function(error, result){ // Function talks to database and requires a callback.
+          // Function talks to database and requires a callback.
+          GetBalance( userID, function(error, result){
 
             let newBalance = ( warholValue + result );
-
-            AddWarhols( userID, newBalance ); // Function talks to database but does not require a callback.
+            // Function talks to database but does not require a callback.
+            AddWarhols( userID, newBalance );
 
             return bot.sendMessage( userID, `Here's the link to view the content you selected: \n${ taskURL }\n\nEnjoy!`, { markup });
 
@@ -2090,8 +2091,8 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
 
     });
 
-    // Reset the random list to nothing so that if someone decides to use a command with a number nothing will happen.
-    // currentCreativeSelection = []
+    // Reset the random list to nothing so that if someone decides to use a
+    // command with a number nothing will happen.
 
   });
 
@@ -2106,19 +2107,25 @@ function DisplayGiftContent( userID, giftNumber, markup ){
 
       if ( error ) throw error;
 
-      // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
+      // Make sure that the number they have entered is either 1 or 5.
+      // If not, just act dumb and don't do anything.
       if ( giftNumber >= 1 && giftNumber <= 5 ) {
 
-        connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + userID, function( error, currentList ){
+        connection.query( 'SELECT temp_user_data FROM accounts WHERE owner ='
+        + userID, function( error, currentList ){
 
-          let temp = currentList[0].temp_user_data.split(","); // Convert the array of numbers in strings into an array.
+          // Convert the array of numbers in strings into an array.
+          let temp = currentList[0].temp_user_data.split(",");
 
-          let contentSelector = Number(temp[ ( giftNumber - 1 ) ]); // Pad the number so we can use it to retreive the selection from the array.
+          // Pad the number so we can use it to retreive the selection from the array.
+          let contentSelector = Number(temp[ ( giftNumber - 1 ) ]);
 
-          let giftDescription = giftContent[ ( contentSelector - 1 ) ].description; // Get the description of the gift.
+          // Get the description of the gift.
+          let giftDescription = giftContent[ ( contentSelector - 1 ) ].description;
 
           // Save the selection of the user in the temp_user_data field for the yes/no confirmation.
-          connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ contentSelector, userID ], function( error, selectionPending){
+          connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?',
+          [ contentSelector, userID ], function( error, selectionPending){
 
             setMode( userID, 8 );
 
@@ -2145,7 +2152,8 @@ function setLastDate( userID ){
 
   pool.getConnection(function(err, connection) {
 
-    connection.query( 'UPDATE accounts SET date_last = ? WHERE owner = ?', [ currentDate, userID ], function( error, current ){
+    connection.query( 'UPDATE accounts SET date_last = ? WHERE owner = ?',
+    [ currentDate, userID ], function( error, current ){
 
     connection.release();
 
@@ -2166,15 +2174,18 @@ function DateCompare( userID ){
 
     pool.getConnection(function(err, connection) {
 
-    connection.query('SELECT date_last FROM accounts WHERE owner =' + userID , function( error, result ){
+    connection.query('SELECT date_last FROM accounts WHERE owner ='
+    + userID , function( error, result ){
 
       connection.release();
 
       if ( error ) return error;
 
-      var previousDate = result[0].date_last; // magical command to get one result into a variable
+      // magical command to get one result into a variable.
+      var previousDate = result[0].date_last;
 
-      var sincelastDate = Math.abs(currentDate-previousDate);  // difference in milliseconds
+      // difference in milliseconds.
+      var sincelastDate = Math.abs(currentDate-previousDate);
 
     });
 
@@ -2190,7 +2201,8 @@ function LastInteraction( userID, callback ){
 
   pool.getConnection(function(err, connection) {
 
-    connection.query('SELECT date_last FROM accounts WHERE owner =' + userID , function( error, result ){
+    connection.query('SELECT date_last FROM accounts WHERE owner ='
+    + userID , function( error, result ){
 
       connection.release();
 
@@ -2246,7 +2258,8 @@ function timeConversion( millisec ) {
     }
 
 
-// Records overflow of fountain, how much each user received, the total amount taken from the fountain and the date.
+// Records overflow of fountain, how much each user received,
+// the total amount taken from the fountain and the date.
 
 function makeFountainHistory( individual, grand ){
 
