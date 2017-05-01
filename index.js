@@ -179,8 +179,13 @@ bot.on([ START_BUTTON ], msg => {
       if ( doesUserExist == true ){
 
         setMode( msg.from.id, 0 );
+
         resetRemoteData( msg.from.id );
-        return bot.sendMessage( msg.from.id, `Welcome back ${ msg.from.first_name }!`, { markup } );
+
+        return bot.sendMessage( 
+          msg.from.id,
+          `Welcome back ${ msg.from.first_name }!`,
+          { markup } );
 
       } else if ( doesUserExist == false ) {
 
