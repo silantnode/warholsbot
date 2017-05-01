@@ -182,14 +182,15 @@ bot.on([ START_BUTTON ], msg => {
 
         resetRemoteData( msg.from.id );
 
-        return bot.sendMessage( 
+        return bot.sendMessage(
           msg.from.id,
           `Welcome back ${ msg.from.first_name }!`,
           { markup } );
 
       } else if ( doesUserExist == false ) {
 
-        // If we get this far then it means the user does not have an account yet. So we create one for them.
+        // If we get this far then it means the user does not
+        // have an account yet. So we create one for them.
 
         createUserAccount( msg.from.id, msg.from.first_name );
 
