@@ -1270,8 +1270,6 @@ bot.on( '/*' , msg => {
 
                   let flavorChoice = result[0].temp_user_data;
 
-                  console.log (flavorChoice);
-
                   let newBet = { time: betDate, event: eventName, market_id: marketClosureId, user: msg.from.id, name: msg.from.first_name, flavor: flavorChoice, amount: betAmount, credited: 0 };
 
                   connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
