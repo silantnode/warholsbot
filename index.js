@@ -972,19 +972,18 @@ bot.on( [ GIFT_RANDOM, GIFT_FOUNTAIN ], msg => {
 
 bot.on( SPECULATIVE_ECON , msg => {
 
-// first check if user exists
-doesUserExist( msg.from.id, function(error, doThey){
+  // first check if user exists
+  doesUserExist( msg.from.id, function(error, doThey){
 
-if ( doThey == true ){
+    if ( doThey == true ){
 
-  setMode( msg.from.id, 13 ); // Entering speculation mode.
+      setMode( msg.from.id, 13 ); // Entering speculation mode.
 
-    betDate = new Date(); // this will be the time of their bet if they place one
-    //console.log('betDate - ', betDate);
+      betDate = new Date(); // this will be the time of their bet if they place one
 
-    pool.getConnection(function(err, connection) {
+      pool.getConnection(function(err, connection) {
 
-      connection.query( 'UPDATE accounts SET pre_bet1 = ? WHERE owner = ?', [ betDate, msg.from.id ], function( error, flavorChoice ){
+        connection.query( 'UPDATE accounts SET pre_bet1 = ? WHERE owner = ?', [ betDate, msg.from.id ], function( error, flavorChoice ){
 
         connection.release();
 
@@ -995,7 +994,6 @@ if ( doThey == true ){
     });
 
     // to do: check if user has enough balance, if not ask to choose other value
-
 
     let markup = bot.keyboard([
 
@@ -1016,8 +1014,6 @@ if ( doThey == true ){
         for (i = 0; i < results.length; i++) {
 
           marketClosureId = results[i].id;
-
-          // console.log('marketClosureId - ', marketClosureId);
 
           var dateDifference = (results[i].close_time-currentDate);
           var timetoClosing = timeConversion(dateDifference);
