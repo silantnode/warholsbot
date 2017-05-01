@@ -99,8 +99,8 @@ const MAX_COUPON = 10;
 // How long a description of content is allowed to be.
 const DESCRIPTION_MAX_LENGTH = 140;
 
-// Identify the event for which the Warhols will be used - this will provide a subset of market closing dates to work with
-
+// Identify the event for which the Warhols will be used -
+// this will provide a subset of market closing dates to work with
 var eventName = 'eind2017';
 
 
