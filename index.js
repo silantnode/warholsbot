@@ -232,13 +232,13 @@ bot.on( BACK_BUTTON, msg => {
       { markup } );
 
     }
-    
+
   });
 
 });
 
-// Command for testing functions.
 
+// Command for testing functions.
 
 bot.on( '/test', msg => {
 
@@ -247,7 +247,8 @@ bot.on( '/test', msg => {
 });
 
 
-function doesUserExist( userID, callback ){ // true if they do exist, false if they don't.
+// true if they do exist, false if they don't.
+function doesUserExist( userID, callback ){
 
   // Check the Warhols database to see if the user already has an account.
 
