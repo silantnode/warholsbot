@@ -712,9 +712,6 @@ bot.on('ask.coupon', msg => {
 
             } else if ( codeFound == true ) {
 
-              console.log('Do the thing.');
-
-
               // Mark the code as used.
               connection.query( 'UPDATE coupons SET used = ? WHERE id = ?', [ 1, allCodes[ matchingCode ].id ], function( error, selectedCoupon ){
 
