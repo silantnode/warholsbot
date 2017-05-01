@@ -93,10 +93,11 @@ const NO_BUTTON = "/no";
 const MAX_LIST_DISPLAY = 5;
 // Range setting for randomly giving out Warhols.
 const RAND_GIFT_RANGE = 10;
-// The amount one receives if they have a coupon 
+// The amount one receives if they have a coupon
 const MAX_COUPON = 10;
 
-const DESCRIPTION_MAX_LENGTH = 140; // How long a description of content is allowed to be.
+// How long a description of content is allowed to be.
+const DESCRIPTION_MAX_LENGTH = 140;
 
 // Identify the event for which the Warhols will be used - this will provide a subset of market closing dates to work with
 
