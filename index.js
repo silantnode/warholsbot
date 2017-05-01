@@ -387,8 +387,6 @@ bot.on( BALANCE_BUTTON, msg => {
 
 doesUserExist( msg.from.id, function(error, doThey){
 
-    console.log('dothey = ' + doThey);
-
     if ( doThey == true ){
 
   GetBalance( msg.from.id, function( error, result ){  // at this point "result" loads the balance since last interaction, bets not processed yet
