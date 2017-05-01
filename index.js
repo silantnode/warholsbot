@@ -199,8 +199,6 @@ bot.on( BACK_BUTTON, msg => {
 
   doesUserExist( msg.from.id, function(error, doThey){
 
-  console.log('dothey = ' + doThey);
-
   if ( doThey == true ){
 
   // Display commands as handy buttons in the telegram interface.
@@ -288,8 +286,6 @@ function createUserAccount( userID, userFirstName ){
 // Sets the mode of the user
 
 function setMode( userID, newMode ){
-
-  console.log('entered setmode function ' + userID);
 
   doesUserExist( userID, function(error, doThey){
 
