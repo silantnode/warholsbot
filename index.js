@@ -2204,9 +2204,6 @@ function newMarketActivity( userID, callback ){
 
               // if bet has not closed yet do not process!
 
-              // console.log(result[i].time + ' is bet date');
-              // console.log(lastMarketClosing + ' is last closing date');
-
               if (result[i].time < lastMarketClosing) {
 
               if (result[i].credited == 0) { // check for any bets still not processed
