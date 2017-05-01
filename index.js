@@ -446,8 +446,6 @@ bot.on( GET_BUTTON, msg => {
 
   doesUserExist( msg.from.id, function(error, doThey){
 
-  console.log('dothey = ' + doThey);
-
   if ( doThey == true ){
 
     let markup = bot.keyboard([
