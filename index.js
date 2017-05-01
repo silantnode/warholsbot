@@ -194,7 +194,12 @@ bot.on([ START_BUTTON ], msg => {
 
         createUserAccount( msg.from.id, msg.from.first_name );
 
-        return bot.sendMessage( msg.from.id, `Welcome ${ msg.from.first_name }! You're new here, right? That's ok! we created an account for you. Use the commands below to interact with your account.`, { markup } );
+        return bot.sendMessage(
+          msg.from.id,
+          `Welcome ${ msg.from.first_name }! You're new here, right? That's ok!
+          we created an account for you. Use the commands below to interact with
+          your account.`,
+          { markup } );
 
       }
 
