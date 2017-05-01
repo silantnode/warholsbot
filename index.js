@@ -1121,7 +1121,7 @@ bot.on( '/*' , msg => {
     } else {
 
     doesUserExist( msg.from.id, function(error, doThey){
-      
+
     if ( doThey == false ){
 
       return bot.sendMessage( msg.from.id, `You don't have an account yet. /start to create one.`);
@@ -1245,8 +1245,6 @@ bot.on( '/*' , msg => {
               return bot.sendMessage( msg.from.id, `You currently have only ${ result } Warhols. Please start with a lower investment.`);
 
             } else {   // Continue with the investment.
-
-              // console.log('they have enough Warhols - ', result);
 
               // write to market bets database: user id, user name, flavor, amount, time bet placed
 
