@@ -295,8 +295,6 @@ function setMode( userID, newMode ){
 
         connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?', [ newMode, userID ], function( error, updatedMode ){
 
-          console.log( userID +' updated to mode ' + newMode );
-
           connection.release();
 
           if ( error ) throw error;
