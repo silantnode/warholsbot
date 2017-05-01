@@ -1433,7 +1433,7 @@ bot.on( YES_BUTTON, msg => {
 
             // Get the response and write to console
             response.body;
-            
+
 
           }); // End of WarholsChannel content posting routine.
 
@@ -1534,8 +1534,6 @@ function SubtractWarhols( userID, subtractionAmount ){
           connection.release();
 
           if ( error ) throw error;
-
-          // console.log('Changed ' + current.changedRows + ' rows');
 
       });
 
