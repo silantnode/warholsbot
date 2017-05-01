@@ -870,10 +870,6 @@ bot.on('ask.whatisit', msg => {
 
               let content = ( [ urlSubmission[0].temp_user_data, urlDescription ] ).toString();
 
-              console.log(content);
-
-              // connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [  msg.text, msg.from.id ], function( error, confirmedContent){
-
               connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ content , msg.from.id ], function( error, confirmedContent ){
 
                 if ( error ) throw error;
