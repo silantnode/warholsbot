@@ -685,9 +685,7 @@ bot.on('ask.coupon', msg => {
 
                 if ( allCodes[i].used == 0 ){
 
-                  console.log('And it can be used!');
                   matchingCode = (allCodes[i].id - 1 ); // Minus 1 to pad for the 0 of the array.
-                  console.log(matchingCode);
                   codeFound = true;
                   break;
 
