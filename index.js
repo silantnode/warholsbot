@@ -88,8 +88,9 @@ const GIFT_MULTIPLYER = 2;
 
 const YES_BUTTON = "/yes";
 const NO_BUTTON = "/no";
-
-const MAX_LIST_DISPLAY = 5; // Maximum number of items to be displayed for the user to choose from whenever they are presented with multiple choice selections.
+// Maximum number of items to be displayed for the user to choose
+// from whenever they are presented with multiple choice selections.
+const MAX_LIST_DISPLAY = 5;
 const RAND_GIFT_RANGE = 10; // Range setting for randomly giving out Warhols.
 const MAX_COUPON = 10; // The amount one receives if they have a coupon
 
