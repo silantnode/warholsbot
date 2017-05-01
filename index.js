@@ -105,15 +105,15 @@ var eventName = 'eind2017';
 
 
 // Holds time of market bets
-
 var betDate = 0;
 
 // Holds id of next market closure for a bet
-
 var marketClosureId = 0;
 
-// Here we are putting temporarily some variables just to test the market winning function
-// Afterwards they should all be converted into local variables or stored on the database to avoid conflicts
+// Here we are putting temporarily some variables
+// just to test the market winning function.
+// Afterwards they should all be converted into local
+// variables or stored on the database to avoid conflicts.
 
 // Date of last market closure
 
