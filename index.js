@@ -353,8 +353,6 @@ function resetRemoteData( userID ){
 
       if ( error ) throw error;
 
-      console.log('The random list selection for ' + userID + ' has been reset');
-
     });
 
   });
