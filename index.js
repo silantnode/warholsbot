@@ -217,7 +217,7 @@ bot.on( BACK_BUTTON, msg => {
 
   doesUserExist( msg.from.id, function(error, doThey){
 
-  console.log('dothey = ' + doThey);
+  
 
   if ( doThey == true ){
 
@@ -311,7 +311,7 @@ function setMode( userID, newMode ){
 
   doesUserExist( userID, function(error, doThey){
 
-    console.log('dothey = ' + doThey);
+
 
     if ( doThey == true ){
 
@@ -417,7 +417,7 @@ bot.on( BALANCE_BUTTON, msg => {
 
 doesUserExist( msg.from.id, function(error, doThey){
 
-    console.log('dothey = ' + doThey);
+
 
     if ( doThey == true ){
 
@@ -482,7 +482,7 @@ bot.on( GET_BUTTON, msg => {
 
   doesUserExist( msg.from.id, function(error, doThey){
 
-  console.log('dothey = ' + doThey);
+
 
   if ( doThey == true ){
 
@@ -506,7 +506,7 @@ bot.on( SPEND_BUTTON, msg => {
    // first check if they have an account
    doesUserExist( msg.from.id, function(error, doThey){
 
-   console.log('dothey = ' + doThey);
+
 
    if ( doThey == true ){
 
@@ -1026,7 +1026,7 @@ bot.on( SPECULATIVE_ECON , msg => {
 // first check if user exists
 doesUserExist( msg.from.id, function(error, doThey){
 
-console.log('dothey = ' + doThey);
+
 
 if ( doThey == true ){
 
@@ -1185,7 +1185,7 @@ bot.on( '/*' , msg => {
 
     doesUserExist( msg.from.id, function(error, doThey){
 
-    console.log('dothey = ' + doThey);
+
 
     if ( doThey == false ){
 
