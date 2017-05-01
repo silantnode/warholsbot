@@ -683,8 +683,6 @@ bot.on('ask.coupon', msg => {
 
               if ( couponCode == allCodes[i].unique){ // If the code entered has been found...
 
-                console.log('Found!');
-
                 if ( allCodes[i].used == 0 ){
 
                   console.log('And it can be used!');
