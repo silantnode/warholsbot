@@ -289,8 +289,6 @@ function setMode( userID, newMode ){
 
   doesUserExist( userID, function(error, doThey){
 
-    console.log('dothey = ' + doThey);
-
     if ( doThey == true ){
 
       pool.getConnection(function(err, connection) {
