@@ -397,10 +397,6 @@ doesUserExist( msg.from.id, function(error, doThey){
       var anyClosures = newMarketNewBalance[0];  // first value of array is 1 for new closures, 0 for none of such
       var betsBalance = newMarketNewBalance[1];  // second result of array is new updated user balance with any new bets won
 
-      // console.log('callback -- anyClosures: ' + anyClosures);
-      // console.log('callback -- new balance after winnings: ' + betsBalance);
-      // console.log('previous balance: ' + result);
-
       var wonWarhols = (betsBalance-result); // Warhols won, can be zero if no wins
 
       if ( anyClosures == 1 ) {
