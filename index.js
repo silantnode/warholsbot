@@ -1862,8 +1862,6 @@ function GetGiftsContent( userID, callback ){
       // Prepare all of the tasks for display.
       // Keep track of which items were selected inside currentCreativeSelection as an array.
 
-      console.log( randomGiftSelection );
-
       let temp = randomGiftSelection.toString(); // Convert the temporary array into a string so we can save it on the database.
 
       connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner =?', [ temp, userID ], function( error, listCurrent ){
