@@ -292,7 +292,11 @@ function createUserAccount( userID, userFirstName ){
 
   pool.getConnection(function(err, connection){
 
-    let newOwner = { owner: userID, owner_name: userFirstName, balance: 0, mode: 0 };
+    let newOwner = {
+      owner: userID,
+      owner_name: userFirstName,
+      balance: 0,
+      mode: 0 };
 
       connection.query('INSERT INTO accounts SET ?', newOwner, function( error, result ){
 
