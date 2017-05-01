@@ -1801,8 +1801,6 @@ function GetCreativeContent( userID, callback ){
 
       // 'UPDATE accounts SET mode = ? WHERE owner =?', [ newMode, userID ], function( error, updatedMode ){
 
-      console.log(randomCreativeSelection);
-
       let temp = randomCreativeSelection.toString(); // Convert the temporary array into a string so we can save it on the database.
 
       connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner =?', [ temp, userID ], function( error, listCurrent ){
