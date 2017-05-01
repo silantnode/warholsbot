@@ -468,8 +468,6 @@ bot.on( SPEND_BUTTON, msg => {
    // first check if they have an account
    doesUserExist( msg.from.id, function(error, doThey){
 
-   console.log('dothey = ' + doThey);
-
    if ( doThey == true ){
 
 
