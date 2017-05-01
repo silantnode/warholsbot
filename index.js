@@ -1706,8 +1706,6 @@ function ShareTheWealth( userID, fountainContribution ){
 
               SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
 
-              console.log('Fountain activated');
-
               // Requestify code here
 
               requestify.post('https://maker.ifttt.com/trigger/new_fountain/with/key/' + custom_data[5] , { // IFTTT secret key.
