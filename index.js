@@ -78,21 +78,30 @@ const SPEC_FLAVOR_2 = "/green";
 const SPEC_FLAVOR_3 = "/orange";
 const SPEC_FLAVOR_4 = "/purple";
 
-const SPEC_MULTIPLIER = 2; // How many times to multiply the bet if user wins in the market
+// How many times to multiply the bet if user wins in the market
+const SPEC_MULTIPLIER = 2;
 
-const MIN_DISTRO = 2; // The minimum amount of warhols required per amount of users for an even distrobution of warhols from the fountain.
-const GIFT_MULTIPLYER = 2; // The maximum bonus amount of warhols included in the distrobution from the fountain.
+// The minimum amount of warhols required per amount of users for an even
+// distrobution of warhols from the fountain.
+const MIN_DISTRO = 2;
+// The maximum bonus amount of warhols included in the distrobution from the fountain.
+const GIFT_MULTIPLYER = 2;
 
 const YES_BUTTON = "/yes";
 const NO_BUTTON = "/no";
+// Maximum number of items to be displayed for the user to choose from whenever
+// they are presented with multiple choice selections.
+const MAX_LIST_DISPLAY = 5;
+// Range setting for randomly giving out Warhols.
+const RAND_GIFT_RANGE = 10;
+// The amount one receives if they have a coupon
+const MAX_COUPON = 10;
 
-const MAX_LIST_DISPLAY = 5; // Maximum number of items to be displayed for the user to choose from whenever they are presented with multiple choice selections.
-const RAND_GIFT_RANGE = 10; // Range setting for randomly giving out Warhols.
-const MAX_COUPON = 10; // The amount one receives if they have a coupon
+// How long a description of content is allowed to be.
+const DESCRIPTION_MAX_LENGTH = 140;
 
-const DESCRIPTION_MAX_LENGTH = 140; // How long a description of content is allowed to be.
-
-// Identify the event for which the Warhols will be used - this will provide a subset of market closing dates to work with
+// Identify the event for which the Warhols will be used - this will provide a
+// subset of market closing dates to work with
 
 var eventName = 'eind2017';
 
@@ -105,37 +114,44 @@ var betDate = 0;
 
 var marketClosureId = 0;
 
-// Here we are putting temporarily some variables just to test the market winning function
-// Afterwards they should all be converted into local variables or stored on the database to avoid conflicts
+// Here we are putting temporarily some variables just to test the market
+// winning function.
 
-// Date of last market closure
+// Afterwards they should all be converted into local variables or stored on
+// the database to avoid conflicts.
+
+// Date of last market closure.
 
 var lastMarketClosing = 0;
 
-// array for storing market winners
+// array for storing market winners.
 
 var marketWinners = [];
 
-// id and flavor for a specific bet by a user
+// id and flavor for a specific bet by a user.
 
 var betInfo = 0;
 
-// cumulative credit of all bets won by a user in period checked
+// cumulative credit of all bets won by a user in period checked.
 
 var betCreditTotal = 0;
 
-// variable to hold updated balance after added market winnings
+// variable to hold updated balance after added market winnings.
 
 var balancePlusBet = 0;
 
 
 // The user starts the bot with the /start command.
 
+
 bot.on([ START_BUTTON ], msg => {
 
   // Display commands as handy buttons in the telegram interface.
-  let markup = bot.keyboard([
-    [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+  let markup = bot.keyboard(
+    [[ GET_BUTTON ],
+    [ SPEND_BUTTON ],
+    [ BALANCE_BUTTON ]],
+    { resize: true }
   );
 
   // Check the Warhols database to see if the user already has an account.
@@ -156,6 +172,10 @@ bot.on([ START_BUTTON ], msg => {
 
           // They are an existing user.
           doesUserExist = true;
+
+          // They are an existing user.    
+          doesUserExist = true;      
+
           break;
 
         } else {
@@ -172,16 +192,32 @@ bot.on([ START_BUTTON ], msg => {
       if ( doesUserExist == true ){
 
         setMode( msg.from.id, 0 );
+
         resetRemoteData( msg.from.id );
-        return bot.sendMessage( msg.from.id, `Welcome back ${ msg.from.first_name }!`, { markup } );
+
+        return bot.sendMessage(
+          msg.from.id,
+          `Welcome back ${ msg.from.first_name }!`,
+          { markup }
+        );
 
       } else if ( doesUserExist == false ) {
 
-        // If we get this far then it means the user does not have an account yet. So we create one for them.
+        // If we get this far then it means the user does not have an account
+        // yet. So we create one for them.
 
-        createUserAccount( msg.from.id, msg.from.first_name );
+        createUserAccount(
+          msg.from.id,
+          msg.from.first_name
+        );
 
-        return bot.sendMessage( msg.from.id, `Welcome ${ msg.from.first_name }! You're new here, right? That's ok! we created an account for you. Use the commands below to interact with your account.`, { markup } );
+        return bot.sendMessage(
+          msg.from.id,
+          `Welcome ${ msg.from.first_name }! You're new here, right? That's ok!
+          we created an account for you. Use the commands below to interact with
+          your account.`,
+          { markup }
+        );
 
       }
 
@@ -217,15 +253,15 @@ bot.on( BACK_BUTTON, msg => {
 
 // Command for testing functions.
 
-
-bot.on( '/test', msg => {
-
+bot.on('/test', msg => {
 
 
-});
+
+}
 
 
-function doesUserExist( userID, callback ){ // true if they do exist, false if they don't.
+// true if they do exist, false if they don't.
+function doesUserExist( userID, callback ){
 
   // Check the Warhols database to see if the user already has an account.
 
@@ -269,7 +305,14 @@ function createUserAccount( userID, userFirstName ){
 
   pool.getConnection(function(err, connection){
 
-    let newOwner = { owner: userID, owner_name: userFirstName, balance: 0, mode: 0 };
+
+    let newOwner = {
+      owner: userID,
+      owner_name: userFirstName,
+      balance: 0,
+      mode: 0
+    };
+
 
       connection.query('INSERT INTO accounts SET ?', newOwner, function( error, result ){
 
@@ -293,7 +336,12 @@ function setMode( userID, newMode ){
 
       pool.getConnection(function(err, connection) {
 
-        connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?', [ newMode, userID ], function( error, updatedMode ){
+
+        connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?',
+        [ newMode, userID ], function( error, updatedMode ){
+
+          console.log( userID +' updated to mode ' + newMode );
+
 
           connection.release();
 
@@ -320,7 +368,8 @@ function getMode( userID, callback ){
 
       pool.getConnection(function(err, connection) {
 
-        connection.query('SELECT mode FROM accounts WHERE owner =' + userID , function( error, currentMode ){
+        connection.query('SELECT mode FROM accounts WHERE owner =' + userID ,
+        function( error, currentMode ){
 
           connection.release();
 
@@ -347,7 +396,9 @@ function resetRemoteData( userID ){
 
     let resetList = "";
 
-    connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ resetList, userID ], function( error, resetList ){
+
+    connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?',
+    [ resetList, userID ], function( error, resetList ){
 
       connection.release();
 
@@ -363,18 +414,24 @@ function resetRemoteData( userID ){
 
 bot.on( '/help', msg => {
 
-  return bot.sendMessage( msg.from.id, `A list of common commands available to use for interacting with warhols bot.\n
+
+  return bot.sendMessage( msg.from.id, `A list of common commands available to
+  use for interacting with warhols bot.\n
+
   /start - Starts the warholsbot.\n
   /back - Returns you to the start menu from anywhere.\n
   /spend - Starts the process of spending warhols and can be used anywhere.\n
   /balance - Check how many warhols you have. Can be accessed anywhere.\n\n
-  You may see other commands as you step through the procedures provided by each of the above commands. These commands are process specific and will not work out of context.
+  You may see other commands as you step through the procedures provided by
+  each of the above commands. These commands are process specific and will not
+  work out of context.
   `);
 
 });
 
 
-// Check the balance of the current users Warhols account. (NEW version with newMarketActivity function plugged in)
+// Check the balance of the current users Warhols account.
+// (NEW version with newMarketActivity function plugged in)
 
 bot.on( BALANCE_BUTTON, msg => {
 
@@ -383,46 +440,58 @@ bot.on( BALANCE_BUTTON, msg => {
     [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
   );
 
-  // to do: check if the fountain has been activated and if so display message (compare last activity with last fountain date)
-
-doesUserExist( msg.from.id, function(error, doThey){
+  // to do: check if the fountain has been activated and if so display message
+  // (compare last activity with last fountain date)
 
     if ( doThey == true ){
 
-  GetBalance( msg.from.id, function( error, result ){  // at this point "result" loads the balance since last interaction, bets not processed yet
+    GetBalance( msg.from.id, function( error, result ){  // at this point "result" loads the balance since last interaction, bets not processed yet
+
 
     // check if there are new market closures that can lead to new balance
 
-      newMarketActivity( msg.from.id, function( error, newMarketNewBalance ){ // this function's result is an array with two values
-      var anyClosures = newMarketNewBalance[0];  // first value of array is 1 for new closures, 0 for none of such
-      var betsBalance = newMarketNewBalance[1];  // second result of array is new updated user balance with any new bets won
+      // this function's result is an array with two values
+      newMarketActivity( msg.from.id, function( error, newMarketNewBalance ){
+      // first value of array is 1 for new closures, 0 for none of such
+      var anyClosures = newMarketNewBalance[0];
+      // second result of array is new updated user balance with any new bets won
+      var betsBalance = newMarketNewBalance[1];
 
       var wonWarhols = (betsBalance-result); // Warhols won, can be zero if no wins
 
       if ( anyClosures == 1 ) {
+        // if new balance is higher, user won Warhols on market - YAY to speculation!
+        if (betsBalance > result) {
 
-        if (betsBalance > result) {  // if new balance is higher, user won Warhols on market - YAY to speculation!
-
-          return bot.sendMessage( msg.from.id, `The market has closed and you have won ${ wonWarhols } Warhols. Your new balance is ${ betsBalance } Warhols. \nChoose how to /spend your warhols. Or /get some more.`, { markup });
+          return bot.sendMessage( msg.from.id, `The market has closed and you
+          have won ${ wonWarhols } Warhols. Your new balance is ${ betsBalance }
+          Warhols. \nChoose how to /spend your warhols. Or /get some more.`,
+          { markup });
 
         } else {
 
-          return bot.sendMessage( msg.from.id, `The market has closed and unfortunately you didn't win. You currently have ${ betsBalance } Warhols. \nChoose how to /spend your warhols. Or /get some more.`, { markup });
+          return bot.sendMessage( msg.from.id, `The market has closed and
+          unfortunately you didn't win. You currently have ${ betsBalance }
+          Warhols. \nChoose how to /spend your warhols. Or /get some more.`,
+          { markup });
 
         }
 
       }
-
-      else { // markets have not closed, just diplay "old" balance which has not changed
+      // markets have not closed, just diplay "old" balance which has not changed
+      else {
 
       // Check what the balance is...
         if ( result == 0 ) {
           // If there are no Warhols on the account encourage them to get some Warhols.
-          return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Use the /get command to change this situation.`, { markup });
+
+          return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols.
+          Use the /get command to change this situation.`, { markup });
 
         } else {
           // If they have Warhols encourage them to spend the Warhols.
-          return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Choose how to /spend your warhols. Or /get some more.`, { markup });
+          return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols.
+          Choose how to /spend your warhols. Or /get some more.`, { markup });
 
         }
 
@@ -481,9 +550,12 @@ bot.on( SPEND_BUTTON, msg => {
             [ GET_BUTTON ]], { resize: true }
           );
 
-          return bot.sendMessage( msg.from.id, `You don’t have enough Warhols in your account. You need at least 5 Warhols and your balance is ${ balance }. You should /get some Warhols first.`);
+          return bot.sendMessage( msg.from.id, `You don’t have enough Warhols in
+          your account. You need at least 5 Warhols and your balance is ${ balance }.
+          You should /get some Warhols first.`);
 
-      } else { // If they have enough warhols they are provided with options for spending them.
+      // If they have enough warhols they are provided with options for spending them.
+      } else {
 
         let markup = bot.keyboard([
           [ GIFT_ECON ],[ CREATIVE_ECON ],[ SPECULATIVE_ECON ]], { resize: true }
@@ -496,6 +568,7 @@ bot.on( SPEND_BUTTON, msg => {
       }
 
     });
+
 
   }
 
@@ -539,7 +612,8 @@ bot.on( CREATIVE_ECON, msg => {
             [ BACK_BUTTON ]], { resize: true }
           );
 
-          return bot.sendMessage( msg.from.id, `You don't have enough Warhols to publish. Try and /get more Warhols`, { markup } );
+          return bot.sendMessage( msg.from.id, `You don't have enough Warhols to
+          publish. Try and /get more Warhols`, { markup } );
 
         } else {
 
@@ -549,9 +623,11 @@ bot.on( CREATIVE_ECON, msg => {
 
           setMode( msg.from.id, 9 );
 
-          return bot.sendMessage( msg.from.id, `You can /publish your content for 10 Warhols. Your current balance is ${ balance } Warhols`, { markup } );
+          return bot.sendMessage( msg.from.id, `You can /publish your content for
+          10 Warhols. Your current balance is ${ balance } Warhols`, { markup } );
 
-        // Function for reading url and descriptive text from the user and sending it to the database.
+        // Function for reading url and descriptive
+        // text from the user and sending it to the database.
 
         }
 
@@ -572,14 +648,16 @@ bot.on( PUBLISH_BUTTON , msg => {
       [ BACK_BUTTON ]], { resize: true }
   );
 
-  // Need a way to prevent the publish command from being invoked or set warhol mode in case people want to short cut to publish without
+  // Need a way to prevent the publish command from being invoked or set warhol
+  // mode in case people want to short cut to publish without
   // stepping through all of the other menus.
 
   getMode( msg.from.id, function( error, currentMode ){
 
     if ( currentMode == 9 ){
 
-      return bot.sendMessage( msg.from.id, `Enter the URL for the content.`, { ask: 'url' }, { markup } );
+      return bot.sendMessage( msg.from.id, `Enter the URL for the content.`,
+      { ask: 'url' }, { markup } );
 
     }
 
@@ -601,23 +679,29 @@ bot.on( '/coupon' , msg => {
 
       pool.getConnection(function(err,connection){
 
-        connection.query( 'SELECT used_coupon FROM accounts WHERE owner =' + msg.from.id, function( error, couponUsed ){
+        connection.query( 'SELECT used_coupon FROM accounts WHERE owner ='
+        + msg.from.id, function( error, couponUsed ){
 
           if( error ) throw error;
 
           if ( couponUsed[0].used_coupon == 1 ) { // They have already used a coupon
 
             let markup = bot.keyboard([
-              [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
+              [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]],
+              { resize: true }
             );
 
-            return bot.sendMessage( msg.from.id, `You have already used a coupon code. Maybe /get some warhols?`, { markup });
+            return bot.sendMessage( msg.from.id, `You have already used a coupon code.
+            Maybe /get some warhols?`, { markup });
 
           } else if ( couponUsed[0].used_coupon == 0 ) { // They have not used a coupon
 
             setMode( msg.from.id, 14 ); // Set to coupon mode.
 
-            return bot.sendMessage( msg.from.id, `It seems you have a coupon for free Warhols. Please enter the coupon code:`, { ask: 'coupon' }, { markup });
+            return bot.sendMessage( msg.from.id, `It seems you have a coupon for
+            free Warhols. Please enter the coupon code:`,
+            { ask: 'coupon' },
+            { markup });
           }
 
         });
@@ -657,7 +741,8 @@ bot.on('ask.coupon', msg => {
             [ BACK_BUTTON ]], { resize: true }
           );
 
-          return bot.sendMessage( msg.from.id, `That is a command. Please enter a coupon code.` ,{ ask: 'coupon' }, { markup });
+          return bot.sendMessage( msg.from.id, `That is a command. Please enter
+          a coupon code.` ,{ ask: 'coupon' }, { markup });
 
         }
 
@@ -681,11 +766,17 @@ bot.on('ask.coupon', msg => {
 
             for( let i = 0; i < allCodes.length; i++ ){
 
-              if ( couponCode == allCodes[i].unique){ // If the code entered has been found...
+              // If the code entered has been found...
+              if ( couponCode == allCodes[i].unique){
 
                 if ( allCodes[i].used == 0 ){
 
+
                   matchingCode = (allCodes[i].id - 1 ); // Minus 1 to pad for the 0 of the array.
+
+                  // Minus 1 to pad for the 0 of the array.
+                  matchingCode = (allCodes[i].id - 1 );
+
                   codeFound = true;
                   break;
 
@@ -702,32 +793,37 @@ bot.on('ask.coupon', msg => {
 
             if ( codeUsed == true ){
 
-              return bot.sendMessage( msg.from.id, `Sorry, this code has been used already. Try another.`, { ask: 'coupon' });
+              return bot.sendMessage( msg.from.id, `Sorry, this code has been
+              used already. Try another.`, { ask: 'coupon' });
 
             }
 
             if ( codeFound == false ){
 
-              return bot.sendMessage( msg.from.id, `This code is invalid. Maybe you mistyped? Try again.`, { ask: 'coupon' });
+              return bot.sendMessage( msg.from.id, `This code is invalid.
+              Maybe you mistyped? Try again.`, { ask: 'coupon' });
 
             } else if ( codeFound == true ) {
 
               // Mark the code as used.
-              connection.query( 'UPDATE coupons SET used = ? WHERE id = ?', [ 1, allCodes[ matchingCode ].id ], function( error, selectedCoupon ){
+              connection.query( 'UPDATE coupons SET used = ? WHERE id = ?',
+              [ 1, allCodes[ matchingCode ].id ], function( error, selectedCoupon ){
 
                 if( error ) throw error;
 
               });
 
               // Record the Telegram user id of the person who used the code.
-              connection.query( 'UPDATE coupons SET owner = ? WHERE id = ?', [ msg.from.id , allCodes[ matchingCode ].id ], function( error, claiment ){
+              connection.query( 'UPDATE coupons SET owner = ? WHERE id = ?',
+              [ msg.from.id , allCodes[ matchingCode ].id ], function( error, claiment ){
 
                 if( error ) throw error;
 
               });
 
               // Flag on the account of the user that they have used a coupon.
-              connection.query( 'UPDATE accounts SET used_coupon = ? WHERE owner = ?', [ 1, msg.from.id ], function( error, usedCoupon ){
+              connection.query( 'UPDATE accounts SET used_coupon = ? WHERE owner = ?',
+              [ 1, msg.from.id ], function( error, usedCoupon ){
 
                 if( error ) throw error;
 
@@ -736,7 +832,9 @@ bot.on('ask.coupon', msg => {
               // Record the time and date the coupon was claimed.
               let currentDate = new Date();
 
-              connection.query( 'UPDATE coupons SET tds = ? WHERE id = ?', [ currentDate , allCodes[ matchingCode ].id ], function( error, dateConfirmation ){
+              connection.query( 'UPDATE coupons SET tds = ? WHERE id = ?',
+              [ currentDate , allCodes[ matchingCode ].id ],
+              function( error, dateConfirmation ){
 
                 connection.release();
 
@@ -759,7 +857,8 @@ bot.on('ask.coupon', msg => {
 
               setMode( msg.from.id, 0 );
 
-              return bot.sendMessage( msg.from.id, `Yay! Your account was credited with 10 Warhols. \nYou can now /spend them, or /get even more!`, { markup });
+              return bot.sendMessage( msg.from.id, `Yay! Your account was credited
+              with 10 Warhols. \nYou can now /spend them, or /get even more!`, { markup });
 
             }
 
@@ -791,7 +890,8 @@ bot.on('ask.url', msg => {
 
         } else {
 
-          return bot.sendMessage( msg.from.id, `That was a command. Please enter a url.`, { ask: 'url' });
+          return bot.sendMessage( msg.from.id, `That was a command. Please enter
+          a url.`, { ask: 'url' });
 
         }
 
@@ -803,7 +903,8 @@ bot.on('ask.url', msg => {
 
           // If it is valid then save it to the temporary data field of the user.
 
-            connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [  msg.text, msg.from.id ], function( error, confirmedContent){
+            connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?',
+            [  msg.text, msg.from.id ], function( error, confirmedContent){
 
               connection.release();
 
@@ -811,7 +912,8 @@ bot.on('ask.url', msg => {
 
               setMode( msg.from.id, 10 );
 
-              return bot.sendMessage( msg.from.id, `Now enter a 140 character description of the content.`, { ask: 'whatisit' });
+              return bot.sendMessage( msg.from.id, `Now enter a 140 character
+              description of the content.`, { ask: 'whatisit' });
 
             });
 
@@ -819,7 +921,8 @@ bot.on('ask.url', msg => {
 
         } else {
 
-          return bot.sendMessage( msg.from.id, `You have not entered a valid web address. Please try again using the proper formatting.`, { ask: 'url' });
+          return bot.sendMessage( msg.from.id, `You have not entered a valid web
+          address. Please try again using the proper formatting.`, { ask: 'url' });
 
         }
 
@@ -846,7 +949,8 @@ bot.on('ask.whatisit', msg => {
 
         } else {
 
-          return bot.sendMessage( msg.from.id, `That was a command. Please enter a description.`, { ask: 'whatisit' });
+          return bot.sendMessage( msg.from.id, `That was a command.
+          Please enter a description.`, { ask: 'whatisit' });
 
         }
 
@@ -856,21 +960,22 @@ bot.on('ask.whatisit', msg => {
 
         if ( urlDescription.length > DESCRIPTION_MAX_LENGTH ) {
 
-          return bot.sendMessage( msg.from.id, `Your description is longer than 140 charcters. Please shorten it.`, { ask: 'whatisit' });
+          return bot.sendMessage( msg.from.id, `Your description is longer than
+          140 charcters. Please shorten it.`, { ask: 'whatisit' });
 
         } else if ( urlDescription.length <= DESCRIPTION_MAX_LENGTH ) {
 
           pool.getConnection( function (err, connection){
 
-            // connection.query('SELECT mode FROM accounts WHERE owner =' + userID , function( error, currentMode ){
-
-            connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, urlSubmission ){
+            connection.query( 'SELECT temp_user_data FROM accounts WHERE owner ='
+            + msg.from.id, function( error, urlSubmission ){
 
               if ( error ) throw error;
 
               let content = ( [ urlSubmission[0].temp_user_data, urlDescription ] ).toString();
 
-              connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ content , msg.from.id ], function( error, confirmedContent ){
+              connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?',
+              [ content , msg.from.id ], function( error, confirmedContent ){
 
                 if ( error ) throw error;
 
@@ -878,7 +983,9 @@ bot.on('ask.whatisit', msg => {
 
                 setMode( msg.from.id, 11 );
 
-                return bot.sendMessage( msg.from.id, `Please review your submission! \n${ urlDescription } ${ urlSubmission[0].temp_user_data } \n  \nIs the content correct? \n/yes or /no` );
+                return bot.sendMessage( msg.from.id, `Please review your submission! \n
+                  ${ urlDescription } ${ urlSubmission[0].temp_user_data } \n
+                  \nIs the content correct? \n/yes or /no` );
 
               });
 
@@ -923,7 +1030,8 @@ bot.on( GIFT_ECON, msg => {
           [ GIFT_FOUNTAIN ], [ GIFT_RANDOM ] ], { resize: true }
         );
 
-        return bot.sendMessage( msg.from.id, `Give Warhols to everybody with the Warhols /fountain\nGive Warhols to a person at /random`, { markup });
+        return bot.sendMessage( msg.from.id, `Give Warhols to everybody with the
+        Warhols /fountain\nGive Warhols to a person at /random`, { markup });
 
       }
 
@@ -957,7 +1065,8 @@ bot.on( [ GIFT_RANDOM, GIFT_FOUNTAIN ], msg => {
 
       }
 
-      return bot.sendMessage( msg.from.id, `How many Warhols do you want to give? \n /5 \n /10 \n /20`, { markup } );
+      return bot.sendMessage( msg.from.id, `How many Warhols do you want to give? \n
+      /5 \n /10 \n /20`, { markup } );
 
     }
 
@@ -983,11 +1092,12 @@ bot.on( SPECULATIVE_ECON , msg => {
 
       pool.getConnection(function(err, connection) {
 
-        connection.query( 'UPDATE accounts SET pre_bet1 = ? WHERE owner = ?', [ betDate, msg.from.id ], function( error, flavorChoice ){
+        connection.query( 'UPDATE accounts SET pre_bet1 = ? WHERE owner = ?',
+        [ betDate, msg.from.id ], function( error, flavorChoice ){
 
-        connection.release();
+          connection.release();
 
-        if ( error ) throw error;
+          if ( error ) throw error;
 
       });
 
@@ -1003,7 +1113,8 @@ bot.on( SPECULATIVE_ECON , msg => {
 
     pool.getConnection(function(err, connection) {
       // new connection to retrieve next market closure dates
-      connection.query('SELECT close_time, id FROM market WHERE event = ?', [eventName], function (error, results, fields) {
+      connection.query('SELECT close_time, id FROM market WHERE event = ?',
+      [eventName], function (error, results, fields) {
 
         if (error) throw error;
 
@@ -1017,12 +1128,13 @@ bot.on( SPECULATIVE_ECON , msg => {
 
           var dateDifference = (results[i].close_time-currentDate);
           var timetoClosing = timeConversion(dateDifference);
+          // choose the first date at least 10 minutes in the future
+          if (dateDifference > 600000) { break; }
 
-          if (dateDifference > 600000) { break; } // choose the first date at least 10 minutes in the future
-
-        }
-
-        return bot.sendMessage( msg.from.id, `The Warhols exchange market will close in ` + timetoClosing + `. In which flavor would you like to invest? \n\n `+ SPEC_FLAVOR_1 +` Warhols \n `+ SPEC_FLAVOR_2 +` Warhols \n `+ SPEC_FLAVOR_3 +` Warhols`, { markup } );
+            return bot.sendMessage( msg.from.id, `The Warhols exchange market will
+            close in ` + timetoClosing + `. In which flavor would you like to invest?
+            \n\n `+ SPEC_FLAVOR_1 +` Warhols \n `+ SPEC_FLAVOR_2 +` Warhols \n
+            `+ SPEC_FLAVOR_3 +` Warhols`, { markup } );
 
     });
 
@@ -1056,7 +1168,8 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
       if ( msg.text == SPEC_FLAVOR_1 ) {
 
-        connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ 1, msg.from.id ], function( error, flavorChoice ){
+        connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?',
+        [ 1, msg.from.id ], function( error, flavorChoice ){
 
           connection.release();
 
@@ -1066,7 +1179,9 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
       } else if ( msg.text == SPEC_FLAVOR_2 ) {
 
-        connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ 2, msg.from.id ], function( error, flavorChoice ){
+
+        connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?',
+        [ 2, msg.from.id ], function( error, flavorChoice ){
 
           connection.release();
 
@@ -1076,7 +1191,8 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
       } else if ( msg.text == SPEC_FLAVOR_3 ) {
 
-        connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ 3, msg.from.id ], function( error, flavorChoice ){
+        connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?',
+        [ 3, msg.from.id ], function( error, flavorChoice ){
 
         connection.release();
 
@@ -1092,7 +1208,8 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
       let flavorName = msg.text.substr(1);
 
-      return bot.sendMessage( msg.from.id, `How many shares of ` + flavorName + ` Warhols you want to buy? \n\n /5 \n /10 \n /20 \n /50 \n /100`, { markup });
+      return bot.sendMessage( msg.from.id, `How many shares of ` + flavorName + `
+      Warhols you want to buy? \n\n /5 \n /10 \n /20 \n /50 \n /100`, { markup });
 
     }
 
@@ -1101,8 +1218,9 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 });
 
 
-// '/*' listens for any activity entered by the user and then filters out the resulting strings. Checks the mode that
-// the user is in to determine how to react to the numbers we are listening for.
+// '/*' listens for any activity entered by the user and then filters out the
+// resulting strings. Checks the mode that the user is in to determine how to
+// react to the numbers we are listening for.
 
 bot.on( '/*' , msg => {
 
@@ -1180,12 +1298,14 @@ bot.on( '/*' , msg => {
 
           } else {
 
-            // Check if the amount they have selected does not exceed the amount available in their account.
+            // Check if the amount they have selected does not exceed the amount
+            // available in their account.
             GetBalance( msg.from.id, function( error, userBalance ){
 
               if ( userBalance < warholAmount ){
 
-                return bot.sendMessage( msg.from.id, `You do not have enough warhols. Please choose a smaller amount or /get more warhols.`);
+                return bot.sendMessage( msg.from.id, `You do not have enough warhols.
+                Please choose a smaller amount or /get more warhols.`);
 
               } else if ( userBalance >= warholAmount ){
 
@@ -1208,12 +1328,14 @@ bot.on( '/*' , msg => {
 
           } else {
 
-            // Check if the amount they have selected does not exceed the amount available in their account.
+            // Check if the amount they have selected does not exceed the amount
+            // available in their account.
             GetBalance( msg.from.id, function( error, userBalance ){
 
               if ( userBalance < warholAmount ){
 
-                return bot.sendMessage( msg.from.id, `You do not have enough warhols. Please choose a smaller amount or /get more warhols.`);
+                return bot.sendMessage( msg.from.id, `You do not have enough
+                warhols. Please choose a smaller amount or /get more warhols.`);
 
               } else if ( userBalance >= warholAmount ){
 
@@ -1228,8 +1350,9 @@ bot.on( '/*' , msg => {
         } else if ( currentMode == 12 ){ // Make sure we are in speculation mode.
 
           let betAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
-
-          if( isNaN( betAmount ) ){  // if user types a command that is not a number, this can cause a bug, so betAmount must not be NaN.
+          // if user types a command that is not a number, this can cause a bug,
+          // so betAmount must not be NaN.
+          if( isNaN( betAmount ) ){
 
             betAmount = 5;
 
@@ -1242,9 +1365,12 @@ bot.on( '/*' , msg => {
           // Check what the balance is...
             if ( result < betAmount ) {
 
-              return bot.sendMessage( msg.from.id, `You currently have only ${ result } Warhols. Please start with a lower investment.`);
+              return bot.sendMessage( msg.from.id, `You currently have only
+              ${ result } Warhols. Please start with a lower investment.`);
 
             } else {   // Continue with the investment.
+
+              // console.log('they have enough Warhols - ', result);
 
               // write to market bets database: user id, user name, flavor, amount, time bet placed
 
@@ -1264,13 +1390,22 @@ bot.on( '/*' , msg => {
 
                 // SELECT viewed FROM gifts WHERE task_id =' + currentGiftSelection[0] , function( error, timesViewed ){
 
-                connection.query( 'SELECT temp_user_data FROM accounts WHERE owner=' + msg.from.id, function( error, result ){
+                connection.query( 'SELECT temp_user_data FROM accounts WHERE owner='
+                + msg.from.id, function( error, result ){
 
                   if( error ) throw error;
 
                   let flavorChoice = result[0].temp_user_data;
-
-                  let newBet = { time: betDate, event: eventName, market_id: marketClosureId, user: msg.from.id, name: msg.from.first_name, flavor: flavorChoice, amount: betAmount, credited: 0 };
+                  
+                  let newBet = {
+                    time: betDate,
+                    event: eventName,
+                    market_id: marketClosureId,
+                    user: msg.from.id,
+                    name: msg.from.first_name,
+                    flavor: flavorChoice,
+                    amount: betAmount, credited: 0
+                  };
 
                   connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
 
@@ -1298,7 +1433,9 @@ bot.on( '/*' , msg => {
 
             setMode( msg.from.id, 0);
 
-            return bot.sendMessage( msg.from.id, `Thanks for your investment! Check you balance again after the market closes. Good luck!`, { markup } );
+            return bot.sendMessage( msg.from.id, `Thanks for your investment!
+            Check you balance again after the market closes. Good luck!`,
+            { markup } );
 
           }); // end if balance enough
 
@@ -1311,6 +1448,7 @@ bot.on( '/*' , msg => {
     }
 
    }
+      
    });  // end of checking if user exists
 
   }  // end of checking for /coupon or /start
@@ -1322,8 +1460,10 @@ bot.on( '/*' , msg => {
 
 // currentList[0].temp_user_data.split(",");
 
-// These two are only relevant for the end routine of a user who has chosen to earn Warhols through the gift economy.
-// I could do an overall better implementation of this but for now I am just trying to get this project done. I am sure you understand how deadlines work.
+// These two are only relevant for the end routine of a user who has chosen to
+// earn Warhols through the gift economy. I could do an overall better
+// implementation of this but for now I am just trying to get this project done.
+// I am sure you understand how deadlines work.
 
 bot.on( YES_BUTTON, msg => {
 
@@ -1349,17 +1489,21 @@ bot.on( YES_BUTTON, msg => {
 
         pool.getConnection(function(err, connection) {
 
-          connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, selectedGift ){
+          connection.query( 'SELECT temp_user_data FROM accounts WHERE owner ='
+           + msg.from.id, function( error, selectedGift ){
 
             // let temp = Number( selectedGift[0].temp_user_data );
 
-            connection.query( 'SELECT viewed FROM gifts WHERE task_id =' + selectedGift[0].temp_user_data, function( error, timesViewed ){
+            connection.query( 'SELECT viewed FROM gifts WHERE task_id ='
+             + selectedGift[0].temp_user_data, function( error, timesViewed ){
 
               if ( error ) throw error;
 
               let viewedIncrement = ( ( timesViewed[0].viewed ) + 1 );
 
-              connection.query( 'UPDATE gifts SET viewed = ? WHERE task_id = ?', [ viewedIncrement, selectedGift[0].temp_user_data ], function( error, viewResult ){
+              connection.query( 'UPDATE gifts SET viewed = ? WHERE task_id = ?',
+              [ viewedIncrement, selectedGift[0].temp_user_data ],
+              function( error, viewResult ){
 
                 connection.release();
 
@@ -1376,7 +1520,8 @@ bot.on( YES_BUTTON, msg => {
 
         });
 
-        return bot.sendMessage( msg.from.id, `Enjoy! Your account has been credited with ${ warholValue } Warhols`, { markup });
+        return bot.sendMessage( msg.from.id, `Enjoy! Your account has been
+        credited with ${ warholValue } Warhols`, { markup });
 
       } else if ( currentMode == 11 ) { // Verify that they are in spend/creative mode.
 
@@ -1386,7 +1531,8 @@ bot.on( YES_BUTTON, msg => {
 
         pool.getConnection(function(err, connection){
 
-          connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, content ){
+          connection.query( 'SELECT temp_user_data FROM accounts WHERE owner ='
+           + msg.from.id, function( error, content ){
 
             connection.release();
 
@@ -1401,8 +1547,8 @@ bot.on( YES_BUTTON, msg => {
             SubtractWarhols( msg.from.id, 10 );
 
             // Post to WarholsChannel New Content
-            if ( typeof msg.from.last_name != "undefined" ){ // if the user does not have a last name
-
+            if ( typeof msg.from.last_name != "undefined" ){
+              // if the user does not have a last name
               var contentName = ( msg.from.first_name+' '+ msg.from.last_name );
 
             } else {
@@ -1411,8 +1557,8 @@ bot.on( YES_BUTTON, msg => {
 
             }
 
-            if ( typeof msg.from.username != "undefined" ){ // if the user does not have a username
-
+            if ( typeof msg.from.username != "undefined" ){
+              // if the user does not have a username
               var contentUser = ( ' - @' + msg.from.username );
 
             } else  {
@@ -1421,7 +1567,8 @@ bot.on( YES_BUTTON, msg => {
 
             }
 
-            requestify.post('https://maker.ifttt.com/trigger/new_content/with/key/' + custom_data[5] , { // IFTTT secret key.
+            requestify.post('https://maker.ifttt.com/trigger/new_content/with/key/'
+            + custom_data[5] , { // IFTTT secret key.
 
               value1: ( contentName + contentUser ) , // telegram user.
               value2: content[1] , // content title.
@@ -1440,7 +1587,9 @@ bot.on( YES_BUTTON, msg => {
           resetRemoteData( msg.from.id );
           setMode( msg.from.id, 0 );
 
-          return bot.sendMessage( msg.from.id, `Excellent! Your content is now available for viewing and 10 Warhols have been subtracted from your account.`, { markup });
+          return bot.sendMessage( msg.from.id, `Excellent! Your content is now
+          available for viewing and 10 Warhols have been subtracted from your account.`,
+          { markup });
 
         });
 
@@ -1465,13 +1614,16 @@ bot.on( NO_BUTTON, msg => {
       resetRemoteData( msg.from.id );
       setMode( msg.from.id, 0 );
 
-      return bot.sendMessage( msg.from.id, `Perhaps there is another good deed you are willing to perform instead? \n/get more gift suggestions or go /back to the main menu.`, { markup } );
+      return bot.sendMessage( msg.from.id, `Perhaps there is another good deed
+      you are willing to perform instead? \n/get more gift suggestions or go
+      /back to the main menu.`, { markup } );
 
     } else if ( currentMode == 11 ){ // Verify that they are in spend mode.
 
       resetRemoteData( msg.from.id );
       setMode( msg.from.id, 9);
-      return bot.sendMessage( msg.from.id, `Enter the URL for the content.` , { ask: 'url'} );
+      return bot.sendMessage( msg.from.id, `Enter the URL for the content.` ,
+      { ask: 'url'} );
 
     }
 
@@ -1505,7 +1657,8 @@ function AddWarhols( userID, addedBalance ){
 
   pool.getConnection(function(err, connection) {
 
-    connection.query( 'UPDATE accounts SET balance = ? WHERE owner = ?', [ addedBalance, userID ], function( error, current ){
+    connection.query( 'UPDATE accounts SET balance = ? WHERE owner = ?',
+    [ addedBalance, userID ], function( error, current ){
 
       connection.release();
 
@@ -1518,8 +1671,9 @@ function AddWarhols( userID, addedBalance ){
 }
 
 
-// Subtracts Warhols from a users account. Need to re-write function so that it does not call GetBalance within it.
-// Have it just receive the value it needs to send to the database.
+// Subtracts Warhols from a users account. Need to re-write function so that
+// it does not call GetBalance within it. Have it just receive the value it
+// needs to send to the database.
 
 function SubtractWarhols( userID, subtractionAmount ){
 
@@ -1529,7 +1683,8 @@ function SubtractWarhols( userID, subtractionAmount ){
 
       pool.getConnection(function(err, connection) {
 
-        connection.query( 'UPDATE accounts SET balance = ? WHERE owner =?', [ newBalance, userID ], function( error, current ){
+        connection.query( 'UPDATE accounts SET balance = ? WHERE owner =?',
+        [ newBalance, userID ], function( error, current ){
 
           connection.release();
 
@@ -1551,7 +1706,9 @@ function GetBalance( msgID, callback ){
 
   pool.getConnection(function(err, connection) {
 
-    connection.query('SELECT balance FROM accounts WHERE owner =' + msgID , function( error, result ){
+
+    connection.query('SELECT balance FROM accounts WHERE owner ='
+    + msgID , function( error, result ){
 
         connection.release();
 
@@ -1570,7 +1727,9 @@ function GetFountainBalance( callback ){
 
   pool.getConnection(function(err, connection) {
 
-    connection.query('SELECT reservoir FROM fountain WHERE id =' + 1, function( error, result ){
+
+    connection.query('SELECT reservoir FROM fountain WHERE id ='
+    + 1, function( error, result ){
 
       connection.release();
 
@@ -1590,7 +1749,8 @@ function AddToFountain( contribution ){
 
   pool.getConnection(function(err, connection) {
 
-    connection.query('UPDATE fountain SET reservoir = ? WHERE id =?', [ contribution, 1 ], function( error, current ){
+    connection.query('UPDATE fountain SET reservoir = ? WHERE id =?',
+    [ contribution, 1 ], function( error, current ){
 
       connection.release();
 
@@ -1644,7 +1804,8 @@ function GiveWarholsRandom( userID, warholAmount, markup ){
 
         setMode( userID, 0 );
 
-        return bot.sendMessage( userID, `Thank you for your gift! Your Warhols have been anonymously sent to a random person.`, { markup });
+        return bot.sendMessage( userID, `Thank you for your gift! Your Warhols
+        have been anonymously sent to a random person.`, { markup });
 
     });
 
@@ -1705,7 +1866,7 @@ function ShareTheWealth( userID, fountainContribution ){
               }
 
               SubtractFromFountain( distroAmount, members.length, newReservoirBalance );
-
+           
               // Requestify code here
 
               requestify.post('https://maker.ifttt.com/trigger/new_fountain/with/key/' + custom_data[5] , { // IFTTT secret key.
@@ -1724,16 +1885,19 @@ function ShareTheWealth( userID, fountainContribution ){
 
             setMode( userID, 0 );
 
-            return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive ${ distroAmount } Warhols :D`, { markup });
+            return bot.sendMessage( userID, `Much generosity activated the
+            Warhols Fountain! Everyone will receive ${ distroAmount } Warhols :D`,
+            { markup });
 
           });
-
 
         } else {
 
           setMode( userID, 0 );
 
-          return bot.sendMessage( userID, `Thanks for your gift! The Warhols will go to the fountain reservoir and will overflow into everybody’s account soon.`, { markup });
+          return bot.sendMessage( userID, `Thanks for your gift! The Warhols
+          will go to the fountain reservoir and will overflow into everybody’s
+          account soon.`, { markup });
 
         }
 
@@ -1760,7 +1924,8 @@ function SubtractFromFountain( amount, members, currentBalance ){
 
   pool.getConnection(function(err, connection) {
 
-    connection.query('UPDATE fountain SET reservoir = ? WHERE id =?', [ resetBalance, 1 ], function( error, current ){
+    connection.query('UPDATE fountain SET reservoir = ? WHERE id =?',
+    [ resetBalance, 1 ], function( error, current ){
 
       connection.release();
 
@@ -1799,18 +1964,19 @@ function GetCreativeContent( userID, callback ){
 
       }
 
-      // 'UPDATE accounts SET mode = ? WHERE owner =?', [ newMode, userID ], function( error, updatedMode ){
+      // Convert the temporary array into a string so we can save it on the database.
+      let temp = randomCreativeSelection.toString();
 
-      let temp = randomCreativeSelection.toString(); // Convert the temporary array into a string so we can save it on the database.
-
-      connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner =?', [ temp, userID ], function( error, listCurrent ){
+      connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner =?',
+      [ temp, userID ], function( error, listCurrent ){
 
         connection.release();
 
         if ( error ) throw error;
 
         // Prepare all of the tasks for display.
-        // Keep track of which items were selected inside currentCreativeSelection as an array.
+        // Keep track of which items were selected inside
+        // currentCreativeSelection as an array.
 
       });
 
@@ -1852,8 +2018,8 @@ function GetGiftsContent( userID, callback ){
       while( randomGiftSelection.length < MAX_LIST_DISPLAY ){
 
         let randNum = ( Math.ceil( Math.random() * gifts.length ) );
-
-        if( randomGiftSelection.indexOf( randNum ) > -1 ) continue; // Makes sure that the random number selected does not already exist in the list.
+        // Makes sure that the random number selected does not already exist in the list.
+        if( randomGiftSelection.indexOf( randNum ) > -1 ) continue;
 
         randomGiftSelection[ randomGiftSelection.length ] = randNum;
 
@@ -1862,7 +2028,8 @@ function GetGiftsContent( userID, callback ){
       // Prepare all of the tasks for display.
       // Keep track of which items were selected inside currentCreativeSelection as an array.
 
-      let temp = randomGiftSelection.toString(); // Convert the temporary array into a string so we can save it on the database.
+      // Convert the temporary array into a string so we can save it on the database.
+      let temp = randomGiftSelection.toString();
 
       connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner =?', [ temp, userID ], function( error, listCurrent ){
 
@@ -1877,12 +2044,16 @@ function GetGiftsContent( userID, callback ){
 
       for ( let i = 0; i < ( randomGiftSelection.length ) ; i++ ) {
 
-        giftListDisplay += '/' + ( i + 1 ) + ' '; // The number the user will select
 
-        giftListDisplay += gifts[ ( randomGiftSelection[i] - 1 ) ].description; // The description of the gift
+        // The number the user will select
+        giftListDisplay += '/' + ( i + 1 ) + ' ';
 
-        giftListDisplay += '\n \n'; // Spaces for the string for the next line
+        // The description of the gift
+        giftListDisplay += gifts[ ( randomGiftSelection[i] - 1 ) ].description;
 
+        // Spaces for the string for the next line
+        giftListDisplay += '\n \n';
+        
       }
 
       return callback ( error, giftListDisplay );
@@ -1899,7 +2070,13 @@ function AddCreativeContent( userID, userName, newContent ){
 
   let currentTDS = new Date();
 
-  let loadContent = { owner: userID, owner_name: userName, description: newContent[1] , url: newContent[0], price: 2, date_created: currentTDS };
+  let loadContent = {
+    owner: userID,
+    owner_name: userName,
+    description: newContent[1] ,
+    url: newContent[0], price: 2,
+    date_created: currentTDS
+  };
 
   pool.getConnection(function(err, connection) {
 
@@ -1927,24 +2104,30 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
 
       if ( error ) throw error;
 
-      // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
+      // Make sure that the number they have entered is either 1 or 5.
+      // If not, just act dumb and don't do anything.
       if ( taskNumber >= 1 && taskNumber <= 5 ) {
 
-        // Retrieve the corresponding item number from the random selection made when the user selected the /creative option.
+        // Retrieve the corresponding item number from the random selection
+        // made when the user selected the /creative option.
         // We use minus 1 to offset the reading of the array.
-        connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + userID, function( error, currentList ){
+        connection.query( 'SELECT temp_user_data FROM accounts WHERE owner ='
+        + userID, function( error, currentList ){
 
           let temp = currentList[0].temp_user_data.split(","); //
 
           let contentSelector = Number(temp[ ( taskNumber - 1 ) ]);
+          // The id of the content in the database table.
+          let taskID = creativeContent[ contentSelector ].task_id;
+          // Content address.
+          let taskURL = creativeContent[ contentSelector ].url;
+          // Content price, as in how many Warhols are earned by watching this media.
+          let warholValue = creativeContent[ contentSelector ].price;
+          // Update how many times the chosen content has been viewed.
+          let viewedIncrement = ( ( creativeContent[ contentSelector ].viewed ) + 1 );
 
-          let taskID = creativeContent[ contentSelector ].task_id; // The id of the content in the database table.
-          let taskURL = creativeContent[ contentSelector ].url; // Content address.
-          let warholValue = creativeContent[ contentSelector ].price; // Content price, as in how many Warhols are earned by watching this media.
-
-          let viewedIncrement = ( ( creativeContent[ contentSelector ].viewed ) + 1 ); // Update how many times the chosen content has been viewed.
-
-          connection.query('UPDATE tasks SET viewed = ? WHERE task_id = ?', [ viewedIncrement , taskID ] , function( error, viewResult ){
+          connection.query('UPDATE tasks SET viewed = ? WHERE task_id = ?',
+          [ viewedIncrement , taskID ] , function( error, viewResult ){
 
             connection.release();
 
@@ -1952,11 +2135,12 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
 
           });
 
-          GetBalance( userID, function(error, result){ // Function talks to database and requires a callback.
+          // Function talks to database and requires a callback.
+          GetBalance( userID, function(error, result){
 
             let newBalance = ( warholValue + result );
-
-            AddWarhols( userID, newBalance ); // Function talks to database but does not require a callback.
+            // Function talks to database but does not require a callback.
+            AddWarhols( userID, newBalance );
 
             return bot.sendMessage( userID, `Here's the link to view the content you selected: \n${ taskURL }\n\nEnjoy!`, { markup });
 
@@ -1971,8 +2155,8 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
 
     });
 
-    // Reset the random list to nothing so that if someone decides to use a command with a number nothing will happen.
-    // currentCreativeSelection = []
+    // Reset the random list to nothing so that if someone decides to use a
+    // command with a number nothing will happen.
 
   });
 
@@ -1987,19 +2171,26 @@ function DisplayGiftContent( userID, giftNumber, markup ){
 
       if ( error ) throw error;
 
-      // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
+      // Make sure that the number they have entered is either 1 or 5.
+      // If not, just act dumb and don't do anything.
       if ( giftNumber >= 1 && giftNumber <= 5 ) {
 
-        connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + userID, function( error, currentList ){
 
-          let temp = currentList[0].temp_user_data.split(","); // Convert the array of numbers in strings into an array.
+        connection.query( 'SELECT temp_user_data FROM accounts WHERE owner ='
+        + userID, function( error, currentList ){
 
-          let contentSelector = Number(temp[ ( giftNumber - 1 ) ]); // Pad the number so we can use it to retreive the selection from the array.
+          // Convert the array of numbers in strings into an array.
+          let temp = currentList[0].temp_user_data.split(",");
 
-          let giftDescription = giftContent[ ( contentSelector - 1 ) ].description; // Get the description of the gift.
+          // Pad the number so we can use it to retreive the selection from the array.
+          let contentSelector = Number(temp[ ( giftNumber - 1 ) ]);
+
+          // Get the description of the gift.
+          let giftDescription = giftContent[ ( contentSelector - 1 ) ].description;
 
           // Save the selection of the user in the temp_user_data field for the yes/no confirmation.
-          connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ contentSelector, userID ], function( error, selectionPending){
+          connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?',
+          [ contentSelector, userID ], function( error, selectionPending){
 
             setMode( userID, 8 );
 
@@ -2026,7 +2217,8 @@ function setLastDate( userID ){
 
   pool.getConnection(function(err, connection) {
 
-    connection.query( 'UPDATE accounts SET date_last = ? WHERE owner = ?', [ currentDate, userID ], function( error, current ){
+    connection.query( 'UPDATE accounts SET date_last = ? WHERE owner = ?',
+    [ currentDate, userID ], function( error, current ){
 
     connection.release();
 
@@ -2047,15 +2239,18 @@ function DateCompare( userID ){
 
     pool.getConnection(function(err, connection) {
 
-    connection.query('SELECT date_last FROM accounts WHERE owner =' + userID , function( error, result ){
+      connection.query('SELECT date_last FROM accounts WHERE owner ='
+      + userID , function( error, result ){
 
-      connection.release();
+        connection.release();
 
-      if ( error ) return error;
+        if ( error ) return error;
 
-      var previousDate = result[0].date_last; // magical command to get one result into a variable
+        // magical command to get one result into a variable.
+        var previousDate = result[0].date_last;
 
-      var sincelastDate = Math.abs(currentDate-previousDate);  // difference in milliseconds
+        // difference in milliseconds.
+        var sincelastDate = Math.abs(currentDate-previousDate);
 
     });
 
@@ -2071,7 +2266,8 @@ function LastInteraction( userID, callback ){
 
   pool.getConnection(function(err, connection) {
 
-    connection.query('SELECT date_last FROM accounts WHERE owner =' + userID , function( error, result ){
+    connection.query('SELECT date_last FROM accounts WHERE owner ='
+    + userID , function( error, result ){
 
       connection.release();
 
@@ -2127,17 +2323,23 @@ function timeConversion( millisec ) {
     }
 
 
-// Records overflow of fountain, how much each user received, the total amount taken from the fountain and the date.
+// Records overflow of fountain, how much each user received,
+// the total amount taken from the fountain and the date.
 
 function makeFountainHistory( individual, grand ){
 
   let currentTDS = new Date();
 
-  let loadContent = { amount_distro: individual, amount_total: grand, tds: currentTDS };
+  let loadContent = {
+    amount_distro: individual,
+    amount_total: grand,
+    tds: currentTDS
+  };
 
   pool.getConnection(function(err, connection) {
 
-    connection.query('INSERT into fountain_history SET ?', loadContent, function( error, result ){
+    connection.query('INSERT into fountain_history SET ?',
+    loadContent, function( error, result ){
 
       connection.release();
 
@@ -2158,7 +2360,8 @@ function newMarketActivity( userID, callback ){
       pool.getConnection(function(err, connection) {
 
       // Retrieve last market closure date
-      connection.query('SELECT close_time, id, winner FROM market WHERE event = ?', [eventName], function (error, result, fields) {
+      connection.query('SELECT close_time, id, winner FROM market WHERE event = ?',
+      [eventName], function (error, result, fields) {
 
         connection.release();
 
@@ -2167,14 +2370,17 @@ function newMarketActivity( userID, callback ){
         var currentDate = new Date();
         var i = 0;
 
-        for (i = 0; i < result.length; i++) {  // retrieve all market closures for this event
+        // retrieve all market closures for this event
+        for (i = 0; i < result.length; i++) {
 
-          if (currentDate > result[i].close_time) {   // check if any of dates are in the past
+          // check if any of dates are in the past
+          if (currentDate > result[i].close_time) {
 
                 lastMarketClosing = result[i].close_time;
                 marketClosureId = result[i].id;
                 var dateDifference = (currentDate-lastMarketClosing);
-                marketWinners[i] = (result[i].winner + '' + result[i].id); // store pair of numbers (id + winning flavor) in array
+                // store pair of numbers (id + winning flavor) in array
+                marketWinners[i] = (result[i].winner + '' + result[i].id);
 
           } else {
 
@@ -2187,7 +2393,9 @@ function newMarketActivity( userID, callback ){
       });
 
     // check if any bets by user
-    connection.query('SELECT * FROM market_bets WHERE event = ? AND user = ?',[eventName, userID], function( error, result ){
+
+    connection.query('SELECT * FROM market_bets WHERE event = ? AND user = ?',
+    [eventName, userID], function( error, result ){
 
         if ( error ) return error;
 
@@ -2199,47 +2407,46 @@ function newMarketActivity( userID, callback ){
           var newMarketClosure = 0 ; // reset previous value of market closure
 
           for (i = 0; i < result.length; i++) {
-
-              betInfo = (result[i].flavor + '' + result[i].market_id); // put together on a string closure id and flavor of bet
+              // put together on a string closure id and flavor of bet
+              betInfo = (result[i].flavor + '' + result[i].market_id);
 
               // if bet has not closed yet do not process!
 
+
               if (result[i].time < lastMarketClosing) {
 
-              if (result[i].credited == 0) { // check for any bets still not processed
+                // check for any bets still not processed
+                if (result[i].credited == 0) {
 
-                var credText = 'not credited yet' ;
-                newMarketClosure = 1 ;
-                ii++;
+                  var credText = 'not credited yet' ;
+                  newMarketClosure = 1 ;
+                  ii++;
 
-                if (marketWinners.indexOf(betInfo) === -1) {  // bet did not win - *sigh*
-                    // console.log(betInfo + ' is NOT a winner');
 
-                             // connection query to update credited field to 1 - bet processed!
-                             connection.query( 'UPDATE market_bets SET credited = 1 WHERE user = ? AND market_id = ? AND flavor = ?', [ userID, betInfo.substring(1) , betInfo.substring(0, 1) ], function( error, current ){
+                  // bet did not win - *sigh*
+                  if (marketWinners.indexOf(betInfo) === -1) {
 
-                             if ( error ) throw error;
+                    // connection query to update credited field to 1 - bet processed!
+                    connection.query( 'UPDATE market_bets SET credited = 1 WHERE user = ? AND market_id = ? AND flavor = ?', [ userID, betInfo.substring(1) , betInfo.substring(0, 1) ], function( error, current ){
 
-                             });
+                      if ( error ) throw error;
 
-                }
-                else {  // bet is a winner - YAY!
-                    // console.log(betInfo + ' is a winner');
+                    });
 
-                    var betCredit = (result[i].amount * SPEC_MULTIPLIER) // multiply bet
-                    betCreditTotal = (betCreditTotal+betCredit); // add value won on this bet with other winnings
+                } else {  // bet is a winner - YAY!
+                    // multiply bet
+                    var betCredit = (result[i].amount * SPEC_MULTIPLIER);
+                    // add value won on this bet with other winnings
+                    betCreditTotal = (betCreditTotal+betCredit);
                     iii++;
-                    // console.log('betCredit: ' + betCredit);
-                    // console.log('betCreditTotal: ' + betCreditTotal);
-                    // console.log(betInfo.substring(0, 1)); // get back closure id from string
-                    // console.log(betInfo.substring(1));  // get back bet flavor from string
 
-                             // connection query to update credited field to 1 - bet processed!
-                             connection.query( 'UPDATE market_bets SET credited = 1 WHERE user = ? AND market_id = ? AND flavor = ?', [ userID, betInfo.substring(1) , betInfo.substring(0, 1) ], function( error, current ){
 
-                             if ( error ) throw error;
+                    connection.query( 'UPDATE market_bets SET credited = 1 WHERE user = ? AND market_id = ? AND flavor = ?', [ userID, betInfo.substring(1) , betInfo.substring(0, 1) ], function( error, current ){
 
-                             });
+                      if ( error ) throw error;
+
+                      });
+
 
                 }
 
@@ -2253,42 +2460,30 @@ function newMarketActivity( userID, callback ){
 
               var credText = 'not closed yet - do not process' ;
 
-              }
-
-          // console.log(result[i].name + ' bet ' + result[i].amount + ' Warhols on flavor ' + result[i].flavor + ' at market id ' + result[i].market_id + ' during event ' + result[i].event+ ' - ' + credText);
+            }
 
           }
 
-          // console.log ('number of uncredited bets: ' + ii);
-          // console.log ('winning bets: ' + iii);
-          // console.log ('total winnings: ' + betCreditTotal);
-          // console.log ('has market closed: ' + newMarketClosure);
+          connection.query('SELECT balance FROM accounts WHERE owner ='
+          + userID , function( error, result ){
 
+            if ( error ) return error;
 
-        connection.query('SELECT balance FROM accounts WHERE owner =' + userID , function( error, result ){
+            var balance = result[0].balance;
 
-          if ( error ) return error;
+            var balancePlusBet = (balance + betCreditTotal);
 
-             var balance = result[0].balance;
-             // console.log('current balance: ' + balance);
+            AddWarhols( userID, balancePlusBet ); // update users balance
 
-             var balancePlusBet = (balance + betCreditTotal);
-             // console.log('new balance: ' + balancePlusBet);
+            marketActivityDisplay = (' new balance after winnings: ' + balancePlusBet);
 
-             AddWarhols( userID, balancePlusBet ); // update users balance
+            var newMarketNewBalance = [newMarketClosure, balancePlusBet];
 
-            // return callback( error, result[0].balance );
-
-             marketActivityDisplay = (' new balance after winnings: ' + balancePlusBet);
-             // console.log('marketActivityDisplay1: ' + marketActivityDisplay);
-
-             var newMarketNewBalance = [newMarketClosure, balancePlusBet];
-
-             return callback( error, newMarketNewBalance );
+            return callback( error, newMarketNewBalance );
 
         });
 
-    });
+      });
 
   });
 
