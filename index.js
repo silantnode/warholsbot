@@ -437,11 +437,11 @@ bot.on( BALANCE_BUTTON, msg => {
 
 doesUserExist( msg.from.id, function(error, doThey){
 
+  if ( doThey == true ){
 
-
-    if ( doThey == true ){
-
-  GetBalance( msg.from.id, function( error, result ){  // at this point "result" loads the balance since last interaction, bets not processed yet
+  // at this point "result" loads the balance since
+  // last interaction, bets not processed yet
+  GetBalance( msg.from.id, function( error, result ){
 
     // check if there are new market closures that can lead to new balance
 
