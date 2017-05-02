@@ -1182,7 +1182,8 @@ if ( doThey == true ){
           var dateDifference = (results[i].close_time-currentDate);
           var timetoClosing = timeConversion(dateDifference);
 
-          if (dateDifference > 600000) { break; } // choose the first date at least 10 minutes in the future
+          // choose the first date at least 10 minutes in the future
+          if (dateDifference > 600000) { break; }
 
         }
 
