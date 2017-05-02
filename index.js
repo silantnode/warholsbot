@@ -1163,7 +1163,9 @@ if ( doThey == true ){
 
     pool.getConnection(function(err, connection) {
       // new connection to retrieve next market closure dates
-      connection.query('SELECT close_time, id FROM market WHERE event = ?', [eventName], function (error, results, fields) {
+      connection.query( 'SELECT close_time, id FROM market WHERE event = ?',
+      [eventName],
+      function (error, results, fields) {
 
         if (error) throw error;
 
