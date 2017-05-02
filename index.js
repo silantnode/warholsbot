@@ -1156,7 +1156,8 @@ if ( doThey == true ){
 
     let markup = bot.keyboard([
 
-      [SPEC_FLAVOR_1 , SPEC_FLAVOR_2 , SPEC_FLAVOR_3],[ BACK_BUTTON ]], { resize: true }
+      [SPEC_FLAVOR_1 , SPEC_FLAVOR_2 , SPEC_FLAVOR_3],[ BACK_BUTTON ]],
+      { resize: true }
 
     );
 
