@@ -1661,7 +1661,8 @@ bot.on( YES_BUTTON, msg => {
 
             }
 
-            requestify.post('https://maker.ifttt.com/trigger/new_content/with/key/' + custom_data[5] , { // IFTTT secret key.
+            requestify.post('https://maker.ifttt.com/trigger/new_content/with/key/' +
+            custom_data[5] , { // IFTTT secret key.
 
               value1: ( contentName + contentUser ) , // telegram user.
               value2: content[1] , // content title.
@@ -1680,7 +1681,10 @@ bot.on( YES_BUTTON, msg => {
           resetRemoteData( msg.from.id );
           setMode( msg.from.id, 0 );
 
-          return bot.sendMessage( msg.from.id, `Excellent! Your content is now available for viewing and 10 Warhols have been subtracted from your account.`, { markup });
+          return bot.sendMessage( msg.from.id, `Excellent! Your content is now
+            available for viewing and 10 Warhols have been subtracted
+            from your account.`,
+            { markup });
 
         });
 
