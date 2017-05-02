@@ -1199,15 +1199,15 @@ if ( doThey == true ){
            ` Warhols`,
            { markup } );
 
-    });
+        });
 
-    // end retrieving market closure dates
+        // end retrieving market closure dates
 
-  });
+      });
 
-}
+    }
 
-}); // end of check if user exists
+  }); // end of check if user exists
 
 }); // end of speculation econ
 
