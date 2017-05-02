@@ -2063,20 +2063,20 @@ function GetCreativeContent( userID, callback ){
 
       }
 
-      // 'UPDATE accounts SET mode = ? WHERE owner =?', [ newMode, userID ], function( error, updatedMode ){
+      // Convert the temporary array into a string so we can save it on the database.
+      let temp = randomCreativeSelection.toString();
 
-      console.log(randomCreativeSelection);
-
-      let temp = randomCreativeSelection.toString(); // Convert the temporary array into a string so we can save it on the database.
-
-      connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner =?', [ temp, userID ], function( error, listCurrent ){
+      connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner =?',
+      [ temp, userID ],
+      function( error, listCurrent ){
 
         connection.release();
 
         if ( error ) throw error;
 
         // Prepare all of the tasks for display.
-        // Keep track of which items were selected inside currentCreativeSelection as an array.
+        // Keep track of which items were selected
+        // inside currentCreativeSelection as an array.
 
       });
 
@@ -2118,38 +2118,44 @@ function GetGiftsContent( userID, callback ){
       while( randomGiftSelection.length < MAX_LIST_DISPLAY ){
 
         let randNum = ( Math.ceil( Math.random() * gifts.length ) );
-
-        if( randomGiftSelection.indexOf( randNum ) > -1 ) continue; // Makes sure that the random number selected does not already exist in the list.
+        // Makes sure that the random number selected does not already exist in the list.
+        if( randomGiftSelection.indexOf( randNum ) > -1 ) continue;
 
         randomGiftSelection[ randomGiftSelection.length ] = randNum;
 
       }
 
       // Prepare all of the tasks for display.
-      // Keep track of which items were selected inside currentCreativeSelection as an array.
+      // Keep track of which items were selected
+      // inside currentCreativeSelection as an array.
 
-      console.log( randomGiftSelection );
+      // Convert the temporary array into a string so we can save it on the database.
+      let temp = randomGiftSelection.toString();
 
-      let temp = randomGiftSelection.toString(); // Convert the temporary array into a string so we can save it on the database.
-
-      connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner =?', [ temp, userID ], function( error, listCurrent ){
+      connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner =?',
+      [ temp, userID ],
+      function( error, listCurrent ){
 
         connection.release();
 
         if ( error ) throw error;
 
         // Prepare all of the tasks for display.
-        // Keep track of which items were selected inside currentCreativeSelection as an array.
+        // Keep track of which items were selected
+        // inside currentCreativeSelection as an array.
 
       });
 
       for ( let i = 0; i < ( randomGiftSelection.length ) ; i++ ) {
 
-        giftListDisplay += '/' + ( i + 1 ) + ' '; // The number the user will select
+        // The number the user will select
+        giftListDisplay += '/' + ( i + 1 ) + ' ';
 
-        giftListDisplay += gifts[ ( randomGiftSelection[i] - 1 ) ].description; // The description of the gift
+        // The description of the gift
+        giftListDisplay += gifts[ ( randomGiftSelection[i] - 1 ) ].description;
 
-        giftListDisplay += '\n \n'; // Spaces for the string for the next line
+        // Spaces for the string for the next line
+        giftListDisplay += '\n \n';
 
       }
 
