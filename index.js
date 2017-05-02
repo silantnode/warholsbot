@@ -614,7 +614,8 @@ bot.on( CREATIVE_ECON, msg => {
             [ BACK_BUTTON ]], { resize: true }
           );
 
-          return bot.sendMessage( msg.from.id, `You don't have enough Warhols to publish. Try and /get more Warhols`, { markup } );
+          return bot.sendMessage( msg.from.id, `You don't have enough Warhols
+            to publish. Try and /get more Warhols`, { markup } );
 
         } else {
 
@@ -624,7 +625,8 @@ bot.on( CREATIVE_ECON, msg => {
 
           setMode( msg.from.id, 9 );
 
-          return bot.sendMessage( msg.from.id, `You can /publish your content for 10 Warhols. Your current balance is ${ balance } Warhols`, { markup } );
+          return bot.sendMessage( msg.from.id, `You can /publish your content
+            for 10 Warhols. Your current balance is ${ balance } Warhols`, { markup } );
 
         // Function for reading url and descriptive text from the user and sending it to the database.
 
@@ -647,14 +649,19 @@ bot.on( PUBLISH_BUTTON , msg => {
       [ BACK_BUTTON ]], { resize: true }
   );
 
-  // Need a way to prevent the publish command from being invoked or set warhol mode in case people want to short cut to publish without
-  // stepping through all of the other menus.
+  // Need a way to prevent the publish command from being invoked or set warhol
+  // mode in case people want to short cut to publish without stepping through
+  // all of the other menus.
 
   getMode( msg.from.id, function( error, currentMode ){
 
     if ( currentMode == 9 ){
 
-      return bot.sendMessage( msg.from.id, `Enter the URL for the content.`, { ask: 'url' }, { markup } );
+      return bot.sendMessage(
+        msg.from.id,
+        `Enter the URL for the content.`,
+        { ask: 'url' },
+        { markup } );
 
     }
 
@@ -676,7 +683,9 @@ bot.on( '/coupon' , msg => {
 
       pool.getConnection(function(err,connection){
 
-        connection.query( 'SELECT used_coupon FROM accounts WHERE owner =' + msg.from.id, function( error, couponUsed ){
+        connection.query( 'SELECT used_coupon FROM accounts WHERE owner ='
+        + msg.from.id,
+        function( error, couponUsed ){
 
           if( error ) throw error;
 
@@ -686,13 +695,17 @@ bot.on( '/coupon' , msg => {
               [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
             );
 
-            return bot.sendMessage( msg.from.id, `You have already used a coupon code. Maybe /get some warhols?`, { markup });
+            return bot.sendMessage( msg.from.id, `You have already used a coupon
+              code. Maybe /get some warhols?`, { markup });
 
           } else if ( couponUsed[0].used_coupon == 0 ) { // They have not used a coupon
 
             setMode( msg.from.id, 14 ); // Set to coupon mode.
 
-            return bot.sendMessage( msg.from.id, `It seems you have a coupon for free Warhols. Please enter the coupon code:`, { ask: 'coupon' }, { markup });
+            return bot.sendMessage( msg.from.id, `It seems you have a coupon
+              for free Warhols. Please enter the coupon code:`,
+              { ask: 'coupon' },
+              { markup });
           }
 
         });
