@@ -2209,25 +2209,33 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
 
       if ( error ) throw error;
 
-      // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
+      // Make sure that the number they have entered is either 1 or 5.
+      // If not, just act dumb and don't do anything.
       if ( taskNumber >= 1 && taskNumber <= 5 ) {
 
-        // Retrieve the corresponding item number from the random selection made when the user selected the /creative option.
+        // Retrieve the corresponding item number from the random
+        // selection made when the user selected the /creative option.
         // We use minus 1 to offset the reading of the array.
-        connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + userID, function( error, currentList ){
+        connection.query( 'SELECT temp_user_data FROM accounts WHERE owner ='
+        + userID,
+        function( error, currentList ){
 
-          let temp = currentList[0].temp_user_data.split(","); //
-          console.log( Number( temp[0] ) );
+          let temp = currentList[0].temp_user_data.split(",");
 
           let contentSelector = Number(temp[ ( taskNumber - 1 ) ]);
 
-          let taskID = creativeContent[ contentSelector ].task_id; // The id of the content in the database table.
-          let taskURL = creativeContent[ contentSelector ].url; // Content address.
-          let warholValue = creativeContent[ contentSelector ].price; // Content price, as in how many Warhols are earned by watching this media.
+          // The id of the content in the database table.
+          let taskID = creativeContent[ contentSelector ].task_id;
+          // Content address.
+          let taskURL = creativeContent[ contentSelector ].url;
+          // Content price, as in how many Warhols are earned by watching this media.
+          let warholValue = creativeContent[ contentSelector ].price;
+          // Update how many times the chosen content has been viewed.
+          let viewedIncrement = ( ( creativeContent[ contentSelector ].viewed ) + 1 );
 
-          let viewedIncrement = ( ( creativeContent[ contentSelector ].viewed ) + 1 ); // Update how many times the chosen content has been viewed.
-
-          connection.query('UPDATE tasks SET viewed = ? WHERE task_id = ?', [ viewedIncrement , taskID ] , function( error, viewResult ){
+          connection.query('UPDATE tasks SET viewed = ? WHERE task_id = ?',
+          [ viewedIncrement , taskID ],
+          function( error, viewResult ){
 
             connection.release();
 
@@ -2235,13 +2243,18 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
 
           });
 
-          GetBalance( userID, function(error, result){ // Function talks to database and requires a callback.
+          // Function talks to database and requires a callback.
+          GetBalance( userID, function(error, result){
 
             let newBalance = ( warholValue + result );
+            // Function talks to database but does not require a callback.
+            AddWarhols( userID, newBalance );
 
-            AddWarhols( userID, newBalance ); // Function talks to database but does not require a callback.
-
-            return bot.sendMessage( userID, `Here's the link to view the content you selected: \n${ taskURL }\n\nEnjoy!`, { markup });
+            return bot.sendMessage(
+              userID,
+              `Here's the link to view the content you selected:
+              \n${ taskURL }\n\nEnjoy!`,
+              { markup });
 
           });
 
@@ -2254,8 +2267,8 @@ function DisplayCreativeContent( userID, taskNumber, markup ){
 
     });
 
-    // Reset the random list to nothing so that if someone decides to use a command with a number nothing will happen.
-    // currentCreativeSelection = []
+    // Reset the random list to nothing so that if someone decides
+    // to use a command with a number nothing will happen.
 
   });
 
