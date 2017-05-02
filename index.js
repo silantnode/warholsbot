@@ -2509,7 +2509,9 @@ function newMarketActivity( userID, callback ){
       });
 
     // check if any bets by user
-    connection.query('SELECT * FROM market_bets WHERE event = ? AND user = ?',[eventName, userID], function( error, result ){
+    connection.query('SELECT * FROM market_bets WHERE event = ? AND user = ?',
+    [eventName, userID], f
+    unction( error, result ){
 
         if ( error ) return error;
 
@@ -2521,50 +2523,49 @@ function newMarketActivity( userID, callback ){
           var newMarketClosure = 0 ; // reset previous value of market closure
 
           for (i = 0; i < result.length; i++) {
-
-              betInfo = (result[i].flavor + '' + result[i].market_id); // put together on a string closure id and flavor of bet
+              // put together on a string closure id and flavor of bet
+              betInfo = (result[i].flavor + '' + result[i].market_id);
 
               // if bet has not closed yet do not process!
 
-              // console.log(result[i].time + ' is bet date');
-              // console.log(lastMarketClosing + ' is last closing date');
-
               if (result[i].time < lastMarketClosing) {
 
-              if (result[i].credited == 0) { // check for any bets still not processed
+              // check for any bets still not processed
+              if (result[i].credited == 0) {
 
                 var credText = 'not credited yet' ;
+
                 newMarketClosure = 1 ;
                 ii++;
 
-                if (marketWinners.indexOf(betInfo) === -1) {  // bet did not win - *sigh*
-                    // console.log(betInfo + ' is NOT a winner');
+                // bet did not win - *sigh*
+                if (marketWinners.indexOf(betInfo) === -1) {
 
-                             // connection query to update credited field to 1 - bet processed!
-                             connection.query( 'UPDATE market_bets SET credited = 1 WHERE user = ? AND market_id = ? AND flavor = ?', [ userID, betInfo.substring(1) , betInfo.substring(0, 1) ], function( error, current ){
+                  // connection query to update credited field to 1 - bet processed!
+                  connection.query( 'UPDATE market_bets SET credited = 1 WHERE user = ? AND market_id = ? AND flavor = ?',
+                  [ userID, betInfo.substring(1), betInfo.substring(0, 1) ],
+                  function( error, current ){
 
-                             if ( error ) throw error;
+                    if ( error ) throw error;
 
-                             });
+                  });
 
-                }
-                else {  // bet is a winner - YAY!
-                    // console.log(betInfo + ' is a winner');
+                } else {  // bet is a winner - YAY!
 
-                    var betCredit = (result[i].amount * SPEC_MULTIPLIER) // multiply bet
-                    betCreditTotal = (betCreditTotal+betCredit); // add value won on this bet with other winnings
+                    // multiply bet
+                    var betCredit = (result[i].amount * SPEC_MULTIPLIER);
+                    // add value won on this bet with other winnings
+                    betCreditTotal = (betCreditTotal+betCredit);
                     iii++;
-                    // console.log('betCredit: ' + betCredit);
-                    // console.log('betCreditTotal: ' + betCreditTotal);
-                    // console.log(betInfo.substring(0, 1)); // get back closure id from string
-                    // console.log(betInfo.substring(1));  // get back bet flavor from string
 
-                             // connection query to update credited field to 1 - bet processed!
-                             connection.query( 'UPDATE market_bets SET credited = 1 WHERE user = ? AND market_id = ? AND flavor = ?', [ userID, betInfo.substring(1) , betInfo.substring(0, 1) ], function( error, current ){
+                    // connection query to update credited field to 1 - bet processed!
+                    connection.query( 'UPDATE market_bets SET credited = 1 WHERE user = ? AND market_id = ? AND flavor = ?',
+                    [ userID, betInfo.substring(1) , betInfo.substring(0, 1) ],
+                    function( error, current ){
 
-                             if ( error ) throw error;
+                      if ( error ) throw error;
 
-                             });
+                    });
 
                 }
 
@@ -2578,40 +2579,34 @@ function newMarketActivity( userID, callback ){
 
               var credText = 'not closed yet - do not process' ;
 
-              }
+            }
 
-          // console.log(result[i].name + ' bet ' + result[i].amount + ' Warhols on flavor ' + result[i].flavor + ' at market id ' + result[i].market_id + ' during event ' + result[i].event+ ' - ' + credText);
+      }
 
-          }
+      connection.query('SELECT balance FROM accounts WHERE owner ='
+      + userID ,
+      function( error, result ){
 
-          // console.log ('number of uncredited bets: ' + ii);
-          // console.log ('winning bets: ' + iii);
-          // console.log ('total winnings: ' + betCreditTotal);
-          // console.log ('has market closed: ' + newMarketClosure);
+        if ( error ) return error;
 
+        var balance = result[0].balance;
+        // console.log('current balance: ' + balance);
 
-        connection.query('SELECT balance FROM accounts WHERE owner =' + userID , function( error, result ){
+        var balancePlusBet = (balance + betCreditTotal);
+        // console.log('new balance: ' + balancePlusBet);
 
-          if ( error ) return error;
+        AddWarhols( userID, balancePlusBet ); // update users balance
 
-             var balance = result[0].balance;
-             // console.log('current balance: ' + balance);
+        // return callback( error, result[0].balance );
 
-             var balancePlusBet = (balance + betCreditTotal);
-             // console.log('new balance: ' + balancePlusBet);
+        marketActivityDisplay = (' new balance after winnings: ' + balancePlusBet);
+        // console.log('marketActivityDisplay1: ' + marketActivityDisplay);
 
-             AddWarhols( userID, balancePlusBet ); // update users balance
+        var newMarketNewBalance = [newMarketClosure, balancePlusBet];
 
-            // return callback( error, result[0].balance );
+        return callback( error, newMarketNewBalance );
 
-             marketActivityDisplay = (' new balance after winnings: ' + balancePlusBet);
-             // console.log('marketActivityDisplay1: ' + marketActivityDisplay);
-
-             var newMarketNewBalance = [newMarketClosure, balancePlusBet];
-
-             return callback( error, newMarketNewBalance );
-
-        });
+      });
 
     });
 
