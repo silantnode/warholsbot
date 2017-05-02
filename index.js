@@ -1304,7 +1304,8 @@ bot.on( '/*' , msg => {
 
   if ( msg.text.startsWith('/') == true ) {
 
-    // first test for coupon or start command since it's ok to activate even without user having an account
+    // first test for coupon or start command
+    // since it's ok to activate even without user having an account
 
     if ( msg.text == '/coupon' | msg.text == '/start') {
 
