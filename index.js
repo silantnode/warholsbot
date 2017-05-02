@@ -1753,12 +1753,14 @@ function AddWarhols( userID, addedBalance ){
 }
 
 
-// Subtracts Warhols from a users account. Need to re-write function so that it does not call GetBalance within it.
+// Subtracts Warhols from a users account.
+// Need to re-write function so that it does not call GetBalance within it.
 // Have it just receive the value it needs to send to the database.
 
 function SubtractWarhols( userID, subtractionAmount ){
-
-    GetBalance( userID, function( error, result ){ // Get the current balance on the account of the user.
+  
+    // Get the current balance on the account of the user.
+    GetBalance( userID, function( error, result ){
 
       let newBalance = ( result - subtractionAmount );
 
