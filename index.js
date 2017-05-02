@@ -326,7 +326,9 @@ function setMode( userID, newMode ){
 
       pool.getConnection(function(err, connection) {
 
-        connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?', [ newMode, userID ], function( error, updatedMode ){
+        connection.query( 'UPDATE accounts SET mode = ? WHERE owner =?',
+         [ newMode, userID ],
+         function( error, updatedMode ){
 
           console.log( userID +' updated to mode ' + newMode );
 
