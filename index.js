@@ -1729,23 +1729,6 @@ bot.on( NO_BUTTON, msg => {
 
 });
 
-// Last Interaction test command
-/*
-bot.on('/last', msg => {
-  // Update database date_last column with current date timestamp.
-  setLastDate( msg.from.id );
-});
-
-// Date comparison test command
-
-bot.on('/date', msg => {
-  // Compare current date and /last date.
-  DateCompare ( msg.from.id );
-
-});
-*/
-
-
 
 /* * * FUNCTIONS * * */
 
