@@ -1609,7 +1609,10 @@ bot.on( YES_BUTTON, msg => {
 
         });
 
-        return bot.sendMessage( msg.from.id, `Enjoy! Your account has been credited with ${ warholValue } Warhols`, { markup });
+        return bot.sendMessage(
+          msg.from.id,
+          `Enjoy! Your account has been credited with ${ warholValue } Warhols`,
+          { markup });
 
       } else if ( currentMode == 11 ) { // Verify that they are in spend/creative mode.
 
