@@ -1007,7 +1007,9 @@ bot.on('ask.whatisit', msg => {
 
               console.log(content);
 
-              connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ content , msg.from.id ], function( error, confirmedContent ){
+              connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?',
+              [ content , msg.from.id ],
+              function( error, confirmedContent ){
 
                 if ( error ) throw error;
 
