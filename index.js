@@ -1709,7 +1709,10 @@ bot.on( NO_BUTTON, msg => {
       resetRemoteData( msg.from.id );
       setMode( msg.from.id, 0 );
 
-      return bot.sendMessage( msg.from.id, `Perhaps there is another good deed you are willing to perform instead? \n/get more gift suggestions or go /back to the main menu.`, { markup } );
+      return bot.sendMessage( msg.from.id, `Perhaps there is another good deed
+        you are willing to perform instead? \n/get more gift suggestions or go
+        /back to the main menu.`,
+        { markup } );
 
     } else if ( currentMode == 11 ){ // Verify that they are in spend mode.
 
