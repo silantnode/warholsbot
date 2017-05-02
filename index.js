@@ -1908,7 +1908,8 @@ function ShareTheWealth( userID, fountainContribution ){
 
   GetFountainBalance( function( error, fountainBalance ){
 
-    // Add the new contribution of warhols to the current reservoir balance including the multiplier.
+    // Add the new contribution of warhols to the
+    // current reservoir balance including the multiplier.
     let newReservoirBalance = ( fountainBalance + ( fountainContribution * GIFT_MULTIPLYER ) ) ;
 
     // Send the newly calculated value to the reservoir.
@@ -1924,7 +1925,8 @@ function ShareTheWealth( userID, fountainContribution ){
 
         if( error ) throw error;
 
-        // Check if the reservoir is full enough for a distrobution of warhols to all the users.
+        // Check if the reservoir is full enough
+        // for a distrobution of warhols to all the users.
         if ( newReservoirBalance >= ( ( MIN_DISTRO * howmanyusers.length ) ) ){
 
           connection.query( 'SELECT * FROM accounts', function( error, members ){
@@ -1933,7 +1935,8 @@ function ShareTheWealth( userID, fountainContribution ){
 
             if( error ) throw error;
 
-              // Round down the number resulting from dividing the new reservoir balance with the number of warhols users.
+              // Round down the number resulting from dividing the
+              // new reservoir balance with the number of warhols users.
               let distroAmount =  Math.floor( ( newReservoirBalance / members.length ) );
 
               // Distribute the awarded warhols to all the users.
@@ -1957,7 +1960,8 @@ function ShareTheWealth( userID, fountainContribution ){
 
               // Requestify code here
 
-              requestify.post('https://maker.ifttt.com/trigger/new_fountain/with/key/' + custom_data[5] , { // IFTTT secret key.
+              requestify.post('https://maker.ifttt.com/trigger/new_fountain/with/key/'
+              + custom_data[5] , { // IFTTT secret key.
 
               value1: distroAmount
 
@@ -1973,7 +1977,11 @@ function ShareTheWealth( userID, fountainContribution ){
 
             setMode( userID, 0 );
 
-            return bot.sendMessage( userID, `Much generosity activated the Warhols Fountain! Everyone will receive ${ distroAmount } Warhols :D`, { markup });
+            return bot.sendMessage(
+              userID,
+              `Much generosity activated the Warhols
+              Fountain! Everyone will receive ${ distroAmount } Warhols :D`,
+              { markup });
 
           });
 
