@@ -1580,14 +1580,19 @@ bot.on( YES_BUTTON, msg => {
           connection.query( 'SELECT temp_user_data FROM accounts WHERE owner ='
           + msg.from.id,
           function( error, selectedGift ){
-            
-            connection.query( 'SELECT viewed FROM gifts WHERE task_id =' + selectedGift[0].temp_user_data, function( error, timesViewed ){
+
+            connection.query( 'SELECT viewed FROM gifts WHERE task_id ='
+            + selectedGift[0].temp_user_data,
+            function( error, timesViewed ){
 
               if ( error ) throw error;
 
               let viewedIncrement = ( ( timesViewed[0].viewed ) + 1 );
 
-              connection.query( 'UPDATE gifts SET viewed = ? WHERE task_id = ?', [ viewedIncrement, selectedGift[0].temp_user_data ], function( error, viewResult ){
+              connection.query( 'UPDATE gifts SET viewed = ? WHERE task_id = ?',
+              [ viewedIncrement,
+              selectedGift[0].temp_user_data ],
+              function( error, viewResult ){
 
                 connection.release();
 
