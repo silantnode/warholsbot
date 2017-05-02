@@ -2533,53 +2533,53 @@ function newMarketActivity( userID, callback ){
               // check for any bets still not processed
               if (result[i].credited == 0) {
 
-                var credText = 'not credited yet' ;
+              var credText = 'not credited yet' ;
 
-                newMarketClosure = 1 ;
-                ii++;
+              newMarketClosure = 1 ;
+              ii++;
 
-                // bet did not win - *sigh*
-                if (marketWinners.indexOf(betInfo) === -1) {
+              // bet did not win - *sigh*
+              if (marketWinners.indexOf(betInfo) === -1) {
 
                   // connection query to update credited field to 1 - bet processed!
-                  connection.query( 'UPDATE market_bets SET credited = 1 WHERE user = ? AND market_id = ? AND flavor = ?',
-                  [ userID, betInfo.substring(1), betInfo.substring(0, 1) ],
-                  function( error, current ){
+                connection.query( 'UPDATE market_bets SET credited = 1 WHERE user = ? AND market_id = ? AND flavor = ?',
+                [ userID, betInfo.substring(1), betInfo.substring(0, 1) ],
+                function( error, current ){
 
-                    if ( error ) throw error;
+                  if ( error ) throw error;
 
-                  });
+              });
 
-                } else {  // bet is a winner - YAY!
+            } else {  // bet is a winner - YAY!
 
-                    // multiply bet
-                    var betCredit = (result[i].amount * SPEC_MULTIPLIER);
-                    // add value won on this bet with other winnings
-                    betCreditTotal = (betCreditTotal+betCredit);
-                    iii++;
+                // multiply bet
+                var betCredit = (result[i].amount * SPEC_MULTIPLIER);
+                // add value won on this bet with other winnings
+                betCreditTotal = (betCreditTotal+betCredit);
+                iii++;
 
-                    // connection query to update credited field to 1 - bet processed!
-                    connection.query( 'UPDATE market_bets SET credited = 1 WHERE user = ? AND market_id = ? AND flavor = ?',
-                    [ userID, betInfo.substring(1) , betInfo.substring(0, 1) ],
-                    function( error, current ){
+                // connection query to update credited field to 1 - bet processed!
+                connection.query( 'UPDATE market_bets SET credited = 1 WHERE user = ? AND market_id = ? AND flavor = ?',
+                [ userID, betInfo.substring(1) , betInfo.substring(0, 1) ],
+                function( error, current ){
 
-                      if ( error ) throw error;
+                  if ( error ) throw error;
 
-                    });
-
-                }
-
-              } else {
-
-                var credText = 'already credited' ;
-
-              }  // end check for any bets still not processed
-
-            } else {
-
-              var credText = 'not closed yet - do not process' ;
+              });
 
             }
+
+          } else {
+
+            var credText = 'already credited' ;
+
+          }  // end check for any bets still not processed
+
+        } else {
+
+          var credText = 'not closed yet - do not process' ;
+
+        }
 
       }
 
