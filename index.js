@@ -1758,7 +1758,7 @@ function AddWarhols( userID, addedBalance ){
 // Have it just receive the value it needs to send to the database.
 
 function SubtractWarhols( userID, subtractionAmount ){
-  
+
     // Get the current balance on the account of the user.
     GetBalance( userID, function( error, result ){
 
@@ -1766,13 +1766,13 @@ function SubtractWarhols( userID, subtractionAmount ){
 
       pool.getConnection(function(err, connection) {
 
-        connection.query( 'UPDATE accounts SET balance = ? WHERE owner =?', [ newBalance, userID ], function( error, current ){
+        connection.query( 'UPDATE accounts SET balance = ? WHERE owner =?',
+        [ newBalance, userID ],
+        function( error, current ){
 
           connection.release();
 
           if ( error ) throw error;
-
-          // console.log('Changed ' + current.changedRows + ' rows');
 
       });
 
