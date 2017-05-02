@@ -1017,7 +1017,10 @@ bot.on('ask.whatisit', msg => {
 
                 setMode( msg.from.id, 11 );
 
-                return bot.sendMessage( msg.from.id, `Please review your submission! \n${ urlDescription } ${ urlSubmission[0].temp_user_data } \n  \nIs the content correct? \n/yes or /no` );
+                return bot.sendMessage(
+                  msg.from.id, `Please review your submission!
+                  \n${ urlDescription } ${ urlSubmission[0].temp_user_data } \n
+                  \nIs the content correct? \n/yes or /no` );
 
               });
 
