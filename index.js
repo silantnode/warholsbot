@@ -1001,7 +1001,9 @@ bot.on('ask.whatisit', msg => {
 
               if ( error ) throw error;
 
-              let content = ( [ urlSubmission[0].temp_user_data, urlDescription ] ).toString();
+              let content = (
+                [ urlSubmission[0].temp_user_data,
+                urlDescription ] ).toString();
 
               console.log(content);
 
