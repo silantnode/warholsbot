@@ -2476,7 +2476,9 @@ function newMarketActivity( userID, callback ){
       pool.getConnection(function(err, connection) {
 
       // Retrieve last market closure date
-      connection.query('SELECT close_time, id, winner FROM market WHERE event = ?', [eventName], function (error, result, fields) {
+      connection.query('SELECT close_time, id, winner FROM market WHERE event = ?',
+      [eventName],
+      function (error, result, fields) {
 
         connection.release();
 
@@ -2485,20 +2487,22 @@ function newMarketActivity( userID, callback ){
         var currentDate = new Date();
         var i = 0;
 
-        for (i = 0; i < result.length; i++) {  // retrieve all market closures for this event
+        // retrieve all market closures for this event
+        for (i = 0; i < result.length; i++) {
 
-          if (currentDate > result[i].close_time) {   // check if any of dates are in the past
+          if (currentDate > result[i].close_time) {
 
                 lastMarketClosing = result[i].close_time;
                 marketClosureId = result[i].id;
                 var dateDifference = (currentDate-lastMarketClosing);
-                marketWinners[i] = (result[i].winner + '' + result[i].id); // store pair of numbers (id + winning flavor) in array
+                // store pair of numbers (id + winning flavor) in array
+                marketWinners[i] = (result[i].winner + '' + result[i].id);
 
-                // console.log(marketWinners[i]);
-                // console.log('closure ' + (i+1) + ': id ' + marketClosureId + ' - ' + timeConversion(dateDifference) + ' ago. Winner: ' + result[i].winner);
-        }
+          } else {
 
-        else { break; }
+            break;
+
+          }
 
         }
 
