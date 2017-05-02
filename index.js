@@ -1106,7 +1106,11 @@ bot.on( [ GIFT_RANDOM, GIFT_FOUNTAIN ], msg => {
 
       }
 
-      return bot.sendMessage( msg.from.id, `How many Warhols do you want to give? \n /5 \n /10 \n /20`, { markup } );
+      return bot.sendMessage(
+        msg.from.id,
+        `How many Warhols do you want to give? \n
+        /5 \n /10 \n /20`,
+        { markup } );
 
     }
 
