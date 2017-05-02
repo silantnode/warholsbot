@@ -1139,7 +1139,9 @@ if ( doThey == true ){
 
     pool.getConnection(function(err, connection) {
 
-      connection.query( 'UPDATE accounts SET pre_bet1 = ? WHERE owner = ?', [ betDate, msg.from.id ], function( error, flavorChoice ){
+      connection.query( 'UPDATE accounts SET pre_bet1 = ? WHERE owner = ?',
+      [ betDate, msg.from.id ],
+      function( error, flavorChoice ){
 
         connection.release();
 
