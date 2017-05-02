@@ -1292,7 +1292,8 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 });
 
 
-// '/*' listens for any activity entered by the user and then filters out the resulting strings. Checks the mode that
+// '/*' listens for any activity entered by the user and then
+// filters out the resulting strings. Checks the mode that
 // the user is in to determine how to react to the numbers we are listening for.
 
 bot.on( '/*' , msg => {
