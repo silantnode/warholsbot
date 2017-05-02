@@ -1187,7 +1187,17 @@ if ( doThey == true ){
 
         }
 
-        return bot.sendMessage( msg.from.id, `The Warhols exchange market will close in ` + timetoClosing + `. In which flavor would you like to invest? \n\n `+ SPEC_FLAVOR_1 +` Warhols \n `+ SPEC_FLAVOR_2 +` Warhols \n `+ SPEC_FLAVOR_3 +` Warhols`, { markup } );
+        return bot.sendMessage(
+          msg.from.id,
+          `The Warhols exchange market will close in ` + timetoClosing + `.
+          In which flavor would you like to invest?
+          \n\n `+ SPEC_FLAVOR_1 +`
+          Warhols \n `+
+           SPEC_FLAVOR_2 +`
+           Warhols \n `+
+           SPEC_FLAVOR_3 +
+           ` Warhols`,
+           { markup } );
 
     });
 
