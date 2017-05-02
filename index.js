@@ -995,7 +995,9 @@ bot.on('ask.whatisit', msg => {
 
           pool.getConnection( function (err, connection){
 
-            connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, urlSubmission ){
+            connection.query( 'SELECT temp_user_data FROM accounts WHERE owner ='
+            + msg.from.id,
+            function( error, urlSubmission ){
 
               if ( error ) throw error;
 
