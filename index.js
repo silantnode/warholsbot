@@ -2439,17 +2439,23 @@ function timeConversion( millisec ) {
     }
 
 
-// Records overflow of fountain, how much each user received, the total amount taken from the fountain and the date.
+// Records overflow of fountain, how much each user received,
+// the total amount taken from the fountain and the date.
 
 function makeFountainHistory( individual, grand ){
 
   let currentTDS = new Date();
 
-  let loadContent = { amount_distro: individual, amount_total: grand, tds: currentTDS };
+  let loadContent = {
+    amount_distro: individual,
+    amount_total: grand,
+    tds: currentTDS };
 
   pool.getConnection(function(err, connection) {
 
-    connection.query('INSERT into fountain_history SET ?', loadContent, function( error, result ){
+    connection.query('INSERT into fountain_history SET ?',
+    loadContent,
+    function( error, result ){
 
       connection.release();
 
