@@ -2022,7 +2022,9 @@ function SubtractFromFountain( amount, members, currentBalance ){
 
   pool.getConnection(function(err, connection) {
 
-    connection.query('UPDATE fountain SET reservoir = ? WHERE id =?', [ resetBalance, 1 ], function( error, current ){
+    connection.query('UPDATE fountain SET reservoir = ? WHERE id =?',
+    [ resetBalance, 1 ],
+    function( error, current ){
 
       connection.release();
 
