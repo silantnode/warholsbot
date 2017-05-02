@@ -2173,11 +2173,19 @@ function AddCreativeContent( userID, userName, newContent ){
 
   let currentTDS = new Date();
 
-  let loadContent = { owner: userID, owner_name: userName, description: newContent[1] , url: newContent[0], price: 2, date_created: currentTDS };
+  let loadContent = {
+    owner: userID,
+    owner_name: userName,
+    description: newContent[1],
+    url: newContent[0],
+    price: 2,
+    date_created: currentTDS };
 
   pool.getConnection(function(err, connection) {
 
-    connection.query('INSERT into tasks SET ?', loadContent, function( error, result ){
+    connection.query('INSERT into tasks SET ?',
+    loadContent,
+    function( error, result ){
 
       connection.release();
 
