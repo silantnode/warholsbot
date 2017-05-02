@@ -1313,206 +1313,234 @@ bot.on( '/*' , msg => {
 
     } else {
 
-    doesUserExist( msg.from.id, function(error, doThey){
-
-
+      doesUserExist( msg.from.id, function(error, doThey){
 
     if ( doThey == false ){
 
-      return bot.sendMessage( msg.from.id, `You don't have an account yet. /start to create one.`);
-
-    }
-
-    else {
-
-
-    if ( msg.text == '/back') {
-
-      // It's a command but just let /back do its job.
+      return bot.sendMessage(
+        msg.from.id, `You don't have an account yet. /start to create one.`);
 
     } else {
 
-      getMode( msg.from.id, function( error, currentMode ){ // Entering get mode.
+      if ( msg.text == '/back') {
 
-        if ( currentMode == 2 ) { // In get/creative mode.
+        // It's a command but just let /back do its job.
 
-          // Extract the number value from the user input
-          // Make sure that what the text is only a number.
-          let taskNumber = Number( ( (msg.text).slice( 1, 2 ) ) );
+      } else {
 
-          if ( isNaN( taskNumber ) ){
+        getMode( msg.from.id, function( error, currentMode ){ // Entering get mode.
 
-            // Do nothing.
+          if ( currentMode == 2 ) { // In get/creative mode.
 
-          } else {
+            // Extract the number value from the user input
+            // Make sure that what the text is only a number.
+            let taskNumber = Number( ( (msg.text).slice( 1, 2 ) ) );
 
-            DisplayCreativeContent( msg.from.id, taskNumber, markup );
+            if ( isNaN( taskNumber ) ){
 
-          }
+              // Do nothing.
 
-        } else if ( currentMode == 3 ){ // In get/gift mode.
+            } else {
 
-          let taskNumber = Number( ( ( msg.text ).slice( 1, 2 ) ) );
+                DisplayCreativeContent( msg.from.id, taskNumber, markup );
 
-          if ( isNaN( taskNumber ) ){
+            }
 
-            // Do nothing.
+          } else if ( currentMode == 3 ) { // In get/gift mode.
 
-          } else {
+            let taskNumber = Number( ( ( msg.text ).slice( 1, 2 ) ) );
 
-            DisplayGiftContent( msg.from.id, taskNumber, markup );
+            if ( isNaN( taskNumber ) ){
 
-          }
+              // Do nothing.
 
-        } else if ( currentMode == 6 ) { // Make sure we are in spend/gift/random mode.
+            } else {
 
-          // Read from the second character in the message string.
-          let warholAmount = Number( ( ( msg.text ).slice( 1, 3 ) ) );
+              DisplayGiftContent( msg.from.id, taskNumber, markup );
 
-          if ( isNaN( warholAmount ) ){
+            }
 
-            // Do nothing.
+          // Make sure we are in spend/gift/random mode.
+          } else if ( currentMode == 6 ) {
 
-          } else {
+            // Read from the second character in the message string.
+            let warholAmount = Number( ( ( msg.text ).slice( 1, 3 ) ) );
 
-            // Check if the amount they have selected does not exceed the amount available in their account.
-            GetBalance( msg.from.id, function( error, userBalance ){
+            if ( isNaN( warholAmount ) ){
 
-              if ( userBalance < warholAmount ){
+              // Do nothing.
 
-                return bot.sendMessage( msg.from.id, `You do not have enough warhols. Please choose a smaller amount or /get more warhols.`);
+            } else {
 
-              } else if ( userBalance >= warholAmount ){
+              // Check if the amount they have selected does not
+              // exceed the amount available in their account.
+              GetBalance( msg.from.id, function( error, userBalance ){
 
-                GiveWarholsRandom( msg.from.id, warholAmount, markup );
+                if ( userBalance < warholAmount ){
 
-              }
+                  return bot.sendMessage(
+                    msg.from.id,
+                    `You do not have enough warhols.
+                    Please choose a smaller amount
+                    or /get more warhols.`);
 
-            });
+                } else if ( userBalance >= warholAmount ){
 
-          }
+                  GiveWarholsRandom( msg.from.id, warholAmount, markup );
 
-        } else if ( currentMode == 7 ){ // Make sure they are in spend/gift/fountain.
-
-          // Read from the second character in the message string.
-          let warholAmount = Number( ( ( msg.text ).slice( 1, 3 ) ) );
-
-          if ( isNaN( warholAmount ) ){
-
-            // Do nothing.
-
-          } else {
-
-            // Check if the amount they have selected does not exceed the amount available in their account.
-            GetBalance( msg.from.id, function( error, userBalance ){
-
-              if ( userBalance < warholAmount ){
-
-                return bot.sendMessage( msg.from.id, `You do not have enough warhols. Please choose a smaller amount or /get more warhols.`);
-
-              } else if ( userBalance >= warholAmount ){
-
-                ShareTheWealth( msg.from.id, warholAmount );
-
-              }
-
-            });
-
-          }
-
-        } else if ( currentMode == 12 ){ // Make sure we are in speculation mode.
-
-          let betAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
-
-          if( isNaN( betAmount ) ){  // if user types a command that is not a number, this can cause a bug, so betAmount must not be NaN.
-
-            betAmount = 5;
-
-          } else {
-
-          // check if user has enough balance, if not ask to choose other value
-
-          GetBalance( msg.from.id, function( error, result ){
-
-          // Check what the balance is...
-            if ( result < betAmount ) {
-
-              return bot.sendMessage( msg.from.id, `You currently have only ${ result } Warhols. Please start with a lower investment.`);
-
-            } else {   // Continue with the investment.
-
-              // console.log('they have enough Warhols - ', result);
-
-              // write to market bets database: user id, user name, flavor, amount, time bet placed
-
-              let currentDate = new Date();
-
-              if (typeof msg.from.last_name != "undefined"){ // if the user does not have a last name
-
-                let betOwner = (msg.from.first_name +' '+ msg.from.last_name);
-
-              } else {
-
-                let betOwner = (msg.from.first_name);
-
-              }
-
-              pool.getConnection(function(err, connection) {
-
-                // SELECT viewed FROM gifts WHERE task_id =' + currentGiftSelection[0] , function( error, timesViewed ){
-
-                connection.query( 'SELECT temp_user_data FROM accounts WHERE owner=' + msg.from.id, function( error, result ){
-
-                  if( error ) throw error;
-
-                  let flavorChoice = result[0].temp_user_data;
-
-                  console.log (flavorChoice);
-
-                  let newBet = { time: betDate, event: eventName, market_id: marketClosureId, user: msg.from.id, name: msg.from.first_name, flavor: flavorChoice, amount: betAmount, credited: 0 };
-
-                  connection.query('INSERT INTO market_bets SET ?', newBet, function( error, result ){
-
-                    connection.release();
-
-                    if( error ) throw error;
-
-                  });
-
-                });
+                }
 
               });
 
             }
-            // deduct warhols from users account
 
-            SubtractWarhols( msg.from.id, betAmount );
-            setLastDate( msg.from.id ); // set last interaction date
+          } else if ( currentMode == 7 ){ // Make sure they are in spend/gift/fountain.
 
-            // send message with thanks, display home menu
+            // Read from the second character in the message string.
+            let warholAmount = Number( ( ( msg.text ).slice( 1, 3 ) ) );
 
-            let markup = bot.keyboard([
-              [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
-            );
+            if ( isNaN( warholAmount ) ){
 
-            setMode( msg.from.id, 0);
+              // Do nothing.
 
-            return bot.sendMessage( msg.from.id, `Thanks for your investment! Check you balance again after the market closes. Good luck!`, { markup } );
+            } else {
 
-          }); // end if balance enough
+              // Check if the amount they have selected does not exceed the amount available in their account.
+              GetBalance( msg.from.id, function( error, userBalance ){
+
+                if ( userBalance < warholAmount ){
+
+                  return bot.sendMessage(
+                    msg.from.id,
+                    `You do not have enough warhols.
+                    Please choose a smaller amount
+                    or /get more warhols.`);
+
+                } else if ( userBalance >= warholAmount ){
+
+                  ShareTheWealth( msg.from.id, warholAmount );
+
+                }
+
+              });
+
+            }
+
+          } else if ( currentMode == 12 ){ // Make sure we are in speculation mode.
+
+            let betAmount = Number( ( ( msg.text ).slice( 1, 4 ) ) );
+
+              if( isNaN( betAmount ) ){  // if user types a command that is not a number, this can cause a bug, so betAmount must not be NaN.
+
+                betAmount = 5;
+
+              } else {
+
+                // check if user has enough balance, if not ask to choose other value
+
+                GetBalance( msg.from.id, function( error, result ){
+
+                  // Check what the balance is...
+                  if ( result < betAmount ) {
+
+                    return bot.sendMessage(
+                      msg.from.id,
+                      `You currently have only ${ result } Warhols.
+                      Please start with a lower investment.`);
+
+                  } else {   // Continue with the investment.
+
+                    // write to market bets database:
+                    // user id,
+                    //user name,
+                    // flavor,
+                    // amount,
+                    // time bet placed
+
+                    let currentDate = new Date();
+
+                    // if the user does not have a last name
+                    if (typeof msg.from.last_name != "undefined"){
+
+                      let betOwner = (msg.from.first_name +' '+ msg.from.last_name);
+
+                    } else {
+
+                      let betOwner = (msg.from.first_name);
+
+                    }
+
+                    pool.getConnection(function(err, connection) {
+
+                      connection.query( 'SELECT temp_user_data FROM accounts WHERE owner='
+                      + msg.from.id,
+                      function( error, result ){
+
+                          if( error ) throw error;
+
+                          let flavorChoice = result[0].temp_user_data;
+
+                          let newBet = {
+                            time: betDate,
+                            event: eventName,
+                            market_id: marketClosureId,
+                            user: msg.from.id,
+                            name: msg.from.first_name,
+                            flavor: flavorChoice,
+                            amount: betAmount,
+                            credited: 0 };
+
+                          connection.query('INSERT INTO market_bets SET ?',
+                          newBet,
+                          function( error, result ){
+
+                            connection.release();
+
+                            if( error ) throw error;
+
+                          });
+
+                        });
+
+                      });
+
+                    }
+                    // deduct warhols from users account
+
+                    SubtractWarhols( msg.from.id, betAmount );
+                    setLastDate( msg.from.id ); // set last interaction date
+
+                    // send message with thanks, display home menu
+
+                    let markup = bot.keyboard([
+                      [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]],
+                      { resize: true }
+                    );
+
+                    setMode( msg.from.id, 0);
+
+                    return bot.sendMessage(
+                      msg.from.id,
+                      `Thanks for your investment!
+                      Check you balance again after
+                      the market closes. Good luck!`,
+                      { markup } );
+
+                  }); // end if balance enough
+
+                }
+
+              }
+
+            });
+
+          }
 
         }
 
-        }
+      });  // end of checking if user exists
 
-      });
-
-    }
-
-   }
-   });  // end of checking if user exists
-
-  }  // end of checking for /coupon or /start
+    }  // end of checking for /coupon or /start
 
   }  // end of checking for / commands
 
