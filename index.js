@@ -1622,7 +1622,9 @@ bot.on( YES_BUTTON, msg => {
 
         pool.getConnection(function(err, connection){
 
-          connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, content ){
+          connection.query( 'SELECT temp_user_data FROM accounts WHERE owner ='
+          + msg.from.id,
+          function( error, content ){
 
             connection.release();
 
@@ -1637,7 +1639,8 @@ bot.on( YES_BUTTON, msg => {
             SubtractWarhols( msg.from.id, 10 );
 
             // Post to WarholsChannel New Content
-            if ( typeof msg.from.last_name != "undefined" ){ // if the user does not have a last name
+            // if the user does not have a last name
+            if ( typeof msg.from.last_name != "undefined" ){
 
               var contentName = ( msg.from.first_name+' '+ msg.from.last_name );
 
@@ -1647,7 +1650,8 @@ bot.on( YES_BUTTON, msg => {
 
             }
 
-            if ( typeof msg.from.username != "undefined" ){ // if the user does not have a username
+            // if the user does not have a username
+            if ( typeof msg.from.username != "undefined" ){
 
               var contentUser = ( ' - @' + msg.from.username );
 
