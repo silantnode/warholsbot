@@ -1259,7 +1259,9 @@ bot.on( [ SPEC_FLAVOR_1, SPEC_FLAVOR_2, SPEC_FLAVOR_3 ], msg => {
 
       } else if ( msg.text == SPEC_FLAVOR_3 ) {
 
-        connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ 3, msg.from.id ], function( error, flavorChoice ){
+        connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?',
+        [ 3, msg.from.id ],
+        function( error, flavorChoice ){
 
         connection.release();
 
