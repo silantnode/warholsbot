@@ -432,7 +432,8 @@ bot.on( BALANCE_BUTTON, msg => {
     [ GET_BUTTON ],[ SPEND_BUTTON ],[ BALANCE_BUTTON ]], { resize: true }
   );
 
-  // to do: check if the fountain has been activated and if so display message (compare last activity with last fountain date)
+  // to do: check if the fountain has been activated and if so display
+  // message (compare last activity with last fountain date)
 
 doesUserExist( msg.from.id, function(error, doThey){
 
