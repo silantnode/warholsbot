@@ -486,11 +486,13 @@ doesUserExist( msg.from.id, function(error, doThey){
       // Check what the balance is...
         if ( result == 0 ) {
           // If there are no Warhols on the account encourage them to get some Warhols.
-          return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Use the /get command to change this situation.`, { markup });
+          return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols.
+            Use the /get command to change this situation.`, { markup });
 
         } else {
           // If they have Warhols encourage them to spend the Warhols.
-          return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols. Choose how to /spend your warhols. Or /get some more.`, { markup });
+          return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols.
+            Choose how to /spend your warhols. Or /get some more.`, { markup });
 
         }
 
