@@ -2332,7 +2332,9 @@ function setLastDate( userID ){
 
   pool.getConnection(function(err, connection) {
 
-    connection.query( 'UPDATE accounts SET date_last = ? WHERE owner = ?', [ currentDate, userID ], function( error, current ){
+    connection.query( 'UPDATE accounts SET date_last = ? WHERE owner = ?',
+    [ currentDate, userID ],
+    function( error, current ){
 
     connection.release();
 
@@ -2353,15 +2355,17 @@ function DateCompare( userID ){
 
     pool.getConnection(function(err, connection) {
 
-    connection.query('SELECT date_last FROM accounts WHERE owner =' + userID , function( error, result ){
+    connection.query('SELECT date_last FROM accounts WHERE owner ='
+    + userID ,
+    function( error, result ){
 
       connection.release();
 
       if ( error ) return error;
-
-      var previousDate = result[0].date_last; // magical command to get one result into a variable
-
-      var sincelastDate = Math.abs(currentDate-previousDate);  // difference in milliseconds
+      // magical command to get one result into a variable
+      var previousDate = result[0].date_last;
+      // difference in milliseconds
+      var sincelastDate = Math.abs(currentDate-previousDate);
 
     });
 
@@ -2377,7 +2381,9 @@ function LastInteraction( userID, callback ){
 
   pool.getConnection(function(err, connection) {
 
-    connection.query('SELECT date_last FROM accounts WHERE owner =' + userID , function( error, result ){
+    connection.query('SELECT date_last FROM accounts WHERE owner ='
+    + userID ,
+    function( error, result ){
 
       connection.release();
 
