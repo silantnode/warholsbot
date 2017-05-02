@@ -445,9 +445,12 @@ doesUserExist( msg.from.id, function(error, doThey){
 
     // check if there are new market closures that can lead to new balance
 
-      newMarketActivity( msg.from.id, function( error, newMarketNewBalance ){ // this function's result is an array with two values
-      var anyClosures = newMarketNewBalance[0];  // first value of array is 1 for new closures, 0 for none of such
-      var betsBalance = newMarketNewBalance[1];  // second result of array is new updated user balance with any new bets won
+      // this function's result is an array with two values
+      newMarketActivity( msg.from.id, function( error, newMarketNewBalance ){
+      // first value of array is 1 for new closures, 0 for none of such
+      var anyClosures = newMarketNewBalance[0];
+      // second result of array is new updated user balance with any new bets won
+      var betsBalance = newMarketNewBalance[1];
 
       // console.log('callback -- anyClosures: ' + anyClosures);
       // console.log('callback -- new balance after winnings: ' + betsBalance);
@@ -457,13 +460,22 @@ doesUserExist( msg.from.id, function(error, doThey){
 
       if ( anyClosures == 1 ) {
 
-        if (betsBalance > result) {  // if new balance is higher, user won Warhols on market - YAY to speculation!
+        // if new balance is higher, user won Warhols on market - YAY to speculation!
+        if (betsBalance > result) {
 
-          return bot.sendMessage( msg.from.id, `The market has closed and you have won ${ wonWarhols } Warhols. Your new balance is ${ betsBalance } Warhols. \nChoose how to /spend your warhols. Or /get some more.`, { markup });
+          return bot.sendMessage( msg.from.id, `The market has closed and
+            you have won ${ wonWarhols } Warhols.
+            Your new balance is ${ betsBalance } Warhols.
+            \nChoose how to /spend your warhols.
+            Or /get some more.`, { markup });
 
         } else {
 
-          return bot.sendMessage( msg.from.id, `The market has closed and unfortunately you didn't win. You currently have ${ betsBalance } Warhols. \nChoose how to /spend your warhols. Or /get some more.`, { markup });
+          return bot.sendMessage( msg.from.id, `The market has closed and
+            unfortunately you didn't win.
+            You currently have ${ betsBalance } Warhols.
+            \nChoose how to /spend your warhols.
+            Or /get some more.`, { markup });
 
         }
 
