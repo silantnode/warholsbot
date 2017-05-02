@@ -1790,7 +1790,9 @@ function GetBalance( msgID, callback ){
 
   pool.getConnection(function(err, connection) {
 
-    connection.query('SELECT balance FROM accounts WHERE owner =' + msgID , function( error, result ){
+    connection.query('SELECT balance FROM accounts WHERE owner ='
+    + msgID ,
+    function( error, result ){
 
         connection.release();
 
@@ -1809,7 +1811,8 @@ function GetFountainBalance( callback ){
 
   pool.getConnection(function(err, connection) {
 
-    connection.query('SELECT reservoir FROM fountain WHERE id =' + 1, function( error, result ){
+    connection.query('SELECT reservoir FROM fountain WHERE id ='
+    + 1, function( error, result ){
 
       connection.release();
 
@@ -1829,7 +1832,9 @@ function AddToFountain( contribution ){
 
   pool.getConnection(function(err, connection) {
 
-    connection.query('UPDATE fountain SET reservoir = ? WHERE id =?', [ contribution, 1 ], function( error, current ){
+    connection.query('UPDATE fountain SET reservoir = ? WHERE id =?',
+    [ contribution, 1 ],
+    function( error, current ){
 
       connection.release();
 
@@ -1883,7 +1888,10 @@ function GiveWarholsRandom( userID, warholAmount, markup ){
 
         setMode( userID, 0 );
 
-        return bot.sendMessage( userID, `Thank you for your gift! Your Warhols have been anonymously sent to a random person.`, { markup });
+        return bot.sendMessage( userID, `Thank you for your gift! Your Warhols
+          have been anonymously
+          sent to a random person.`,
+          { markup });
 
     });
 
