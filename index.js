@@ -1068,7 +1068,11 @@ bot.on( GIFT_ECON, msg => {
           [ GIFT_FOUNTAIN ], [ GIFT_RANDOM ] ], { resize: true }
         );
 
-        return bot.sendMessage( msg.from.id, `Give Warhols to everybody with the Warhols /fountain\nGive Warhols to a person at /random`, { markup });
+        return bot.sendMessage(
+          msg.from.id,
+          `Give Warhols to everybody with the Warhols /fountain
+          \nGive Warhols to a person at /random`,
+          { markup });
 
       }
 
