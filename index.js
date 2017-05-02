@@ -1718,7 +1718,10 @@ bot.on( NO_BUTTON, msg => {
 
       resetRemoteData( msg.from.id );
       setMode( msg.from.id, 9);
-      return bot.sendMessage( msg.from.id, `Enter the URL for the content.` , { ask: 'url'} );
+      return bot.sendMessage(
+        msg.from.id,
+        `Enter the URL for the content.`,
+        { ask: 'url'} );
 
     }
 
