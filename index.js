@@ -1055,7 +1055,10 @@ bot.on( GIFT_ECON, msg => {
 
         GetGiftsContent( msg.from.id, function( error, content ){
 
-          return bot.sendMessage( msg.from.id, `${ content }`, { markup } );
+          return bot.sendMessage(
+            msg.from.id,
+            `${ content }`
+            , { markup } );
 
         });
 
