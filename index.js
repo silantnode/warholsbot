@@ -803,13 +803,17 @@ bot.on('ask.coupon', msg => {
 
             if ( codeUsed == true ){
 
-              return bot.sendMessage( msg.from.id, `Sorry, this code has been used already. Try another.`, { ask: 'coupon' });
+              return bot.sendMessage( msg.from.id, `Sorry, this code has been
+                used already. Try another.`,
+                { ask: 'coupon' });
 
             }
 
             if ( codeFound == false ){
 
-              return bot.sendMessage( msg.from.id, `This code is invalid. Maybe you mistyped? Try again.`, { ask: 'coupon' });
+              return bot.sendMessage( msg.from.id, `This code is invalid.
+                Maybe you mistyped? Try again.`,
+                { ask: 'coupon' });
 
             } else if ( codeFound == true ) {
 
@@ -817,21 +821,28 @@ bot.on('ask.coupon', msg => {
 
 
               // Mark the code as used.
-              connection.query( 'UPDATE coupons SET used = ? WHERE id = ?', [ 1, allCodes[ matchingCode ].id ], function( error, selectedCoupon ){
+              connection.query( 'UPDATE coupons SET used = ? WHERE id = ?',
+              [ 1, allCodes[ matchingCode ].id ],
+              function( error, selectedCoupon ){
 
                 if( error ) throw error;
 
               });
 
               // Record the Telegram user id of the person who used the code.
-              connection.query( 'UPDATE coupons SET owner = ? WHERE id = ?', [ msg.from.id , allCodes[ matchingCode ].id ], function( error, claiment ){
+              connection.query( 'UPDATE coupons SET owner = ? WHERE id = ?',
+              [ msg.from.id,
+              allCodes[ matchingCode ].id ],
+              function( error, claiment ){
 
                 if( error ) throw error;
 
               });
 
               // Flag on the account of the user that they have used a coupon.
-              connection.query( 'UPDATE accounts SET used_coupon = ? WHERE owner = ?', [ 1, msg.from.id ], function( error, usedCoupon ){
+              connection.query( 'UPDATE accounts SET used_coupon = ? WHERE owner = ?',
+              [ 1, msg.from.id ],
+              function( error, usedCoupon ){
 
                 if( error ) throw error;
 
@@ -840,7 +851,10 @@ bot.on('ask.coupon', msg => {
               // Record the time and date the coupon was claimed.
               let currentDate = new Date();
 
-              connection.query( 'UPDATE coupons SET tds = ? WHERE id = ?', [ currentDate , allCodes[ matchingCode ].id ], function( error, dateConfirmation ){
+              connection.query( 'UPDATE coupons SET tds = ? WHERE id = ?',
+              [ currentDate,
+              allCodes[ matchingCode ].id ],
+              function( error, dateConfirmation ){
 
                 connection.release();
 
@@ -863,7 +877,10 @@ bot.on('ask.coupon', msg => {
 
               setMode( msg.from.id, 0 );
 
-              return bot.sendMessage( msg.from.id, `Yay! Your account was credited with 10 Warhols. \nYou can now /spend them, or /get even more!`, { markup });
+              return bot.sendMessage( msg.from.id, `Yay! Your account was
+              credited with 10 Warhols. \nYou can now /spend them,
+              or /get even more!`,
+              { markup });
 
             }
 
@@ -895,7 +912,9 @@ bot.on('ask.url', msg => {
 
         } else {
 
-          return bot.sendMessage( msg.from.id, `That was a command. Please enter a url.`, { ask: 'url' });
+          return bot.sendMessage( msg.from.id, `That was a command.
+            Please enter a url.`,
+            { ask: 'url' });
 
         }
 
@@ -907,7 +926,9 @@ bot.on('ask.url', msg => {
 
           // If it is valid then save it to the temporary data field of the user.
 
-            connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [  msg.text, msg.from.id ], function( error, confirmedContent){
+            connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?',
+            [  msg.text, msg.from.id ],
+            function( error, confirmedContent){
 
               connection.release();
 
@@ -915,7 +936,9 @@ bot.on('ask.url', msg => {
 
               setMode( msg.from.id, 10 );
 
-              return bot.sendMessage( msg.from.id, `Now enter a 140 character description of the content.`, { ask: 'whatisit' });
+              return bot.sendMessage( msg.from.id, `Now enter a 140 character
+              description of the content.`,
+              { ask: 'whatisit' });
 
             });
 
@@ -923,7 +946,9 @@ bot.on('ask.url', msg => {
 
         } else {
 
-          return bot.sendMessage( msg.from.id, `You have not entered a valid web address. Please try again using the proper formatting.`, { ask: 'url' });
+          return bot.sendMessage( msg.from.id, `You have not entered a valid web
+          address. Please try again using the proper formatting.`,
+          { ask: 'url' });
 
         }
 
