@@ -776,15 +776,16 @@ bot.on('ask.coupon', msg => {
             if( error ) throw error;
 
             for( let i = 0; i < allCodes.length; i++ ){
-
-              if ( couponCode == allCodes[i].unique){ // If the code entered has been found...
+              // If the code entered has been found...
+              if ( couponCode == allCodes[i].unique){
 
                 console.log('Found!');
 
                 if ( allCodes[i].used == 0 ){
 
                   console.log('And it can be used!');
-                  matchingCode = (allCodes[i].id - 1 ); // Minus 1 to pad for the 0 of the array.
+                  // Minus 1 to pad for the 0 of the array.
+                  matchingCode = (allCodes[i].id - 1 );
                   console.log(matchingCode);
                   codeFound = true;
                   break;
