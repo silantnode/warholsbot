@@ -718,7 +718,12 @@ bot.on( '/coupon' , msg => {
 
       setMode (msg.from.id, 14);
 
-      return bot.sendMessage( msg.from.id, `Welcome ${ msg.from.first_name }! You're new here, right? We created an account for you. Now you can enter the coupon code.`, { ask: 'coupon' }, { markup } );
+      return bot.sendMessage( msg.from.id,
+        `Welcome ${ msg.from.first_name }!
+        You're new here, right? We created an account for you.
+        Now you can enter the coupon code.`,
+        { ask: 'coupon' },
+        { markup } );
 
     }
 
