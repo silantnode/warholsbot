@@ -479,31 +479,30 @@ doesUserExist( msg.from.id, function(error, doThey){
 
         }
 
-      }
+      } else { // markets have not closed, just diplay "old" balance which has not changed
 
-      else { // markets have not closed, just diplay "old" balance which has not changed
+          // Check what the balance is...
+          if ( result == 0 ) {
+            // If there are no Warhols on the account encourage them to get some Warhols.
+            return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols.
+              Use the /get command to change this situation.`, { markup });
 
-      // Check what the balance is...
-        if ( result == 0 ) {
-          // If there are no Warhols on the account encourage them to get some Warhols.
-          return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols.
-            Use the /get command to change this situation.`, { markup });
+          } else {
+            // If they have Warhols encourage them to spend the Warhols.
+            return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols.
+              Choose how to /spend your warhols. Or /get some more.`, { markup });
 
-        } else {
-          // If they have Warhols encourage them to spend the Warhols.
-          return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols.
-            Choose how to /spend your warhols. Or /get some more.`, { markup });
+          }
 
         }
 
-      }
-
       }); // end of market check routine
 
-  });  // end of getBalance function
+    });  // end of getBalance function
 
-}
-}); // end of checking if user exists
+  }
+
+  }); // end of checking if user exists
 
 }); // end of bot.on balance button
 
