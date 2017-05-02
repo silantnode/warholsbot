@@ -1547,10 +1547,11 @@ bot.on( '/*' , msg => {
 });
 
 
-// currentList[0].temp_user_data.split(",");
-
-// These two are only relevant for the end routine of a user who has chosen to earn Warhols through the gift economy.
-// I could do an overall better implementation of this but for now I am just trying to get this project done. I am sure you understand how deadlines work.
+// These two are only relevant for the end routine of a
+// user who has chosen to earn Warhols through the gift economy.
+// I could do an overall better implementation of this but for now
+// I am just trying to get this project done.
+// I am sure you understand how deadlines work.
 
 bot.on( YES_BUTTON, msg => {
 
