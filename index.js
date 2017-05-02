@@ -750,7 +750,10 @@ bot.on('ask.coupon', msg => {
             [ BACK_BUTTON ]], { resize: true }
           );
 
-          return bot.sendMessage( msg.from.id, `That is a command. Please enter a coupon code.` ,{ ask: 'coupon' }, { markup });
+          return bot.sendMessage( msg.from.id, `That is a command.
+            Please enter a coupon code.` ,
+            { ask: 'coupon' },
+            { markup });
 
         }
 
