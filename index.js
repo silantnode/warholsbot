@@ -422,7 +422,8 @@ bot.on( '/help', msg => {
 });
 
 
-// Check the balance of the current users Warhols account. (NEW version with newMarketActivity function plugged in)
+// Check the balance of the current users Warhols account.
+// (NEW version with newMarketActivity function plugged in)
 
 bot.on( BALANCE_BUTTON, msg => {
 
