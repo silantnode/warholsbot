@@ -435,72 +435,72 @@ bot.on( BALANCE_BUTTON, msg => {
   // to do: check if the fountain has been activated and if so display
   // message (compare last activity with last fountain date)
 
-doesUserExist( msg.from.id, function(error, doThey){
+  doesUserExist( msg.from.id, function(error, doThey){
 
-  if ( doThey == true ){
+    if ( doThey == true ){
 
-  // at this point "result" loads the balance since
-  // last interaction, bets not processed yet
-  GetBalance( msg.from.id, function( error, result ){
+      // at this point "result" loads the balance since
+      // last interaction, bets not processed yet
+      GetBalance( msg.from.id, function( error, result ){
 
-    // check if there are new market closures that can lead to new balance
+        // check if there are new market closures that can lead to new balance
 
-      // this function's result is an array with two values
-      newMarketActivity( msg.from.id, function( error, newMarketNewBalance ){
-      // first value of array is 1 for new closures, 0 for none of such
-      var anyClosures = newMarketNewBalance[0];
-      // second result of array is new updated user balance with any new bets won
-      var betsBalance = newMarketNewBalance[1];
+        // this function's result is an array with two values
+        newMarketActivity( msg.from.id, function( error, newMarketNewBalance ){
+        // first value of array is 1 for new closures, 0 for none of such
+        var anyClosures = newMarketNewBalance[0];
+        // second result of array is new updated user balance with any new bets won
+        var betsBalance = newMarketNewBalance[1];
 
-      // console.log('callback -- anyClosures: ' + anyClosures);
-      // console.log('callback -- new balance after winnings: ' + betsBalance);
-      // console.log('previous balance: ' + result);
+        // console.log('callback -- anyClosures: ' + anyClosures);
+        // console.log('callback -- new balance after winnings: ' + betsBalance);
+        // console.log('previous balance: ' + result);
 
-      var wonWarhols = (betsBalance-result); // Warhols won, can be zero if no wins
+        var wonWarhols = (betsBalance-result); // Warhols won, can be zero if no wins
 
-      if ( anyClosures == 1 ) {
+        if ( anyClosures == 1 ) {
 
-        // if new balance is higher, user won Warhols on market - YAY to speculation!
-        if (betsBalance > result) {
+          // if new balance is higher, user won Warhols on market - YAY to speculation!
+          if (betsBalance > result) {
 
-          return bot.sendMessage( msg.from.id, `The market has closed and
-            you have won ${ wonWarhols } Warhols.
-            Your new balance is ${ betsBalance } Warhols.
-            \nChoose how to /spend your warhols.
-            Or /get some more.`, { markup });
+                return bot.sendMessage( msg.from.id, `The market has closed and
+                you have won ${ wonWarhols } Warhols.
+                Your new balance is ${ betsBalance } Warhols.
+                \nChoose how to /spend your warhols.
+                Or /get some more.`, { markup });
 
-        } else {
+            } else {
 
-          return bot.sendMessage( msg.from.id, `The market has closed and
-            unfortunately you didn't win.
-            You currently have ${ betsBalance } Warhols.
-            \nChoose how to /spend your warhols.
-            Or /get some more.`, { markup });
+                return bot.sendMessage( msg.from.id, `The market has closed and
+                unfortunately you didn't win.
+                You currently have ${ betsBalance } Warhols.
+                \nChoose how to /spend your warhols.
+                Or /get some more.`, { markup });
 
-        }
+            }
 
-      } else { // markets have not closed, just diplay "old" balance which has not changed
+          } else { // markets have not closed, just diplay "old" balance which has not changed
 
-          // Check what the balance is...
-          if ( result == 0 ) {
-            // If there are no Warhols on the account encourage them to get some Warhols.
-            return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols.
-              Use the /get command to change this situation.`, { markup });
+              // Check what the balance is...
+              if ( result == 0 ) {
+                // If there are no Warhols on the account encourage them to get some Warhols.
+                return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols.
+                  Use the /get command to change this situation.`, { markup });
 
-          } else {
-            // If they have Warhols encourage them to spend the Warhols.
-            return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols.
-              Choose how to /spend your warhols. Or /get some more.`, { markup });
+              } else {
+                // If they have Warhols encourage them to spend the Warhols.
+                return bot.sendMessage( msg.from.id, `You currently have ${ result } Warhols.
+                  Choose how to /spend your warhols. Or /get some more.`, { markup });
+
+              }
 
           }
 
-        }
+        }); // end of market check routine
 
-      }); // end of market check routine
+      });  // end of getBalance function
 
-    });  // end of getBalance function
-
-  }
+    }
 
   }); // end of checking if user exists
 
