@@ -357,7 +357,9 @@ function getMode( userID, callback ){
 
       pool.getConnection(function(err, connection) {
 
-        connection.query('SELECT mode FROM accounts WHERE owner =' + userID , function( error, currentMode ){
+        connection.query('SELECT mode FROM accounts WHERE owner ='
+         + userID ,
+         function( error, currentMode ){
 
           connection.release();
 
