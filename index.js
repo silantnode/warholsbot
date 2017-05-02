@@ -388,7 +388,9 @@ function resetRemoteData( userID ){
 
     let resetList = "";
 
-    connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ resetList, userID ], function( error, resetList ){
+    connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?',
+    [ resetList, userID ],
+    function( error, resetList ){
 
       connection.release();
 
