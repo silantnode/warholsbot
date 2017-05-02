@@ -1738,7 +1738,9 @@ function AddWarhols( userID, addedBalance ){
 
   pool.getConnection(function(err, connection) {
 
-    connection.query( 'UPDATE accounts SET balance = ? WHERE owner = ?', [ addedBalance, userID ], function( error, current ){
+    connection.query( 'UPDATE accounts SET balance = ? WHERE owner = ?',
+    [ addedBalance, userID ],
+    function( error, current ){
 
       connection.release();
 
