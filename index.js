@@ -2283,23 +2283,33 @@ function DisplayGiftContent( userID, giftNumber, markup ){
 
       if ( error ) throw error;
 
-      // Make sure that the number they have entered is either 1 or 5. If not, just act dumb and don't do anything.
+      // Make sure that the number they have entered is either 1 or 5.
+      // If not, just act dumb and don't do anything.
       if ( giftNumber >= 1 && giftNumber <= 5 ) {
 
-        connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + userID, function( error, currentList ){
-
-          let temp = currentList[0].temp_user_data.split(","); // Convert the array of numbers in strings into an array.
-
-          let contentSelector = Number(temp[ ( giftNumber - 1 ) ]); // Pad the number so we can use it to retreive the selection from the array.
-
-          let giftDescription = giftContent[ ( contentSelector - 1 ) ].description; // Get the description of the gift.
+        connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' +
+        userID,
+        function( error, currentList ){
+          // Convert the array of numbers in strings into an array.
+          let temp = currentList[0].temp_user_data.split(",");
+          // Pad the number so we can use it to retreive the selection from the array.
+          let contentSelector = Number(temp[ ( giftNumber - 1 ) ]);
+          // Get the description of the gift.
+          let giftDescription = giftContent[ ( contentSelector - 1 ) ].description;
 
           // Save the selection of the user in the temp_user_data field for the yes/no confirmation.
-          connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?', [ contentSelector, userID ], function( error, selectionPending){
+          connection.query( 'UPDATE accounts SET temp_user_data = ? WHERE owner = ?',
+          [ contentSelector, userID ],
+          function( error, selectionPending){
 
             setMode( userID, 8 );
 
-            return bot.sendMessage( userID, `Will you ${ giftDescription }? \n\n/yes, I will. \n/no, thanks.`, { markup });
+            return bot.sendMessage(
+              userID,
+              `Will you ${ giftDescription }?
+              \n\n/yes, I will.
+              \n/no, thanks.`,
+              { markup });
 
           });
 
