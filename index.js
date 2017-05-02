@@ -975,7 +975,9 @@ bot.on('ask.whatisit', msg => {
 
         } else {
 
-          return bot.sendMessage( msg.from.id, `That was a command. Please enter a description.`, { ask: 'whatisit' });
+          return bot.sendMessage( msg.from.id, `That was a command.
+          Please enter a description.`,
+          { ask: 'whatisit' });
 
         }
 
@@ -985,13 +987,13 @@ bot.on('ask.whatisit', msg => {
 
         if ( urlDescription.length > DESCRIPTION_MAX_LENGTH ) {
 
-          return bot.sendMessage( msg.from.id, `Your description is longer than 140 charcters. Please shorten it.`, { ask: 'whatisit' });
+          return bot.sendMessage( msg.from.id, `Your description is longer than
+          140 charcters. Please shorten it.`,
+          { ask: 'whatisit' });
 
         } else if ( urlDescription.length <= DESCRIPTION_MAX_LENGTH ) {
 
           pool.getConnection( function (err, connection){
-
-            // connection.query('SELECT mode FROM accounts WHERE owner =' + userID , function( error, currentMode ){
 
             connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, urlSubmission ){
 
