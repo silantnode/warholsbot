@@ -1577,10 +1577,10 @@ bot.on( YES_BUTTON, msg => {
 
         pool.getConnection(function(err, connection) {
 
-          connection.query( 'SELECT temp_user_data FROM accounts WHERE owner =' + msg.from.id, function( error, selectedGift ){
-
-            // let temp = Number( selectedGift[0].temp_user_data );
-
+          connection.query( 'SELECT temp_user_data FROM accounts WHERE owner ='
+          + msg.from.id,
+          function( error, selectedGift ){
+            
             connection.query( 'SELECT viewed FROM gifts WHERE task_id =' + selectedGift[0].temp_user_data, function( error, timesViewed ){
 
               if ( error ) throw error;
